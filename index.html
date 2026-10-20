@@ -11068,6 +11068,14 @@ function techCard2(id, p, opts = {}) {
   }
   window.HandSigns = { draw, NAMES, n: 12 };
 })();
+/* ===== Bouton « Retour au menu des jeux » (hub lindcil.github.io) ===== */
+(function () {
+  if (window.__hubBtn) return; window.__hubBtn = 1;
+  const a = document.createElement('a'); a.id = 'hubback'; a.href = 'https://lindcil.github.io/'; a.textContent = '⟵ Retour au menu des jeux';
+  a.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:99999;padding:8px 14px;border-radius:8px;background:rgba(20,14,30,.82);color:#ffd27a;border:1px solid #ff8a2b;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 0 12px rgba(255,138,43,.35);display:none';
+  const add = () => document.body && !document.getElementById('hubback') && document.body.appendChild(a);
+  setInterval(() => { add(); let menu = true; try { menu = !G.mode || G.mode === 'demo'; } catch (e) {} a.style.display = menu ? 'block' : 'none'; }, 300);
+})();
 /* Rig v4.6 d'Éternel II : squelette hiérarchique FK + IK 2 os, UNE seule orientation pour tout le corps.
    Les poses (12 principes / ZZZ) de Shinobi 2 sont conservées : le nouveau rig lit les cibles de ninjaPose et le ressort stx/sty. */
 (function () {
