@@ -34,3 +34,8 @@ Next Generation prend le meilleur de **Shinobi 1** (Éternel II v4.7) et de **Sh
 - **Substitution** : prédiction (C + esquive, garde 2 s), 3 charges, +1 charge / 10 s.
 - **Charge de mode Z** : mode Boruto équipé > bijū > ermite > pupille ; maintien = charge de chakra.
 - **Edo Tensei** : alliés régénérants, 4 réincarnés max, 50 % d’échec, contrôle via R (retour auto au corps si l’un des deux tombe).
+
+## NG 6 — choix
+- **Carrière** = profil séparé (l’ancien profil est sauvegardé dans `sng:profile_backup`). Rang calculé depuis le niveau (XP ×5) ; le Sommet des Kage le termine.
+- **Verrous** par rang plutôt que par niveau brut, pour suivre la progression d’un ninja ; la Saga passe par le moteur créatif mais reste ouverte dès Genin.
+- **Rencontres** : poids identiques (1) pour les 37 ; récompenses équilibrées par la difficulté (PV ×1,4 à ×22) et des gains de ryō/XP modérés ; Akatsuki = 4 membres au hasard parmi 8 pour garder des duels courts.

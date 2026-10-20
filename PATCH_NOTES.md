@@ -1,5 +1,16 @@
 # Shinobi Next Generation — Notes de version
 
+## NG 6 — Carrière, rencontres et Ninjutsu (20 octobre 2026)
+- **Mode Carrière** (parcours principal, bouton en tête de l’écran titre) : nouvelle partie → clan et nature de chakra tirés au hasard → cinématique du clan → **épreuve de la feuille** en plein écran (verre d’eau : maintiens Espace pour garder l’aiguille dans la zone ; vent = la feuille se coupe, feu = elle brûle, eau = l’eau monte, terre = elle s’effrite, foudre = elle se froisse) → départ à l’**Académie ninja** (Iruka).
+- **Rangs** : Académie → Genin (niv. 5) → Chūnin (15) → Jōnin (30) → ANBU (40) → Sannin (50) → Kage (60) → **Sommet des Kage** (objectif final). Progression uniquement par le monde ouvert et les missions.
+- **Verrous** : Duel et Saga au rang Genin, Survie au rang Chūnin, Tour, Raid et Créatif au rang Jōnin.
+- **Rencontres** : 37 rencontres, toutes au même taux.
+  - Akatsuki : ciel rouge, nuages rouges, musique sombre, 4 duels à la suite ; chaque membre vaincu donne son moveset.
+  - Minato scelle une bête en toi (gratuit) ; Momoshiki t’offre son mode.
+  - Nouvelles : Sommet des Kage (aider Sasuke ou les Kage), assaut de Pain (6 chemins), Zabuza & Haku sur le pont, examen Chūnin d’Orochimaru, Kaguya, Itachi & Kisame, Kinshiki.
+- **Navigateur de Ninjutsu** (bouton 忍 Ninjutsu) : mêmes filtres que Préparation.
+- XP ×5 conservé.
+
 ## NG 5 — portage de la MAJ 14 de Shinobi 2 : Edo Tensei, prédiction et nouvelles touches (20 octobre 2026)
 
 **Touches (AZERTY par défaut, codes physiques `event.code`)**

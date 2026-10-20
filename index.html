@@ -11072,9 +11072,66 @@ function techCard2(id, p, opts = {}) {
 (function () {
   if (window.__hubBtn) return; window.__hubBtn = 1;
   const a = document.createElement('a'); a.id = 'hubback'; a.href = 'https://lindcil.github.io/'; a.textContent = '⟵ Retour au menu des jeux';
-  a.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:99999;padding:8px 14px;border-radius:8px;background:rgba(20,14,30,.82);color:#ffd27a;border:1px solid #ff8a2b;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 0 12px rgba(255,138,43,.35);display:none';
+  a.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:60;padding:8px 14px;border-radius:8px;background:rgba(20,14,30,.82);color:#ffd27a;border:1px solid #ff8a2b;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 0 12px rgba(255,138,43,.35);display:none';
   const add = () => document.body && !document.getElementById('hubback') && document.body.appendChild(a);
   setInterval(() => { add(); let menu = true; try { menu = !G.mode || G.mode === 'demo'; } catch (e) {} a.style.display = menu ? 'block' : 'none'; }, 300);
+})();
+/* ===== Navigateur de Ninjutsu (commun aux 3 jeux) : mêmes filtres que Préparation ===== */
+(function () {
+  if (window.NJB) return; const N = (window.NJB = { q: '', sub: 'tous', el: 'tous', rar: 0, mode: 'tous', cat: 'tous', sort: 'rar', sel: null, ev: {} });
+  const SUBS = { proj: ['Projectile', '#ff9a3c'], zone: ['Zone (AoE)', '#ff6a5a'], mob: ['Mobilité', '#7ff0ff'], melee: ['Corps à corps', '#ffd27a'], ctrl: ['Contrôle', '#b47cff'], def: ['Défense', '#7ab8ff'], sout: ['Soutien / soin', '#7dffb0'], inv: ['Invocation', '#c98c4b'], buff: ['Renfort', '#ffe23f'], misc: ['Divers', '#a69db8'] };
+  const sub = (T) => { try { if (typeof techSub === 'function' && typeof SUBCLASS !== 'undefined') { const s = techSub(T); if (SUBCLASS[s]) return 'S:' + s; } } catch (e) {} const k = T.kind;
+    if (/proj|orb|chain|beam|chargeorb|barrage/.test(k)) return 'proj'; if (/dash|teleport|blink/.test(k)) return 'mob'; if (/zone|nova|aoe|rain|wave|cone|slam/.test(k)) return 'zone'; if (/melee|launcher|rush|combo/.test(k)) return 'melee';
+    if (/heal/.test(k)) return 'sout'; if (/summon|clone/.test(k)) return 'inv'; if (/buff|aura|mode/.test(k)) return 'buff'; if (/wall|shield|guard/.test(k)) return 'def'; if (/bind|trap|gen|stun/.test(k)) return 'ctrl'; return 'misc'; };
+  const subInfo = (s) => { if (s.startsWith('S:')) { const S = SUBCLASS[s.slice(2)]; return [S.n, S.c]; } return SUBS[s] || SUBS.misc; };
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const isMode = (T) => !!(T.mode || T.beast || T.eye); const isUlt = (T) => !!(T.ult || T.cat === 'secret');
+  N.list = function () {
+    let L = Object.values(TECH).filter((T) => T && T.n && !T.innate);
+    if (N.mode === 'normal') L = L.filter((T) => !isMode(T) && !isUlt(T)); else if (N.mode === 'mode') L = L.filter(isMode); else if (N.mode === 'ult') L = L.filter(isUlt);
+    if (N.sub !== 'tous') L = L.filter((T) => sub(T) === N.sub); if (N.el !== 'tous') L = L.filter((T) => T.el === N.el); if (N.rar) L = L.filter((T) => T.rar === N.rar); if (N.cat !== 'tous') L = L.filter((T) => T.cat === N.cat);
+    const q = N.q.trim().toLowerCase(); if (q) L = L.filter((T) => (T.n + ' ' + (T.desc || '') + ' ' + T.id).toLowerCase().includes(q));
+    const so = { rar: (a, b) => (b.rar || 0) - (a.rar || 0) || a.n.localeCompare(b.n), nom: (a, b) => a.n.localeCompare(b.n), dmg: (a, b) => (b.dmg || 0) * (b.cnt || 1) - (a.dmg || 0) * (a.cnt || 1), cout: (a, b) => (a.cost || 0) - (b.cost || 0) }[N.sort];
+    return L.sort(so);
+  };
+  N.open = function () {
+    let el = document.getElementById('njb'); if (el) el.remove(); el = document.createElement('div'); el.id = 'njb'; document.body.appendChild(el); N.ev.open = (N.ev.open || 0) + 1;
+    const all = Object.values(TECH).filter((T) => T && T.n && !T.innate); const subs = Array.from(new Set(all.map(sub))); const els = Array.from(new Set(all.map((T) => T.el))).filter((e) => EL[e]);
+    const cats = typeof CATS !== 'undefined' ? Object.keys(CATS).filter((c) => all.some((T) => T.cat === c)) : [];
+    const render = () => {
+      const L = N.list(); const S = N.sel && TECH[N.sel];
+      const chip = (attr, v, lab, col, on) => `<button data-${attr}="${v}" class="${on ? 'on' : ''}" style="--cc:${col || '#a69db8'}">${esc2(lab)}</button>`;
+      el.innerHTML = `<div class="box"><header><h2>忍 Ninjutsu <small>${L.length} / ${all.length} techniques</small></h2><button id="njbx">Fermer (Échap)</button></header>
+        <div class="row"><input id="njq" type="search" placeholder="Rechercher (nom, effet)…" value="${esc2(N.q)}"><select id="njs"><option value="rar">Rareté ↓</option><option value="nom">Nom</option><option value="dmg">Dégâts ↓</option><option value="cout">Coût ↑</option></select>
+          <select id="njm"><option value="tous">Tout</option><option value="normal">Techniques</option><option value="mode">Techniques de mode</option><option value="ult">Ultimes / secrètes</option></select>
+          ${cats.length ? `<select id="njc"><option value="tous">Tous les types</option>${cats.map((c) => `<option value="${c}">${esc2(CATS[c].n)}</option>`).join('')}</select>` : ''}</div>
+        <div class="chips"><span>Rôle</span>${chip('sub', 'tous', 'Tous', '', N.sub === 'tous')}${subs.map((s) => chip('sub', s, subInfo(s)[0], subInfo(s)[1], N.sub === s)).join('')}</div>
+        <div class="chips"><span>Élément</span>${chip('el', 'tous', 'Tous', '', N.el === 'tous')}${els.map((e) => chip('el', e, EL[e].n, EL[e].c, N.el === e)).join('')}</div>
+        <div class="chips"><span>Rareté</span>${[0, 5, 4, 3, 2, 1].filter((r) => !r || RAR[r]).map((r) => chip('rar', r, r ? RAR[r].n : 'Toutes', r ? RAR[r].c : '', N.rar === r)).join('')}</div>
+        <div class="main"><div class="list">${L.slice(0, 400).map((T) => `<button data-t="${T.id}" class="${N.sel === T.id ? 'on' : ''}" style="--cc:${RAR[T.rar] ? RAR[T.rar].c : '#aaa'}"><b>${esc2(T.n)}</b><small>${esc2(subInfo(sub(T))[0])} · ${esc2((EL[T.el] || { n: T.el }).n)}${isMode(T) ? ' · mode' : ''}</small></button>`).join('') || '<p>Aucune technique.</p>'}</div>
+        <aside>${S ? `<h3 style="color:${RAR[S.rar] ? RAR[S.rar].c : '#fff'}">${esc2(S.n)}</h3><p class="r">${RAR[S.rar] ? RAR[S.rar].n : ''} · ${esc2(subInfo(sub(S))[0])} · ${esc2((EL[S.el] || { n: S.el }).n)}</p><p>${esc2(S.desc || '')}</p><table><tr><td>Dégâts</td><td>${S.dmg || 0}${S.cnt > 1 ? ' ×' + S.cnt : ''}</td></tr><tr><td>Chakra</td><td>${S.cost || 0}</td></tr><tr><td>Recharge</td><td>${S.cd || 0} s</td></tr><tr><td>Signes</td><td>${S.seals || 0}</td></tr></table>` : '<p class="r">Choisis une technique pour voir sa fiche.</p>'}</aside></div></div>`;
+      el.querySelector('#njs').value = N.sort; el.querySelector('#njm').value = N.mode; const nc = el.querySelector('#njc'); if (nc) { nc.value = N.cat; nc.onchange = () => { N.cat = nc.value; render(); }; }
+      el.querySelector('#njbx').onclick = () => el.remove();
+      const q = el.querySelector('#njq'); q.oninput = () => { N.q = q.value; const p = q.selectionStart; render(); const n = el.querySelector('#njq'); n.focus(); n.setSelectionRange(p, p); };
+      el.querySelector('#njs').onchange = (e) => { N.sort = e.target.value; render(); }; el.querySelector('#njm').onchange = (e) => { N.mode = e.target.value; render(); };
+      el.querySelectorAll('[data-sub]').forEach((b) => (b.onclick = () => { N.sub = b.dataset.sub; render(); })); el.querySelectorAll('[data-el]').forEach((b) => (b.onclick = () => { N.el = b.dataset.el; render(); }));
+      el.querySelectorAll('[data-rar]').forEach((b) => (b.onclick = () => { N.rar = +b.dataset.rar; render(); })); el.querySelectorAll('[data-t]').forEach((b) => (b.onclick = () => { N.sel = b.dataset.t; render(); }));
+    };
+    render();
+  };
+  addEventListener('keydown', (e) => { const el = document.getElementById('njb'); if (el && e.code === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); el.remove(); } }, true);
+  const css = document.createElement('style'); css.textContent = `#njbbtn{position:fixed;left:14px;bottom:56px;z-index:60;padding:8px 14px;border-radius:8px;background:rgba(20,14,30,.85);color:#ffd27a;border:1px solid #b47cff;font:600 13px system-ui,sans-serif;cursor:pointer;display:none}
+  #njb{position:fixed;inset:0;z-index:99998;background:rgba(8,5,14,.86);display:flex;align-items:center;justify-content:center;font:14px system-ui,sans-serif;color:#eee}
+  #njb .box{width:min(1180px,96vw);height:min(860px,94vh);display:flex;flex-direction:column;background:linear-gradient(160deg,#241834,#120c1c);border:1px solid #c8a050;border-radius:12px;padding:14px 16px}
+  #njb header{display:flex;justify-content:space-between;align-items:center}#njb h2{margin:0;color:#ffd27a}#njb h2 small{font-size:13px;color:#b9add0;margin-left:8px}
+  #njb .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}#njb input{flex:1;min-width:180px}#njb input,#njb select,#njb header button{background:#1a1426;color:#eee;border:1px solid #3a2e4a;border-radius:6px;padding:6px 8px}
+  #njb .chips{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0;align-items:center}#njb .chips span{width:62px;color:#9a8fb0;font-size:12px}#njb .chips button{border:1px solid var(--cc);background:#1a1426;color:#ddd;border-radius:999px;padding:2px 9px;font-size:12px;cursor:pointer}#njb .chips button.on{background:var(--cc);color:#14101c}
+  #njb .main{flex:1;display:flex;gap:12px;min-height:0;margin-top:8px}#njb .list{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;align-content:start}
+  #njb .list button{text-align:left;background:#1a1426;border:1px solid #2e2440;border-left:4px solid var(--cc);border-radius:6px;color:#eee;padding:6px 8px;cursor:pointer}#njb .list button.on{outline:2px solid #ffd27a}#njb .list small{display:block;color:#a99cc0;font-size:11px}
+  #njb aside{width:280px;background:#150f20;border-radius:8px;padding:10px;overflow:auto}#njb aside .r{color:#a99cc0}#njb aside table{width:100%}#njb aside td:last-child{text-align:right;color:#ffd27a}`;
+  document.head.appendChild(css);
+  const b = document.createElement('button'); b.id = 'njbbtn'; b.textContent = '忍 Ninjutsu'; b.onclick = () => N.open();
+  setInterval(() => { if (document.body && !document.getElementById('njbbtn')) document.body.appendChild(b); let menu = true; try { menu = !G.mode || G.mode === 'demo'; } catch (e) {} b.style.display = menu ? 'block' : 'none'; }, 300);
 })();
 /* Rig v4.6 d'Éternel II : squelette hiérarchique FK + IK 2 os, UNE seule orientation pour tout le corps.
    Les poses (12 principes / ZZZ) de Shinobi 2 sont conservées : le nouveau rig lit les cibles de ninjaPose et le ressort stx/sty. */
@@ -13527,6 +13584,245 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     ['穢', '#d8d0c0', 'Edo Tensei', 'Les 4 Hokage ou 56 personnages (dont Ōtsutsuki et Kara), 50 % d’échec, contrôle jouable.'],
     ['避', '#cfd8e6', 'Esquive Ultra Instinct', 'Plus aucune esquive ne téléporte : balancement sur place, invulnérable, contre +50 %. Substitution par prédiction (3 charges, 10 s).'],
     ['変', '#b47cff', 'Modes et double appui', 'Techniques du mode hors roue au double appui. Clans : ultime + passif, élément libre. Listes triées par rareté, sélecteur créatif, Équiper le meilleur, Outils ninja, rythme plus posé.'],
+  ]);
+})();
+/* Next Generation 6 — Mode Carrière (flux principal) : clan et élément tirés au hasard, cinématique du clan,
+   épreuve de la feuille (verre d'eau) en plein écran, départ à l'Académie, progression par rangs, modes verrouillés. */
+(function () {
+  const C = (SNG.career = { ev: {} });
+  const RANKS = [
+    { id: 'academie', n: 'Élève de l’Académie', k: '学', lv: 1 }, { id: 'genin', n: 'Genin', k: '下', lv: 5 }, { id: 'chunin', n: 'Chūnin', k: '中', lv: 15 },
+    { id: 'jonin', n: 'Jōnin', k: '上', lv: 30 }, { id: 'anbu', n: 'ANBU', k: '暗', lv: 40 }, { id: 'sannin', n: 'Sannin', k: '三', lv: 50 }, { id: 'kage', n: 'Kage', k: '影', lv: 60 },
+  ];
+  C.RANKS = RANKS;
+  C.LOCKS = { pvp: 1, saga: 1, survival: 2, creative: 3, tower: 3, raid: 3, duel: 1 }; // index de rang requis
+  const prof = () => { try { return P(); } catch (e) { return null; } };
+  C.on = () => { const p = prof(); return !!(p && p.career); };
+  C.rankIdx = (p) => { p = p || prof(); let r = 0; RANKS.forEach((R, i) => { if ((p.lv || 1) >= R.lv) r = i; }); if (p && p.career && p.career.summit) r = RANKS.length - 1; return r; };
+  C.rank = (p) => RANKS[C.rankIdx(p)];
+  const EL_TXT = { vent: ['La feuille se coupe en deux.', 'Vent'], feu: ['La feuille s’embrase et part en cendres.', 'Feu'], eau: ['L’eau monte et déborde du verre.', 'Eau'], terre: ['La feuille s’effrite en terre.', 'Terre'], foudre: ['La feuille se froisse, parcourue d’étincelles.', 'Foudre'] };
+
+  // ---------- Verrous de modes ----------
+  const bsg = startGame; startGame = function (mode, opts) {
+    if (C.on() && C.LOCKS[mode] != null && C.rankIdx() < C.LOCKS[mode] && !(opts && opts.career) && !sagaOK) { const R = RANKS[C.LOCKS[mode]]; toast('Carrière', 'Mode verrouillé', `Rang ${R.n} requis (niveau ${R.lv}). Progresse dans le monde ouvert et les missions.`, '#ffb13d', '鎖'); Audio.play('deny'); C.ev.locked = mode; return; }
+    return bsg.apply(this, arguments);
+  };
+  let sagaOK = false;
+  if (typeof SNG.saga === 'function') { const bss = SNG.saga; SNG.saga = function () { if (C.on() && C.rankIdx() < C.LOCKS.saga) { toast('Carrière', 'Saga verrouillée', 'Rang Genin requis (niveau 5).', '#ffb13d', '鎖'); C.ev.locked = 'saga'; return; } sagaOK = true; try { return bss.apply(this, arguments); } finally { sagaOK = false; } }; }
+
+  // ---------- Promotions ----------
+  setInterval(() => { try { const p = prof(); if (!p || !p.career) return; const i = C.rankIdx(p); if (i > (p.career.rank || 0)) { p.career.rank = i; const R = RANKS[i]; if (G.mode) banner(R.n, 'PROMOTION', '#ffd27a', i === RANKS.length - 1 && !p.career.summit ? 'Le Sommet des Kage t’attend' : 'Nouveaux modes débloqués'); C.ev.promo = R.id; Profile.save();
+      if (i === RANKS.length - 1 && !p.career.summit && G.mode === 'monde' && SNG.enc) setTimeout(() => SNG.enc.fire('summit'), 4000); } } catch (e) {} }, 1000);
+
+  // ---------- Cinématique du clan ----------
+  const ov = (id, html) => { const el = document.createElement('div'); el.id = id; el.innerHTML = html; document.body.appendChild(el); return el; };
+  C.cinematic = function (clan, done) {
+    const K = CLANS[clan]; const U = TECH[K.sec];
+    const slides = [[K.k, 'Le clan ' + K.n, 'Tu es né dans le clan ' + K.n + '.'], ['伝', 'Héritage', K.p + ' — ' + K.pd], ['秘', 'Technique ultime', U ? U.n : '—'], ['葉', 'Ta nature de chakra', 'L’épreuve de la feuille va la révéler.']];
+    const el = ov('cin75', `<div class="sl"></div><small>Espace / clic : passer</small>`); el.style.setProperty('--cc', K.c); let i = 0, t = null;
+    const show = () => { if (i >= slides.length) return end(); const s = slides[i]; el.querySelector('.sl').innerHTML = `<div class="k">${s[0]}</div><h2>${esc(s[1])}</h2><p>${esc(s[2])}</p>`; el.querySelector('.sl').classList.remove('in'); void el.offsetWidth; el.querySelector('.sl').classList.add('in'); clearTimeout(t); t = setTimeout(() => { i++; show(); }, 2300); };
+    const key = (e) => { if (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); i = e.code === 'Escape' ? 99 : i + 1; show(); } };
+    const end = () => { clearTimeout(t); removeEventListener('keydown', key, true); el.remove(); C.ev.cin = 1; done && done(); };
+    el.onclick = () => { i++; show(); }; addEventListener('keydown', key, true); show();
+  };
+
+  // ---------- Épreuve de la feuille (verre d'eau) ----------
+  C.leafTest = function (el0, done) {
+    const el = ov('leaf75', `<canvas width="960" height="600"></canvas><div class="hud"><h2>Épreuve de la feuille</h2><p id="lf75t">Maintiens <b>Espace</b> (ou clic) pour faire passer ton chakra dans la feuille. Garde l’aiguille dans la zone verte.</p><div class="bar"><i></i></div></div>`);
+    const cv = el.querySelector('canvas'), g = cv.getContext('2d'); const fill = el.querySelector('.bar i');
+    const S = { t: 0, prog: 0, needle: 0.3, vel: 0, hold: false, zone: 0.45, phase: 'ch', rt: 0, parts: [] };
+    const kd = (e) => { if (e.code === 'Space') { e.preventDefault(); e.stopImmediatePropagation(); S.hold = true; } }, ku = (e) => { if (e.code === 'Space') { e.preventDefault(); e.stopImmediatePropagation(); S.hold = false; } };
+    addEventListener('keydown', kd, true); addEventListener('keyup', ku, true); cv.onpointerdown = () => (S.hold = true); cv.onpointerup = cv.onpointerleave = () => (S.hold = false);
+    C.leafState = S; let last = performance.now(), raf;
+    const EC = { vent: '#9ff5dc', feu: '#ff6a2b', eau: '#3f9dff', terre: '#c98c4b', foudre: '#ffe23f' }[el0];
+    const loop = (now) => { raf = requestAnimationFrame(loop); const dt = Math.min(0.05, (now - last) / 1000); last = now; S.t += dt;
+      if (S.phase === 'ch') { S.vel += ((S.hold ? 1.5 : -1.3) + Math.sin(S.t * 2.3) * 0.8) * dt; S.vel *= 0.92; S.needle = clamp(S.needle + S.vel * dt * 2.2, 0, 1); S.zone = 0.45 + Math.sin(S.t * 0.7) * 0.18;
+        const inz = Math.abs(S.needle - S.zone) < 0.13; S.prog = clamp(S.prog + (inz ? 0.24 : S.hold ? 0.06 : -0.03) * dt, 0, 1); fill.style.width = (S.prog * 100) + '%';
+        if (S.prog >= 1 || S.t > 14) { S.phase = 'rev'; S.rt = 0; C.ev.leafWin = S.prog >= 1; } }
+      else { S.rt += dt; if (S.rt > 4.2 && !S.done) { S.done = 1; finish(); } }
+      draw(); };
+    const draw = () => {
+      const W = 960, H = 600; g.clearRect(0, 0, W, H);
+      const bg = g.createRadialGradient(W / 2, H / 2, 40, W / 2, H / 2, 600); bg.addColorStop(0, '#2a1f3a'); bg.addColorStop(1, '#07050c'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+      g.fillStyle = '#4a3020'; g.fillRect(0, 470, W, 130); g.fillStyle = '#5a3a26'; g.fillRect(0, 466, W, 8);
+      const cx = W / 2, top = 230, bot = 465, wt = 120, wb = 90; const k = S.phase === 'rev' ? Math.min(1, S.rt / 2.4) : 0;
+      // eau
+      let lvl = 290; if (el0 === 'eau' && S.phase === 'rev') lvl = 290 - k * 70;
+      const wAt = (y) => wb + (wt - wb) * ((bot - y) / (bot - top));
+      g.fillStyle = el0 === 'terre' && S.phase === 'rev' ? `rgba(120,80,40,${0.35 + 0.35 * k})` : 'rgba(80,160,255,.35)';
+      g.beginPath(); g.moveTo(cx - wAt(lvl), lvl); g.lineTo(cx + wAt(lvl), lvl); g.lineTo(cx + wb, bot); g.lineTo(cx - wb, bot); g.closePath(); g.fill();
+      if (el0 === 'eau' && S.phase === 'rev' && k > 0.6) { g.fillStyle = 'rgba(80,160,255,.5)'; for (let i = 0; i < 6; i++) { const yy = top + ((S.rt * 160 + i * 40) % 240); g.beginPath(); g.ellipse(cx + wt + 4 + (i % 2) * 6, yy, 4, 7, 0, 0, TAU); g.ellipse(cx - wt - 4 - (i % 2) * 6, yy + 20, 4, 7, 0, 0, TAU); g.fill(); } g.fillRect(cx - 220, 466, 440, 6); }
+      // verre
+      g.strokeStyle = 'rgba(220,235,255,.85)'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx - wt, top); g.lineTo(cx - wb, bot); g.lineTo(cx + wb, bot); g.lineTo(cx + wt, top); g.stroke();
+      g.strokeStyle = 'rgba(255,255,255,.25)'; g.lineWidth = 8; g.beginPath(); g.moveTo(cx - wt + 18, top + 20); g.lineTo(cx - wb + 14, bot - 20); g.stroke();
+      // aura de chakra
+      if (S.phase === 'ch') { g.globalAlpha = 0.15 + S.prog * 0.5; g.fillStyle = '#7ab8ff'; g.beginPath(); g.ellipse(cx, 360, 150 + Math.sin(S.t * 6) * 6, 160, 0, 0, TAU); g.fill(); g.globalAlpha = 1; }
+      else { g.globalAlpha = 0.25 * (1 - k * 0.5); g.fillStyle = EC; g.beginPath(); g.ellipse(cx, 360, 170, 170, 0, 0, TAU); g.fill(); g.globalAlpha = 1; }
+      // feuille
+      const ly = lvl - 4; const leaf = (dx, ang, col, sc, half) => { g.save(); g.translate(cx + dx, ly); g.rotate(ang); g.scale(sc, sc); g.fillStyle = col; g.beginPath();
+        if (half === 1) { g.moveTo(-46, 0); g.quadraticCurveTo(0, -26, 46, 0); g.closePath(); } else if (half === 2) { g.moveTo(-46, 0); g.quadraticCurveTo(0, 26, 46, 0); g.closePath(); } else { g.moveTo(-46, 0); g.quadraticCurveTo(0, -26, 46, 0); g.quadraticCurveTo(0, 26, -46, 0); }
+        g.fill(); g.strokeStyle = 'rgba(20,60,20,.7)'; g.lineWidth = 2; g.beginPath(); g.moveTo(-40, 0); g.lineTo(40, 0); g.stroke(); g.restore(); };
+      const sway = Math.sin(S.t * 1.6) * 0.06;
+      if (S.phase === 'ch') leaf(0, sway, '#5fbf4a', 1);
+      else if (el0 === 'vent') { leaf(-k * 60, sway - k * 0.5, '#5fbf4a', 1, 1); leaf(k * 60, sway + k * 0.5, '#5fbf4a', 1, 2); g.strokeStyle = 'rgba(200,255,240,.6)'; g.lineWidth = 2; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(cx, ly, 60 + i * 18 + k * 40, -0.3, 0.3); g.stroke(); } }
+      else if (el0 === 'feu') { const c = k < 0.5 ? '#5fbf4a' : '#2a1a10'; leaf(0, sway, c, 1 - k * 0.7); for (let i = 0; i < 14; i++) { const fx = cx + Math.sin(i * 7 + S.rt * 9) * 40 * (1 - k * 0.6), fy = ly - ((S.rt * 120 + i * 17) % 90); g.fillStyle = i % 2 ? '#ffb13d' : '#ff5a2b'; g.globalAlpha = 0.8 * (1 - k * 0.6); g.beginPath(); g.ellipse(fx, fy, 6, 12, 0, 0, TAU); g.fill(); } g.globalAlpha = 1; }
+      else if (el0 === 'eau') leaf(0, sway, '#5fbf4a', 1);
+      else if (el0 === 'terre') { leaf(0, sway, '#5fbf4a', 1 - k * 0.8); g.fillStyle = '#7a5230'; for (let i = 0; i < 40; i++) { const a = i * 2.4; g.fillRect(cx + Math.cos(a) * 40 * (1 - k * 0.3), ly + k * ((i * 13) % 150), 4, 4); } }
+      else if (el0 === 'foudre') { g.save(); g.translate(cx, ly); g.fillStyle = '#5fbf4a'; g.beginPath(); for (let i = 0; i <= 20; i++) { const a = (i / 20) * TAU; const r = (i % 2 ? 26 : 44) * (1 - k * 0.25) + (i % 2 ? 0 : Math.sin(i * 3) * 8 * k); g.lineTo(Math.cos(a) * r * 1.1, Math.sin(a) * r * 0.5); } g.fill(); g.restore();
+        g.strokeStyle = '#ffe23f'; g.lineWidth = 2; for (let i = 0; i < 3; i++) { g.beginPath(); let x = cx - 40 + i * 40, y = ly - 30; g.moveTo(x, y); for (let j = 0; j < 4; j++) { x += Math.random() * 16 - 8; y += 12; g.lineTo(x, y); } g.stroke(); } }
+      // jauge aiguille
+      if (S.phase === 'ch') { const bx = 760, by = 160, bh = 300; g.fillStyle = '#1a1426'; g.fillRect(bx, by, 30, bh); g.fillStyle = 'rgba(127,255,140,.45)'; g.fillRect(bx, by + (1 - S.zone - 0.13) * bh, 30, 0.26 * bh); g.fillStyle = '#ffd27a'; g.fillRect(bx - 6, by + (1 - S.needle) * bh - 3, 42, 6); }
+      if (S.phase === 'rev' && k > 0.5) { g.globalAlpha = Math.min(1, (k - 0.5) * 3); g.fillStyle = EC; g.font = '700 46px "Exo 2", system-ui'; g.textAlign = 'center'; g.fillText('Affinité : ' + EL_TXT[el0][1], cx, 150); g.font = '400 20px system-ui'; g.fillStyle = '#e8e0f0'; g.fillText(EL_TXT[el0][0], cx, 188); g.globalAlpha = 1; }
+    };
+    const finish = () => { cancelAnimationFrame(raf); removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); el.remove(); C.leafState = null; done && done(); };
+    C.leafSkip = () => { S.prog = 1; };
+    raf = requestAnimationFrame(loop);
+  };
+
+  // ---------- Nouvelle carrière / continuer ----------
+  C.newCareer = function (name) {
+    try { const old = Profile.data; if (old && !old.career) localStorage.setItem('sng:profile_backup', JSON.stringify(old)); } catch (e) {}
+    const clan = pick(CLAN_ORDER), el = pick(BASE_EL);
+    const p = Profile.fresh(clan, name || 'Shinobi'); Object.assign(p, { tutorial: true, seenVer: 99, tourSeen: true, elements: [el], career: { rank: 0, clan, el, t: Date.now() } });
+    p.clans = Array.from(new Set([clan].concat(p.clans || []))); p.clan = clan;
+    const st = Object.values(TECH).filter((T) => T.el === el && T.rar === 1 && !T.clan && !T.mode && !T.beast && !T.innate).slice(0, 2).map((T) => T.id);
+    p.techs = ['kunai_ex'].concat(st).filter((x) => TECH[x]); p.slots = [st[0] || 'kunai_ex', st[1] || null, 'kunai_ex', null, null, null, null, null];
+    Profile.data = p; Profile.save(); C.ev.newc = clan + '/' + el;
+    C.cinematic(clan, () => C.leafTest(el, () => C.toAcademy(true)));
+    return p;
+  };
+  C.toAcademy = function (first) {
+    SE35.start(); const vz = SE35.ZONES[1]; const u = G.players[0]; if (!u) return;
+    u.x = vz.cx; u.y = vz.cy + 120; Cam.x = u.x; Cam.y = u.y;
+    const ir = spawnMob('moine', vz.cx + 90, vz.cy + 60, 0, { team: -1 }); if (ir) { ir.name = 'Iruka — Académie ninja'; ir.ai = null; ir.maxHp = ir.hp = 1e9; ir.spd = 0; ir.look = Object.assign({}, ir.look, { hair: '#3a2a1a', outfit: '#3a5a3a', scarf: '#ffffff', band: '#3a5aa8' }); }
+    const p = prof(); const R = C.rank(p);
+    banner('Académie ninja', R.n.toUpperCase(), '#ffd27a', first ? 'Ta carrière commence ici' : 'Rang ' + R.n);
+    if (first) SE35.say([{ who: 'Iruka', k: '学', c: '#7dffb0', t: `Bienvenue à l’Académie, ${p.name} du clan ${CLANS[p.clan].n} ! Ta nature de chakra : ${EL[p.elements[0]].n}.` }, { who: 'Iruka', k: '学', c: '#7dffb0', t: 'Explore le monde, aide les gens, accomplis des missions. Genin au niveau 5, puis Chūnin, Jōnin… jusqu’au Sommet des Kage.' }]);
+    C.ev.academy = 1;
+  };
+  C.continue = () => C.toAcademy(false);
+  C.panel = function () {
+    $('#car75') && $('#car75').remove(); const p = prof(); const on = p && p.career; const ri = on ? C.rankIdx(p) : 0;
+    const el = ov('car75', `<div class="w"><button class="ghost x" id="c75x">Fermer</button><h2>Carrière</h2><p class="muted">Clan et nature de chakra tirés au hasard. Tu progresses uniquement par le monde ouvert et les missions. Objectif final : le Sommet des Kage.</p>
+      <div class="rk">${RANKS.map((R, i) => `<div class="${on && i <= ri ? 'on' : ''}"><b>${R.k}</b><span>${R.n}</span><small>niv. ${R.lv}</small></div>`).join('')}</div>
+      <p class="muted small">Verrous : Duel/Saga au rang Genin, Survie au rang Chūnin, Tour, Raid et Créatif au rang Jōnin.</p>
+      <div class="row">${on ? `<button class="primary" id="c75c">Continuer — ${esc(p.name)} (${esc(C.rank(p).n)})</button>` : ''}<button ${on ? '' : 'class="primary"'} id="c75n">Nouvelle carrière</button></div></div>`);
+    el.querySelector('#c75x').onclick = () => el.remove();
+    const c = el.querySelector('#c75c'); if (c) c.onclick = () => { el.remove(); C.continue(); };
+    el.querySelector('#c75n').onclick = () => { if (on && !confirm('Recommencer une carrière ? La carrière actuelle sera remplacée.')) return; el.remove(); C.newCareer(p && p.name && p.name !== 'Test' ? p.name : 'Shinobi'); };
+  };
+  const bt = UI.title; UI.title = function () { const r = bt.apply(this, arguments); try { const nav = document.querySelector('#scr-title .mainnav'); if (nav && !nav.querySelector('[data-car]')) { nav.insertAdjacentHTML('afterbegin', `<button class="big primary" data-car="1">${seal('志', '#ffd27a')}<span>Carrière<small>Le parcours principal</small></span></button>`); nav.querySelector('[data-car]').onclick = () => C.panel(); } } catch (e) { console.warn('car', e.message); } return r; };
+  try { if (document.querySelector('#scr-title.on, #scr-title:not([hidden])')) UI.title(); } catch (e) {}
+
+  const css = document.createElement('style'); css.textContent = `
+  #cin75{position:fixed;inset:0;z-index:9500;background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--cc) 35%,#000) 0,#05030a 70%);display:grid;place-items:center;color:#fff;cursor:pointer}
+  #cin75 .sl{text-align:center;opacity:0;transform:translateY(16px)}#cin75 .sl.in{animation:cin75 .6s cubic-bezier(.2,.8,.2,1) forwards}@keyframes cin75{to{opacity:1;transform:none}}
+  #cin75 .k{font-size:140px;color:var(--cc);text-shadow:0 0 40px var(--cc);font-family:"Noto Sans JP",serif;line-height:1}#cin75 h2{font-size:40px;margin:10px 0 6px;letter-spacing:.08em}#cin75 p{max-width:640px;color:#d8d0e8;font-size:18px}#cin75>small{position:absolute;bottom:18px;color:#9a8fb0}
+  #leaf75{position:fixed;inset:0;z-index:9500;background:#05030a;display:grid;place-items:center}#leaf75 canvas{width:min(100vw,160vh);height:auto;max-height:100vh}
+  #leaf75 .hud{position:absolute;top:18px;left:50%;transform:translateX(-50%);text-align:center;color:#fff;width:min(720px,92vw)}#leaf75 h2{margin:0;color:#ffd27a;letter-spacing:.1em}#leaf75 p{color:#d8d0e8;margin:6px 0}
+  #leaf75 .bar{height:10px;background:#2a2036;border-radius:6px;overflow:hidden}#leaf75 .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7ab8ff,#ffd27a)}
+  #car75{position:fixed;inset:0;z-index:9000;background:rgba(6,3,12,.8);display:grid;place-items:center}#car75 .w{width:min(820px,94vw);background:linear-gradient(160deg,#241834,#120c1c);border:1px solid #ffb347;border-radius:12px;padding:20px;color:#eee;position:relative}
+  #car75 .x{position:absolute;right:12px;top:12px}#car75 h2{margin:0 0 6px;color:#ffd27a}#car75 .rk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:12px 0}#car75 .rk div{background:#1a1426;border:1px solid #3a2e4a;border-radius:8px;padding:8px 4px;text-align:center;display:flex;flex-direction:column}
+  #car75 .rk div.on{border-color:#ffd27a;box-shadow:0 0 12px rgba(255,210,122,.35)}#car75 .rk b{font-size:24px;color:#ffb347}#car75 .rk small{color:#9a8fb0}#car75 .row{display:flex;gap:8px;flex-wrap:wrap}`;
+  document.head.appendChild(css);
+  SNG.release(10, 'Next Generation 6 — Carrière', [
+    ['志', '#ffd27a', 'Mode Carrière', 'Nouveau parcours principal : clan et nature de chakra tirés au hasard, cinématique du clan, épreuve de la feuille en plein écran, départ à l’Académie. Rangs : Académie, Genin, Chūnin, Jōnin, ANBU, Sannin, Kage, puis le Sommet des Kage. Les autres modes se débloquent avec le rang.'],
+  ]);
+})();
+/* Next Generation 6 — Rencontres aléatoires refaites : toutes au même taux, Akatsuki (ambiance + enchaînement de 1 contre 1),
+   Minato (bijū scellé gratuit), Momoshiki (mode offert), Sommet des Kage (choix), assaut de Pain, Zabuza sur le pont,
+   examen Chūnin d'Orochimaru, Kaguya, Itachi & Kisame, Kinshiki. */
+(function () {
+  const E = (SNG.enc = { ev: {} }); const V = S2.v14; if (!SE35 || !SE35.EVENTS || !V) return;
+  const hero = () => G.players[0]; const prof = () => P();
+  const R = (id) => V.ROSTER.find((r) => r.id === id);
+  const say = (pages, done) => { const d = document.getElementById('dlg35'); if (d && d.classList.contains('on')) return setTimeout(() => say(pages, done), 300); SE35.say(pages, done); };
+  const near = (u, a, b) => { const t = rand(TAU), d = rand(a, b); return [clamp(u.x + Math.cos(t) * d, 80, G.map.w - 80), clamp(u.y + Math.sin(t) * d, 80, G.map.h - 80)]; };
+  // ---- personnage nommé (ennemi ou allié)
+  E.kitOf = (id) => { const p = prof(); p.encKits = p.encKits || {}; if (!p.encKits[id] || !p.encKits[id].every((t) => TECH[t])) p.encKits[id] = V.kitFor(R(id)); return p.encKits[id]; };
+  E.foe = function (id, o = {}) {
+    const Rc = R(id); const u0 = hero(); if (!Rc || !u0) return null; const lv = Math.max(10, prof().lv || 10);
+    const b = botBuild(CLAN_ORDER.find((c) => CLANS[c].el === Rc.el) || 'hibana', lv, true); b.slots = E.kitOf(id); b.name = o.name || Rc.n; b.look = Object.assign({}, b.look, Rc.look, o.look || {});
+    const MAPE = { sh: ['solaire', 'lunaire', 'miroir'], by: ['celeste'], ri: ['neant'] }[Rc.eye]; b.eye = MAPE ? MAPE.find((x) => EYES[x] && MODES[x]) || null : null;
+    const u = makePlayerUnit(b, o.team != null ? o.team : 1, 9, false); u.kind = 'mob'; u.isBot = false; u.ai = { type: 'shinobi', st: 'idle', t: 0 };
+    const [x, y] = o.at || near(u0, 260, 380); u.x = x; u.y = y; u.sword = !!Rc.sword || u.sword; u.maxHp *= o.hp || 3; u.hp = u.maxHp; u.size = o.size || 1; u.r = 15 * u.size; u.xpVal = (o.xp || 60) * (1 + lv / 10); u.ryoVal = o.ryo || 40;
+    u._enc = id; addUnit(u); return u;
+  };
+  // ---- enchaînement de combats
+  E.chain = function (steps, done, fail) {
+    let i = -1, cur = []; const run = { on: true };
+    const next = () => { i++; if (i >= steps.length) { run.on = false; clearInterval(h); done && done(); return; } cur = [].concat(steps[i]() || []).filter(Boolean); };
+    const h = setInterval(() => { try { if (!run.on) return clearInterval(h); if (G.mode !== 'monde') { run.on = false; clearInterval(h); fail && fail(); return; }
+      const me = hero(); if (!me || me.down || me.dead) { run.on = false; clearInterval(h); fail && fail(); return; }
+      if (G.paused) return; if (cur.every((u) => !alive(u) || !G.units.includes(u))) next(); } catch (e) { console.warn('chain', e.message); } }, 400);
+    next(); return run;
+  };
+  const grantKit = (id) => { const p = prof(); const got = []; for (const t of E.kitOf(id)) if (TECH[t] && !p.techs.includes(t)) { grantTech(p, TECH[t]); got.push(TECH[t].n); } Profile.save(); return got; };
+  const reward = (xp, ryo) => { const p = prof(); grantXP(p, xp); p.ryo += ryo; Profile.save(); };
+
+  // ---- ambiance Akatsuki : ciel rouge, nuages rouges, musique sombre
+  E.ambiance = function (on) {
+    let el = $('#aka76'); if (on && !el) { el = document.createElement('div'); el.id = 'aka76';
+      const cloud = '<svg viewBox="0 0 120 60"><path d="M20 45c-12 0-16-14-6-19 0-12 16-16 23-8 6-12 26-10 28 3 12-4 24 6 18 17 10 3 8 15-2 15H22z" fill="#c4161c" stroke="#fff" stroke-width="4"/></svg>';
+      el.innerHTML = Array.from({ length: 9 }, (_, i) => `<i style="top:${4 + (i * 11) % 60}%;animation-delay:${-i * 4.3}s;animation-duration:${30 + (i % 4) * 7}s;width:${90 + (i % 3) * 50}px">${cloud}</i>`).join(''); document.body.appendChild(el);
+      if (G.map) { E._night = G.map.night; G.map.night = true; }
+      try { const AC = window.AudioContext || window.webkitAudioContext; const ac = (E.ac = E.ac || new AC()); const g = ac.createGain(); g.gain.value = 0; g.gain.linearRampToValueAtTime(0.05, ac.currentTime + 2); const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320; lp.connect(g); g.connect(ac.destination);
+        const os = [55, 55.6, 82.4].map((f) => { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); o.start(); return o; }); const lfo = ac.createOscillator(); lfo.frequency.value = 0.15; const lg = ac.createGain(); lg.gain.value = 120; lfo.connect(lg); lg.connect(lp.frequency); lfo.start(); E.music = { g, os: os.concat([lfo]) }; } catch (e) {}
+      E.ev.amb = 1; }
+    if (!on && el) { el.classList.add('off'); setTimeout(() => el.remove(), 900); if (G.map) G.map.night = !!E._night; try { const ac = E.ac, m = E.music; if (m) { m.g.gain.linearRampToValueAtTime(0, ac.currentTime + 1); setTimeout(() => m.os.forEach((o) => o.stop()), 1200); E.music = null; } } catch (e) {} }
+  };
+  const AKA = ['pain', 'konan', 'itachi', 'kisame', 'deidara', 'sasori', 'hidan', 'kakuzu'];
+  if (!R('pain')) V.ROSTER.push({ id: 'pain', n: 'Pain (Tendō)', el: 'vent', eye: 'ri', look: { hair: '#ff7a2a', outfit: '#121018', scarf: '#c02a2a' } });
+  if (!R('kaguya')) V.ROSTER.push({ id: 'kaguya', n: 'Kaguya Ōtsutsuki', el: 'neutre', eye: 'by', look: { hair: '#f2f2f2', outfit: '#f0ecf8', scarf: '#b47cff' } });
+  const AK = { look: { outfit: '#121018', scarf: '#c4161c' } };
+  E.akatsuki = function () {
+    const list = AKA.slice().sort(() => Math.random() - 0.5).slice(0, 4); E.ambiance(true); banner('Akatsuki', 'RENCONTRE', '#c4161c', list.length + ' duels à la suite');
+    say([{ who: 'Pain', k: '暁', c: '#c4161c', t: 'Ressens la douleur. L’Akatsuki va te mettre à l’épreuve, un par un.' }], () => {
+      E.chain(list.map((id) => () => { const u = E.foe(id, Object.assign({ hp: 5, xp: 90, ryo: 80 }, AK, { look: Object.assign({}, R(id).look, AK.look) })); if (u) { banner(R(id).n, 'DUEL', '#c4161c'); u._akaId = id; } return u; }).concat([]), () => {
+        E.ambiance(false); const got = []; for (const id of list) got.push(R(id).n + ' : ' + grantKit(id).join(', ')); reward(600, 400); E.ev.aka = list.join(',');
+        say([{ who: 'Narration', k: '暁', c: '#c4161c', t: 'L’Akatsuki se retire. Tu as appris leurs techniques.' }, { who: 'Techniques', k: '巻', c: '#ffd27a', t: got.join(' · ') || 'Déjà connues.' }]); }, () => { E.ambiance(false); });
+      // récompense par duel gagné
+      E._duelWatch = setInterval(() => { if (!$('#aka76')) return clearInterval(E._duelWatch); for (const u of G.units) if (u._akaId && !alive(u) && !u._rw) { u._rw = 1; const g = grantKit(u._akaId); toast('Akatsuki', R(u._akaId).n + ' vaincu', g.length ? 'Moveset obtenu : ' + g.join(', ') : 'Moveset déjà connu', '#c4161c', '暁'); } }, 500);
+    });
+  };
+  E.momoshiki = function () {
+    say([{ who: 'Momoshiki Ōtsutsuki', k: '桃', c: '#e8e4f0', t: 'Une créature inférieure… mais ton corps fera un réceptacle acceptable.' }, { who: 'Momoshiki Ōtsutsuki', k: '桃', c: '#e8e4f0', t: 'Je te confie mon pouvoir. Ne me déçois pas.' }], () => {
+      const o = SNG.ngp(); o.modes.momoshiki = 1; if (!o.mode) o.mode = 'momoshiki'; Profile.save(); E.ev.momo = 1; banner('Mode Momoshiki', 'OFFERT', '#c06bff', 'Équipe-le dans « Ère Boruto », active-le avec Z ou ' + codeLabel(V.B('ngmode') || 'KeyB')); });
+  };
+  E.summit = function () {
+    const p = prof(); banner('Sommet des Kage', 'RENCONTRE', '#ffd27a');
+    say([{ who: 'Narration', k: '影', c: '#ffd27a', t: 'Pays du Fer. Le Sommet des cinq Kage… Sasuke Uchiha fait irruption et attaque les Kage !' }, { who: 'Sasuke Uchiha', k: '鷹', c: '#7a5cff', t: 'Je suis venu pour Danzō. Écartez-vous.',
+      ch: [{ t: 'Aider Sasuke', f: () => { E.side = 'sasuke'; } }, { t: 'Aider les Kage', f: () => { E.side = 'kage'; } }] }], () => {
+      const side = E.side || 'kage'; E.ev.summit = side; const ally = side === 'sasuke' ? E.foe('sasuke', { team: 0, hp: 3 }) : [E.foe('gaara', { team: 0, hp: 3 })];
+      [].concat(ally).forEach((a) => a && (a.ai.leader = hero()));
+      const foes = side === 'sasuke' ? () => [E.foe('a3', { name: 'Ay (4e Raikage)', hp: 6, xp: 140 }), E.foe('gengetsu', { name: 'Mei Terumī', hp: 5, xp: 140 }), E.foe('mu', { name: 'Ōnoki', hp: 5, xp: 140 })] : () => [E.foe('sasuke', { hp: 12, xp: 260, ryo: 200 })];
+      E.chain([foes], () => { p.career = p.career || {}; if (C2().rankIdx(p) >= 6) p.career.summit = true; reward(900, 600); grantKit(side === 'sasuke' ? 'a3' : 'sasuke'); say([{ who: 'Narration', k: '影', c: '#ffd27a', t: side === 'sasuke' ? 'Sasuke disparaît dans un tourbillon. Les Kage se souviendront de toi…' : 'Sasuke est repoussé. Les cinq Kage saluent ton courage.' }]); });
+    });
+  };
+  const C2 = () => SNG.career;
+  E.pain = function () { banner('Assaut de Pain', 'RENCONTRE', '#ff7a2a'); say([{ who: 'Pain', k: '痛', c: '#ff7a2a', t: 'Shinra Tensei. Konoha connaîtra la douleur.' }], () => E.chain([() => Array.from({ length: 6 }, (_, i) => E.foe('pain', { name: ['Tendō', 'Shuradō', 'Ningendō', 'Chikushōdō', 'Gakidō', 'Jigokudō'][i], hp: 1.4, xp: 50, ryo: 30, look: { outfit: '#121018', scarf: '#c4161c' } }))], () => { reward(500, 300); grantKit('pain'); })); };
+  E.zabuza = function () { banner('Le pont de Tazuna', 'RENCONTRE', '#c8d8e8'); for (let i = 0; i < 3; i++) { const [x, y] = near(hero(), 60, 300); addZone('mist', x, y, 220, 35, null, { natural: 1, quiet: 1 }); }
+    say([{ who: 'Zabuza Momochi', k: '霧', c: '#c8d8e8', t: 'Le Démon du Brouillard… Huit points vitaux. Lequel choisir ?' }], () => E.chain([() => [E.foe('zabuza', { hp: 5, xp: 120 }), E.foe('haku', { hp: 3, xp: 80 })]], () => { reward(350, 250); grantKit('zabuza'); })); };
+  E.orochimaru = function () { banner('Forêt de la Mort', 'EXAMEN CHŪNIN', '#7a5cff'); say([{ who: 'Orochimaru', k: '蛇', c: '#7a5cff', t: 'Ton rouleau, petit… ou ta vie. Les serpents ont faim.' }], () => E.chain([() => [0, 1, 2].map(() => { const [x, y] = near(hero(), 200, 320); return spawnMob(MOBS.serpent35 ? 'serpent35' : Object.keys(MOBS)[0], x, y, 1); }), () => E.foe('orochimaru', { hp: 8, xp: 180, ryo: 150 })], () => { reward(450, 300); grantKit('orochimaru'); })); };
+  E.kaguya = function () { banner('Kaguya Ōtsutsuki', 'RENCONTRE', '#b47cff'); say([{ who: 'Kaguya Ōtsutsuki', k: '輝', c: '#b47cff', t: 'Ce chakra m’appartient. Rends-le moi.' }], () => E.chain([() => E.foe('kaguya', { hp: 22, size: 1.5, xp: 400, ryo: 300 })], () => { reward(900, 500); grantKit('kaguya'); })); };
+  E.duo = function () { E.ambiance(true); banner('Itachi & Kisame', 'RENCONTRE', '#c4161c'); say([{ who: 'Itachi Uchiha', k: '鴉', c: '#c4161c', t: 'Kisame. Pas de blessure inutile.' }, { who: 'Kisame Hoshigaki', k: '鮫', c: '#3f6aa0', t: 'Héhé, Samehada n’est pas d’accord.' }], () => E.chain([() => [E.foe('itachi', Object.assign({ hp: 6, xp: 160 }, AK)), E.foe('kisame', Object.assign({ hp: 7, xp: 160 }, AK))]], () => { E.ambiance(false); reward(600, 350); grantKit('itachi'); grantKit('kisame'); }, () => E.ambiance(false))); };
+  E.kinshiki = function () { banner('Kinshiki Ōtsutsuki', 'RENCONTRE', '#c98c4b'); say([{ who: 'Kinshiki Ōtsutsuki', k: '金', c: '#c98c4b', t: '…Momoshiki-sama attend ton chakra.' }], () => E.chain([() => E.foe('kinshiki', { hp: 14, size: 1.7, xp: 300, ryo: 250 })], () => { reward(700, 400); grantKit('kinshiki'); })); };
+
+  // ---- table des événements : refonte + nouveaux, tous au même taux
+  const EV = SE35.EVENTS; const by = (n) => EV.find((e) => e.n === n);
+  const aka = by('Rencontre de l’Akatsuki'); if (aka) aka.f = E.akatsuki;
+  const mo = by('Réceptacle de Momoshiki'); if (mo) { mo.n = 'Momoshiki t’offre son pouvoir'; mo.f = E.momoshiki; }
+  const add = (n, k, c, f, key) => { EV.push({ id: EV.length, n, k, c, f, rare: false, w: 1, key }); };
+  add('Sommet des Kage', '影', '#ffd27a', E.summit, 'summit'); add('Assaut de Pain', '痛', '#ff7a2a', E.pain, 'pain'); add('Zabuza sur le pont', '霧', '#c8d8e8', E.zabuza, 'zabuza');
+  add('Examen Chūnin d’Orochimaru', '蛇', '#7a5cff', E.orochimaru, 'orochimaru'); add('Kaguya', '輝', '#b47cff', E.kaguya, 'kaguya'); add('Itachi & Kisame', '鴉', '#c4161c', E.duo, 'duo'); add('Kinshiki', '金', '#c98c4b', E.kinshiki, 'kinshiki');
+  for (const e of EV) { e.w = 1; e.rare = false; }
+  if (aka) aka.key = 'akatsuki'; if (mo) mo.key = 'momoshiki'; const mi = EV.find((e) => /Minato/.test(e.n)); if (mi) mi.key = 'minato';
+  E.fire = (key) => { const e = EV.find((x) => x.key === key); if (e) SE35.fire(EV.indexOf(e)); };
+  const css = document.createElement('style'); css.textContent = `#aka76{position:fixed;inset:0;z-index:5;pointer-events:none;background:linear-gradient(rgba(150,10,20,.55),rgba(90,6,14,.35) 60%,rgba(40,2,8,.55));mix-blend-mode:multiply;transition:opacity .9s}#aka76.off{opacity:0}
+  #aka76 i{position:absolute;left:-220px;opacity:.85;animation:aka76 linear infinite;mix-blend-mode:normal}#aka76 i svg{width:100%;height:auto}@keyframes aka76{to{transform:translateX(calc(100vw + 440px))}}`;
+  document.head.appendChild(css);
+  SNG.release(10, 'Next Generation 6 — Rencontres', [
+    ['暁', '#c4161c', 'Rencontres refaites', EV.length + ' rencontres, toutes au même taux. Akatsuki : ciel rouge, nuages, musique sombre et 4 duels à la suite ; chaque membre vaincu te donne son moveset. Minato scelle une bête en toi, Momoshiki t’offre son mode. Nouveau : Sommet des Kage (aider Sasuke ou les Kage), assaut de Pain, Zabuza sur le pont, examen Chūnin d’Orochimaru, Kaguya, Itachi & Kisame, Kinshiki.'],
   ]);
 })();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */

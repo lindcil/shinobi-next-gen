@@ -9,3 +9,5 @@
 | Plus tard | Doublage, saga Code/Eida, coopération en ligne pour la Saga | à venir |
 
 - ✅ **NG 5 — Edo Tensei, prédiction & touches** : portage de la MAJ 14 de Shinobi 2 (touches AZERTY réaffectables, esquive Ultra Instinct, Edo Tensei jouable, double appui en mode, clans ultime+passif, créatif, Outils ninja, rythme).
+- ✅ **NG 6 — Carrière & rencontres** : mode Carrière (clan/élément aléatoires, cinématique, épreuve de la feuille, Académie, rangs jusqu’au Sommet des Kage, verrous), 37 rencontres au même taux (Akatsuki, Sommet des Kage…), navigateur de Ninjutsu.
+- ⏭ Prochaines idées : missions de rang (D→S) dédiées à la Carrière, équipe de trois Genin, examen Chūnin jouable.
