@@ -7,3 +7,5 @@
 | NG 3 — Jigen | Boss Jigen / Isshiki Ōtsutsuki en 3 phases (Sukunahikona, Daikokuten cubes et pieux, Kāma) | ✅ |
 | NG 4 — Saga | Mode Saga de Naruto à Boruto : arcs, vie quotidienne en scènes QTE (Ichiraku, Académie, famille, entraînement, festivals, missions), dialogues courts | ✅ |
 | Plus tard | Doublage, saga Code/Eida, coopération en ligne pour la Saga | à venir |
+
+- ✅ **NG 5 — Edo Tensei, prédiction & touches** : portage de la MAJ 14 de Shinobi 2 (touches AZERTY réaffectables, esquive Ultra Instinct, Edo Tensei jouable, double appui en mode, clans ultime+passif, créatif, Outils ninja, rythme).

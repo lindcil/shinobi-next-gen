@@ -27,3 +27,10 @@ Next Generation prend le meilleur de **Shinobi 1** (Éternel II v4.7) et de **Sh
 - « 5× plus grand » s’entend en **surface** : les dimensions des arènes, survies, missions, tours et duels sont multipliées par √5 ≈ 2,24 (2300×1500 → 5143×3354).
 - Le monde ouvert passe de 7200×4500 à 22800×14200, soit **10× la surface**.
 - Pour rester fluide, le sol de base a une résolution plafonnée et des tuiles de détail de 640 px sont générées autour de la caméra (cache de 64 tuiles). Tout ce qui est hors champ n’est pas dessiné, et les ennemis à plus de 2400 px des joueurs sont mis en veille.
+
+## NG 5 — choix
+- **Touches** : codes physiques (`event.code`), libellés AZERTY par défaut. Déplacement aux flèches en AZERTY pour libérer Z (charge de mode) ; préréglage QWERTY = WASD + Z. Réaffectation complète dans Options.
+- **Esquive** : jamais de téléportation (substitution comprise) — balancement sur place façon Ultra Instinct, invulnérable, puis contre +50 %. Le dash reste un dash.
+- **Substitution** : prédiction (C + esquive, garde 2 s), 3 charges, +1 charge / 10 s.
+- **Charge de mode Z** : mode Boruto équipé > bijū > ermite > pupille ; maintien = charge de chakra.
+- **Edo Tensei** : alliés régénérants, 4 réincarnés max, 50 % d’échec, contrôle via R (retour auto au corps si l’un des deux tombe).
