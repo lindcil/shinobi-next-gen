@@ -11213,15 +11213,15 @@ function techCard2(id, p, opts = {}) {
   /* ---------- Smears en croissant (v4.6.1) : 3 couches, contour encré, 4 images, plus grands sur les finisseurs, sans flash ---------- */
   const ARC = { atk1: [-1.0, 0.55, 0], atk2: [0.9, -0.85, 0], atk3: [0.75, -1.3, 0], atk4: [-2.7, 2.5, 1], slash1: [-2.2, 0.8, 0], slash2: [1.2, -1.7, 0], slash3: [-0.7, 0.35, 1] };
   const colOf = (u) => (u.mode && typeof modeColor === 'function' && modeColor(u)) || (u.buffs && u.buffs.elemblade && EL[u.elemMain] ? EL[u.elemMain].c : u.isPlayer && u.look && /^#/.test(u.look.scarf || '') ? u.look.scarf : u.isPlayer ? '#ffcf5a' : '#ff7a7a');
-  function spawn(u) { const A = ARC[u.pose]; if (!A) return; const J = u.rig.j46; const c = J ? J.chest : [6, -40]; R46.list.push({ u, a0: A[0], d: A[1] - A[0], cx: c[0] + 4, cy: c[1] + 4, R: 34 * (A[2] ? 1.35 : 1), big: A[2], col: colOf(u), fr: 0, t0: performance.now() }); R46.n.smear++; }
+  function spawn(u) { const A = ARC[u.pose]; if (!A) return; const J = u.rig.j46; const c = J ? J.chest : [6, -40]; R46.list.push({ u, a0: A[0], d: A[1] - A[0], cx: c[0] + 4, cy: c[1] + 4, R: 48 * (A[2] ? 1.35 : 1), big: A[2], col: colOf(u), fr: 0, t0: performance.now() }); R46.n.smear++; }
   function drawArc(ctx, u, S, k) { const F = frameOf(u), n = 18; const P = (ang, r) => W(F, [S.cx + Math.cos(ang) * r, S.cy + Math.sin(ang) * r]); const lit = (c, q) => mixHex(c, '#ffffff', q);
     const layer = (rO, th, col, al) => { ctx.globalAlpha = al; ctx.fillStyle = col; ctx.beginPath(); for (let i = 0; i <= n; i++) { const p = P(S.a0 + S.d * (i / n), rO); ctx.lineTo(p[0], p[1]); } for (let i = n; i >= 0; i--) { const q = i / n, w = th * Math.pow(Math.sin(q * Math.PI * 0.92 + 0.08), 0.8) * (0.35 + 0.65 * q); const p = P(S.a0 + S.d * q, rO - w); ctx.lineTo(p[0], p[1]); } ctx.closePath(); ctx.fill(); };
-    const th = (S.big ? 24 : 17) * (1 - k * 0.3); ctx.save(); layer(S.R + 4, th + 8, S.col, 0.28 * (1 - k)); layer(S.R, th, lit(S.col, 0.15), 0.75 * (1 - k * 0.6)); layer(S.R - 2, th * 0.45, lit(S.col, 0.75), 0.95 * (1 - k * 0.5));
+    const th = (S.big ? 32 : 24) * (1 - k * 0.3); ctx.save(); layer(S.R + 4, th + 8, S.col, 0.4 * (1 - k)); layer(S.R, th, lit(S.col, 0.15), 0.92 * (1 - k * 0.6)); layer(S.R - 2, th * 0.45, lit(S.col, 0.75), 0.95 * (1 - k * 0.5));
     ctx.globalAlpha = 0.8 * (1 - k); ctx.strokeStyle = OUT; ctx.lineWidth = 1.6; ctx.beginPath(); for (let i = 0; i <= n; i++) { const p = P(S.a0 + S.d * (i / n), S.R + 0.8); ctx.lineTo(p[0], p[1]); } ctx.stroke(); ctx.restore(); }
   drawNinja = function (ctx, gl, u) { if (!u || !u.rig || !u.look) return;
     const r = u.rig; if (!u._tint && ARC[u.pose]) { const t = u.poseT || 0, key = u.pose + ':' + (u.act ? u.act.idx || 0 : 0) + ':' + (u.act ? Math.round((u.act.t0 || 0) * 1000) : 0); if (t > 0.26 && t < 0.62 && r.sm2 !== key) { r.sm2 = key; spawn(u); } if (t < 0.15) r.sm2 = null; }
     try { draw(ctx, gl, u); } catch (e) { if (!R46.err) { R46.err = String(e && e.stack || e); console.warn('rig2', e); } }
-    if (!u._tint) for (let i = R46.list.length - 1; i >= 0; i--) { const S = R46.list[i]; if (S.u !== u) continue; if (!S.frz) S.fr++; const k = Math.min((performance.now() - S.t0) / 180, (S.fr - 1) / (S.big ? 5 : 4)); if (k >= 1) { R46.list.splice(i, 1); continue; } try { drawArc(ctx, u, S, k); } catch (e) {} } };
+    if (!u._tint) for (let i = R46.list.length - 1; i >= 0; i--) { const S = R46.list[i]; if (S.u !== u) continue; if (!S.frz) S.fr++; const k = Math.min((performance.now() - S.t0) / 240, (S.fr - 1) / (S.big ? 5 : 4)); if (k >= 1) { R46.list.splice(i, 1); continue; } try { drawArc(ctx, u, S, k); } catch (e) {} } };
   // ancienne traînée fine : remplacée par les croissants
   if (typeof drawSmear === 'function') drawSmear = function () {};
   // tête/cou/hanches pour les manteaux de bête : lus sur le nouveau squelette
@@ -14228,6 +14228,9 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
       const allDown = H.every((u) => u.dead || u.down);
       const res = vis(document.getElementById('scr-results'));
       if (res) { addRetry(); downT = overT = 0; return; }
+      const dlgOn = () => { const d = document.getElementById('dlg'); return !!(d && d.classList.contains('on')); };
+      if (allDown && !world() && G.mode !== 'pvp' && dlgOn()) { D.ev.dlgSkip = (D.ev.dlgSkip || 0) + 1; for (let i = 0; i < 20 && dlgOn(); i++) { try { if (typeof Dlg !== 'undefined' && Dlg.finish) Dlg.finish(); else document.querySelector('#dlg .dlgskip').click(); } catch (e) { break; } } const d = document.getElementById('dlg'); if (d) d.classList.remove('on'); G.paused = false; }
+      if (allDown && dlgOn() === false && G.paused && !world() && !document.querySelector('#pause:not([hidden]),#scr-pause:not([hidden])')) downT += dt; else
       if (allDown && (!G.paused || world())) downT += dt; else if (!allDown) downT = 0;
       if (world() && allDown && downT > 2.2) { for (const u of H) D.respawn(u); downT = 0; return; }
       if (G.mode === 'creative' && allDown && downT > 2.2 && !window.SIM48_ACTIVE) { for (const u of H) { if (typeof reviveUnit === 'function') reviveUnit(u, 1); u.dead = u.down = false; u.hp = u.maxHp; } downT = 0; return; }
@@ -14272,7 +14275,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
       set: (c) => { const L = plainTechs(); return [0, 1, 2, 3].map((i) => `<label>Technique ${i + 1}<select data-c="sk${i}">${L.map((k) => opt(k, TN(k), k === c['sk' + i])).join('')}</select></label>`).join('') + diffSel(c); } },
     boss: { n: 'Simulateur de boss', k: '鬼', goal: 'Affronte le boss de ton choix au rang choisi. Victoire quand il tombe, défaite si tu tombes. Le chrono est affiché à la fin.', keys: () => KEYS.move,
       set: (c) => `<label>Boss<select data-c="boss">${Object.keys(BOS()).map((k) => opt(k, BN(k), k === c.boss)).join('')}</select></label><label>Rang<select data-c="tier">${[0, 1, 2, 3, 4, 5].map((t) => opt(t, 'Rang ' + (t + 1), +c.tier === t)).join('')}</select></label>` },
-    labo: { n: 'Labo libre', k: '創', goal: 'Bac à sable : invoque ennemis et mannequins, triches, techniques, pupilles et bêtes. Les outils du labo s’affichent ici quand une session est en cours (Tab pour revenir à ce panneau).', keys: () => `${KEYS.move} · ${K('Tab')} panneau Créatif`,
+    labo: { n: 'Labo libre', k: '創', goal: 'Bac à sable : invoque ennemis et mannequins, triches, techniques, pupilles et bêtes. Les outils du labo s’affichent ici quand une session est en cours (Tab pour revenir à ce panneau).', keys: () => KEYS.move,
       set: (c) => `<label>Terrain<select data-c="biome">${Object.keys(BIO()).map((b) => opt(b, (BIO()[b] && BIO()[b].n) || b, b === c.biome)).join('')}</select></label><div id="ch49tools"></div>` },
     mastery: { n: 'Éditeur de maîtrise', k: '極', editor: 1, goal: 'Règle la maîtrise (0 à V) de tes techniques. Modifie ton profil réel.', keys: () => 'Souris / clavier',
       set: () => `<div class="r"><input id="ch49q" placeholder="Rechercher une technique…"><button data-x="m5">Tout en Maîtrise V</button><button data-x="m0">Tout à 0</button></div><div id="ch49m"></div>` },
