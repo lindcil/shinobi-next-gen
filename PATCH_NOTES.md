@@ -43,3 +43,37 @@
 - Les cubes du Daikokuten tombent du ciel après un avertissement au sol. Le Mode Kāma de Kawaki peut aussi en invoquer.
 - Jigen respecte les mêmes recharges, le même coût en chakra et les mêmes temps d’incantation que le joueur.
 - Le vaincre débloque le Kāma de Kawaki. Accès : menu **Ère Boruto → Boss**.
+
+## NG 4 — La Saga
+- **Mode Saga** (bouton en tête du menu), 12 arcs de Naruto à Boruto :
+  - Académie ;
+  - Pays des Vagues ;
+  - Examen Chūnin ;
+  - Vallée de la Fin ;
+  - Pain ;
+  - Grande Guerre ;
+  - Une Paix Fragile (mariage, festival, famille) ;
+  - Boruto à l’Académie ;
+  - Momoshiki ;
+  - Kara ;
+  - Jigen ;
+  - Mode Baryon.
+- **Pas que des combats** : 21 scènes de vie quotidienne en QTE (rythme, martèlement, équilibre, séquence de signes), avec des dialogues courts :
+  - Ichiraku ;
+  - clones et grimpe aux arbres ;
+  - épreuve écrite ;
+  - mariage ;
+  - festival du feu ;
+  - naissance ;
+  - dîners en famille ;
+  - concours de ramen ;
+  - escorte au festival ;
+  - adieux à Kurama.
+- 13 combats canon :
+  - Mizuki, Zabuza, Gaara, Sasuke, Pain, Madara ;
+  - Momoshiki, Delta et Kashin Kōji, Jigen ;
+  - Isshiki en Mode Baryon.
+- Dans la Saga, tu te relèves une fois par combat ; sinon, le combat recommence.
+- Les arcs se débloquent dans l’ordre. Le premier passage donne de l’XP (×5).
+- **684 techniques** au total (`tools/count_moves.js`).
+- Le bandeau des modes de l’ère Boruto affiche « ÈRE BORUTO ».

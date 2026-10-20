@@ -4762,7 +4762,7 @@ function enterMode(u, id, stage = 1, quiet) {
   Post.shock(u.x, u.y, 1.1, 320 + stage * 80); Cam.add(0.5 + stage * 0.15); Cam.punch = 0.08; G.slowT = 0.45; G.slowS = 0.3; G.flashA = 0.35; G.flashC = c;
   for (const v of enemiesOf(u)) if (dist(u.x, u.y, v.x, v.y) < 200 + stage * 30) { const a = angTo(u, v); v.vx += Math.cos(a) * 520; v.vy += Math.sin(a) * 520; v.kbT = 0.3; }
   Audio.play(prev ? 'modeup' : Md.kind === 'beast' ? 'roar' : 'eyeon', 1, u.x); if (Md.kind === 'beast') Audio.play('roar', 1, u.x);
-  if (!quiet) { if (u.isPlayer) banner(modeName(u), prev ? `STADE ${stage}` : Md.kind === 'beast' ? 'MODE JINCHŪRIKI' : Md.kind === 'sage' ? 'MODE ERMITE' : 'PUPILLE ÉVEILLÉE', c, kitHint(u)); else FX.text(u.x, u.y - 110 * u.size, modeName(u), c, 18, true, 1.3); }
+  if (!quiet) { if (u.isPlayer) banner(modeName(u), prev ? `STADE ${stage}` : Md.kind === 'beast' ? 'MODE JINCHŪRIKI' : Md.kind === 'sage' ? 'MODE ERMITE' : Md.ng ? (id === 'jougan' ? 'PUPILLE ÉVEILLÉE' : 'ÈRE BORUTO') : 'PUPILLE ÉVEILLÉE', c, kitHint(u)); else FX.text(u.x, u.y - 110 * u.size, modeName(u), c, 18, true, 1.3); }
   if (u.isPlayer && G.run) { G.run.modes = G.run.modes || {}; G.run.modes[id] = Math.max(G.run.modes[id] || 0, stage); }
   if (u.isPlayer && P() && progMode()) { const p = P(); p.stats.maxStage = Math.max(p.stats.maxStage || 0, stage); if (id === 'bete' && stage >= 3) p.stats.fullBeast = (p.stats.fullBeast || 0) + 1; }
   return true;
@@ -7233,7 +7233,7 @@ const Cine = {
     banner = function (...a) { args = a; };
     let r; try { r = baseMode(u, id, stage, quiet); } finally { banner = b0; }
     if (!r && r !== undefined) { if (args) banner(...args); return r; }
-    const Md = MODES[id]; const played = u.mode && Cine.play(u, { title: u.mode.def.n, sub: prev ? `${Md.n.toUpperCase()} · STADE ${stage}` : Md.kind === 'beast' ? `MODE JINCHŪRIKI · ${modeName(u).split(' — ')[0].toUpperCase()}` : Md.kind === 'sage' ? 'MODE ERMITE' : 'PUPILLE ÉVEILLÉE', k: Md.k, c: modeColor(u) });
+    const Md = MODES[id]; const played = u.mode && Cine.play(u, { title: u.mode.def.n, sub: prev ? `${Md.n.toUpperCase()} · STADE ${stage}` : Md.kind === 'beast' ? `MODE JINCHŪRIKI · ${modeName(u).split(' — ')[0].toUpperCase()}` : Md.kind === 'sage' ? 'MODE ERMITE' : Md.ng ? (id === 'jougan' ? 'PUPILLE ÉVEILLÉE' : 'ÈRE BORUTO') : 'PUPILLE ÉVEILLÉE', k: Md.k, c: modeColor(u) });
     if (args) { if (played) setTimeout(() => { if (u.mode) banner(...args); }, Cine.on ? Cine.on.dur * 1000 - 150 : 0); else banner(...args); }
     return r;
   };
@@ -12980,6 +12980,118 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   SNG.release(10, 'Next Generation 3 — Jigen', [
     ['大', '#ffd27a', 'Boss : Jigen (Isshiki Ōtsutsuki)', 'Trois phases : Jigen, Kāma déployé, puis Isshiki en personne. Pieux et cubes du Daikokuten, Sukunahikona (pieux qui grandissent en vol), absorption de Kāma, téléportation, onde et rayon final. Il respecte les mêmes recharges et le même coût en chakra que toi.'],
     ['方', '#9aa7ff', 'Cubes du Daikokuten', 'Les cubes tombent du ciel après un avertissement au sol. Le Mode Kāma de Kawaki peut aussi en invoquer.'],
+  ]);
+})();
+/* Shinobi Next Generation — NG 4 : la Saga, de Naruto à Boruto. Vie quotidienne en scènes QTE, dialogues courts, combats canon. */
+(function () {
+  const ev = SNG.evc;
+  const L = (hair, outfit, scarf, x) => Object.assign({ hair, outfit, scarf }, x || {});
+  // boss « souvenirs » des arcs classiques (techniques existantes)
+  Object.assign(BOSSES, {
+    mizuki: { n: 'Mizuki', ai: 'boss', hp: 700, spd: 180, dmg: 14, xp: 120, ryo: 80, mind: 0.4, skill: 0.4, size: 1.05, el: 'neutre', moves: ['kunai_ex', 'tempete_shuriken', 'shuriken'], look: L('#c8d0e0', '#4a5a3a', '#3a4a6a'), ng: 1 },
+    zabuza: { n: 'Zabuza Momochi', ai: 'boss', hp: 1200, spd: 185, dmg: 20, xp: 200, ryo: 140, mind: 0.6, skill: 0.6, size: 1.2, el: 'eau', sword: 1, moves: ['eau_prison', 'eau_vague', 'ken_iai'], look: L('#2a2a2a', '#5a6a6a', '#e8e8e8', { mask: 1 }), ng: 1 },
+    gaara_saga: { n: 'Gaara du Désert', ai: 'boss', hp: 1500, spd: 140, dmg: 20, xp: 240, ryo: 160, mind: 0.6, skill: 0.6, size: 1.05, el: 'terre', moves: ['ng_gaara_sable', 'ng_shinki_sable', 'ng_shinki_ours'], look: L('#c0302a', '#7a4a2a', '#c8a070'), ng: 1 },
+    sasuke_vallee: { n: 'Sasuke Uchiha (Vallée de la Fin)', ai: 'boss', hp: 1700, spd: 210, dmg: 22, xp: 280, ryo: 180, mind: 0.8, skill: 0.85, size: 1.05, el: 'foudre', moves: ['ng_chidori_sarada', 'feu_boule', 'ng_sarada_genjutsu', 'ng_sarada_shuriken'], look: L('#1a1a2a', '#e8e8f0', '#3a3a8a'), ng: 1 },
+    pain: { n: 'Pain (Tendō)', ai: 'boss', hp: 2600, spd: 160, dmg: 26, xp: 380, ryo: 240, mind: 0.9, skill: 0.85, size: 1.15, el: 'gravite', moves: ['grav_repousse', 'grav_attire', 'mo_meteores'], look: L('#ff7a2a', '#1a1a2a', '#c02a2a'), ng: 1 },
+    madara: { n: 'Madara Uchiha', ai: 'boss', hp: 3400, spd: 190, dmg: 30, xp: 460, ryo: 280, mind: 0.95, skill: 0.9, size: 1.2, el: 'feu', moves: ['feu_dragon', 'mo_meteores', 'ng_sasuke_indra', 'feu_boule'], look: L('#1a1a1a', '#8a2a2a', '#3a1a1a'), ng: 1 },
+  });
+  // ---------- les arcs ----------
+  const N = { naruto: ['Naruto', '鳴', '#ff9a3c'], iruka: ['Iruka', '海', '#6a8aa8'], kakashi: ['Kakashi', '案', '#9ab4c8'], sakura: ['Sakura', '桜', '#ff8ac0'], sasuke: ['Sasuke', '影', '#7a6ad8'], jiraiya: ['Jiraiya', '蝦', '#e8e8e8'], hinata: ['Hinata', '日', '#b8a8ff'], boruto: ['Boruto', '殻', '#4fd6ff'], sarada: ['Sarada', '桜', '#ff5a5a'], mitsuki: ['Mitsuki', '蛇', '#7ad8a0'], himawari: ['Himawari', '向', '#ffd23f'], kurama: ['Kurama', '九', '#ff6a2b'], kawaki: ['Kawaki', '鬼', '#9aa7ff'], teuchi: ['Teuchi', '楽', '#ffd27a'], shikamaru: ['Shikamaru', '影', '#6a8a5a'], konohamaru: ['Konohamaru', '猿', '#ffb13d'], narr: ['', '話', '#3a4a6a'] };
+  const s = (who, t) => ({ who: N[who][0], k: N[who][1], c: N[who][2], t });
+  const scene = (title, sub, lines, qte, after) => ({ type: 'scene', title, sub, lines, qte, after });
+  const fight = (title, foes, line) => ({ type: 'fight', title, foes, line });
+  const ARCS = SNG.ARCS = [
+    { id: 'academie', n: 'L’Académie', era: 'Naruto', biome: 'konoha_ng', k: '学', beats: [
+      scene('Chez Ichiraku', 'VIE QUOTIDIENNE', [s('teuchi', 'Un miso-chāshū, comme d’habitude ?'), s('iruka', 'C’est moi qui paie. Mais seulement si tu réussis l’examen, Naruto.'), s('naruto', 'Croix de bois, croix de fer ! Je deviendrai Hokage !')], { type: 'timing', title: 'Aspire tes nouilles au bon moment', dur: 9, n: 3, maxMiss: 2, zw: 0.2 }),
+      scene('Clones de l’ombre', 'ENTRAÎNEMENT', [s('naruto', 'Le parchemin interdit… Multi-clonage !')], { type: 'mash', title: 'Concentre ton chakra', dur: 7, k: 0.08 }),
+      fight('Mizuki trahit le village', [['bandit', 2], ['mizuki', 1, 1]], s('iruka', 'Naruto, cours ! … Non. Bats-toi à mes côtés.')),
+    ] },
+    { id: 'vagues', n: 'Le Pays des Vagues', era: 'Naruto', biome: 'cote', k: '波', beats: [
+      scene('Grimper aux arbres', 'ENTRAÎNEMENT', [s('kakashi', 'Sans les mains. Juste le chakra dans les pieds.'), s('sakura', 'C’est facile, regardez !'), s('naruto', 'Grr… je vais y arriver avant Sasuke !')], { type: 'hold', title: 'Garde ton chakra stable', dur: 8 }),
+      fight('Le Démon de la Brume', [['deserteur', 2], ['zabuza', 1, 1]], s('kakashi', 'Zabuza Momochi. Restez derrière moi.')),
+    ] },
+    { id: 'chunin', n: 'L’Examen Chūnin', era: 'Naruto', biome: 'foret', k: '中', beats: [
+      scene('Copier les signes', 'ÉPREUVE ÉCRITE', [s('sakura', 'Les questions sont impossibles…'), s('sasuke', 'Le but, c’est de tricher sans se faire voir.')], { type: 'seq', title: 'Reproduis la séquence de signes', dur: 8, n: 5 }),
+      fight('Gaara du Désert', [['gaara_saga', 1, 1]], s('naruto', 'Je ne te laisserai pas faire de mal à mes amis !')),
+    ] },
+    { id: 'sasuke', n: 'La Vallée de la Fin', era: 'Naruto', biome: 'cote', k: '谷', beats: [
+      scene('Dernier ramen à trois', 'VIE QUOTIDIENNE', [s('naruto', 'Teuchi, trois bols ! Sasuke paie !'), s('sasuke', '…'), s('sakura', 'Sasuke… tu as l’air ailleurs.')], { type: 'timing', title: 'Attrape le dernier chāshū', dur: 8, n: 2, maxMiss: 2, zw: 0.22 }),
+      fight('Sasuke s’en va', [['sasuke_vallee', 1, 1]], s('naruto', 'Je te ramènerai, même si je dois te briser les bras !')),
+    ] },
+    { id: 'pain', n: 'L’Invasion de Pain', era: 'Shippuden', biome: 'pics', k: '痛', beats: [
+      scene('Le mont Myōboku', 'ENTRAÎNEMENT', [s('jiraiya', 'Le Mode Ermite, gamin. Reste immobile et sens la nature.'), s('naruto', 'Immobile ? C’est le plus dur !')], { type: 'hold', title: 'Ressens l’énergie naturelle', dur: 9 }),
+      fight('Pain détruit Konoha', [['deserteur', 2], ['pain', 1, 1]], s('naruto', 'Je ne te pardonnerai pas… mais je vais te comprendre.')),
+    ] },
+    { id: 'guerre', n: 'La Quatrième Grande Guerre', era: 'Shippuden', biome: 'ruines', k: '戦', beats: [
+      scene('L’Alliance', 'DISCOURS', [s('shikamaru', 'Cinq villages, une seule armée.'), s('naruto', 'On se bat pour ceux qui viendront après nous !', ), { who: 'Alliance', k: '盟', c: '#ffd27a', t: 'Que veux-tu dire aux troupes ?', ch: [{ t: 'On rentre tous ensemble.' }, { t: 'Pour nos enfants.' }] }], null),
+      fight('Madara Uchiha', [['zetsu_ng', 3], ['madara', 1, 2]], s('sasuke', 'Naruto. Ensemble, cette fois.')),
+    ] },
+    { id: 'paix', n: 'Une Paix Fragile', era: 'The Last', biome: 'konoha_ng', k: '和', beats: [
+      scene('Le mariage', 'FÊTE', [s('hinata', 'Naruto… merci d’être toujours là.'), s('sakura', 'Lance le bouquet, Hinata !')], { type: 'timing', title: 'Lance le bouquet au bon moment', dur: 8, n: 2, maxMiss: 2, zw: 0.24 }),
+      scene('Festival du feu', 'FÊTE', [s('konohamaru', 'Les feux d’artifice vont commencer !'), s('naruto', 'Un jour, mes enfants verront ça aussi.')], { type: 'mash', title: 'Allume les feux d’artifice', dur: 6, k: 0.09 }),
+      scene('Une famille', 'VIE QUOTIDIENNE', [s('hinata', 'Il s’appellera Boruto.'), s('naruto', 'Et un jour, il me dépassera.')], { type: 'hold', title: 'Berce Himawari', dur: 6 }),
+    ] },
+    { id: 'boruto_academie', n: 'Boruto à l’Académie', era: 'Boruto', biome: 'konoha_ng', k: '新', beats: [
+      scene('Dîner en famille', 'VIE QUOTIDIENNE', [s('himawari', 'Papa ne rentre pas ce soir ?'), s('boruto', 'Ce vieux… il est toujours dans son bureau.'), s('hinata', 'Il vous aime. Mangez, ça va refroidir.')], { type: 'seq', title: 'Mets la table avant Himawari', dur: 7, n: 4 }),
+      scene('Ichiraku, nouvelle génération', 'VIE QUOTIDIENNE', [s('sarada', 'Tu manges encore des ramen ? Ton père aussi, toujours.'), s('mitsuki', 'Les ramen, c’est une coutume de votre clan ?'), s('boruto', 'Ha ! Je vais vider le bol plus vite que vous !')], { type: 'timing', title: 'Concours de ramen', dur: 8, n: 3, maxMiss: 2, zw: 0.18 }),
+      fight('Mission rang D qui tourne mal', [['kara_ninja', 3], ['bandit', 2]], s('sarada', 'Équipe 7, formation !')),
+    ] },
+    { id: 'momoshiki', n: 'L’Examen Chūnin — Momoshiki', era: 'Boruto', biome: 'otsutsuki', k: '桃', beats: [
+      scene('Le maître de Boruto', 'ENTRAÎNEMENT', [s('sasuke', 'Un Rasengan, c’est la technique de ton père. Fais-en la tienne.'), s('boruto', 'Un Rasengan… qui disparaît !')], { type: 'mash', title: 'Forme le Rasengan Fantôme', dur: 7, k: 0.07 }),
+      fight('Momoshiki Ōtsutsuki', [['momoshiki_boss', 1, 1]], s('boruto', 'Rends-moi mon père !')),
+    ] },
+    { id: 'kara', n: 'Kara', era: 'Boruto', biome: 'kara_repaire', k: '殻', beats: [
+      scene('Escorte au festival', 'MISSION', [s('konohamaru', 'Mission simple : surveiller les lanternes.'), s('mitsuki', 'Il y a une ombre sur le toit.')], { type: 'timing', title: 'Rattrape les lanternes', dur: 8, n: 3, maxMiss: 2, zw: 0.2 }),
+      fight('Delta et Kashin Kōji', [['kara_soldat', 2], ['delta', 1, 1], ['kashin_koji', 1, 1]], s('kawaki', 'Kara… ils viennent pour moi.')),
+    ] },
+    { id: 'jigen', n: 'Jigen', era: 'Boruto', biome: 'otsutsuki', k: '大', beats: [
+      scene('Père et fils', 'DIALOGUE', [s('naruto', 'Boruto. Quoi qu’il arrive, je suis fier de toi.'), s('boruto', 'Arrête, papa… on dirait des adieux.'), s('kawaki', 'Je ne laisserai personne toucher au Septième.')], null),
+      fight('Jigen, réceptacle d’Isshiki', [['jigen', 1, 1]], s('naruto', 'Kurama… on y va.')),
+    ] },
+    { id: 'baryon', n: 'Le Mode Baryon', era: 'Boruto', biome: 'otsutsuki', k: '核', beats: [
+      scene('Le dernier pari', 'DIALOGUE', [s('kurama', 'Il existe un mode… il brûle nos deux vies.'), s('naruto', 'Si ça protège mon fils, je le prends.')], { type: 'hold', title: 'Synchronise-toi avec Kurama', dur: 7 }),
+      fight('Isshiki Ōtsutsuki', [['jigen', 1, 2, 'isshiki']], s('kurama', 'Mode Baryon. Frappe, Naruto !')),
+      scene('Adieu, Kurama', 'ÉPILOGUE', [s('kurama', 'Naruto… c’était bien. Notre combat.'), s('naruto', 'Kurama !… Merci, partenaire.')], null),
+      scene('Ichiraku, après tout ça', 'VIE QUOTIDIENNE', [s('teuchi', 'Pour toi, c’est la maison qui offre, Septième.'), s('boruto', 'Papa, tu me dois un bol. Le plus grand.'), s('himawari', 'Et moi aussi !')], { type: 'timing', title: 'Un dernier bol, en famille', dur: 8, n: 2, maxMiss: 3, zw: 0.25 }),
+    ] },
+  ];
+  // ---------- moteur ----------
+  const sp = () => { const p = P(); p.ng = p.ng || { modes: {}, masters: {} }; p.ng.saga = p.ng.saga || { done: {} }; return p.ng.saga; };
+  let S = null; SNG.sagaState = () => S;
+  function next() { if (!S) return; S.i++; const A = ARCS[S.a]; if (S.i >= A.beats.length) return finish(); run(A.beats[S.i]); }
+  function run(Bt) { ev('beat'); S.beat = Bt;
+    if (Bt.type === 'scene') { banner(Bt.title, Bt.sub, ARCS[S.a] ? '#4fd6ff' : '#fff'); const go = () => { if (Bt.qte) SE35.runQTE(Bt.qte, (win) => { S.qte.push(!!win); ev(win ? 'qteWin' : 'qteMiss'); setTimeout(next, 300); }); else setTimeout(next, 200); };
+      setTimeout(() => SE35.say(Bt.lines, go), 700); ev('scene'); return; }
+    // combat
+    banner(Bt.title, 'COMBAT', '#ff6b1a'); const u = G.players[0]; G.cheats.god = false; S.fightT = G.t; S.wave = [];
+    for (const [k, n, boss, form] of Bt.foes) for (let i = 0; i < n; i++) { const a = rand(0, TAU), d = 380 + i * 40; const x = clamp(u.x + Math.cos(a) * d, 100, G.map.w - 100), y = clamp(u.y + Math.sin(a) * d, 100, G.map.h - 100);
+      const v = boss ? spawnBoss(k, x, y, boss) : spawnMob(k, x, y, 1); if (v) { v._saga = 1; S.wave.push(v); if (form === 'isshiki') { v.hp = v.maxHp * 0.32; } } }
+    if (Bt.line) setTimeout(() => SE35.say([Bt.line]), 400);
+    if (ARCS[S.a].id === 'baryon' && Bt.type === 'fight') { const p = P(); try { SNG.ngp().modes.baryon = 1; } catch (e) {} u.ch = u.maxCh; const prev = u.eye; u.eye = 'baryon'; u.lv = Math.max(u.lv || 1, 55); setTimeout(() => { if (!u.mode) { enterMode(u, 'baryon', 1); } }, 1600); } }
+  function finish() { const A = ARCS[S.a]; const o = sp(); const first = !o.done[A.id]; o.done[A.id] = 1; const p = P(); if (first) grantXP(p, 400 + S.a * 120); Profile.save(); ev('arcDone');
+    banner(A.n, first ? 'ARC TERMINÉ' : 'ARC REJOUÉ', '#ffd27a'); const nx = S.a + 1; S = null; G.ngSaga = null; setTimeout(() => { if (ARCS[nx]) SE35.say([{ who: '', k: '次', c: '#4fd6ff', t: 'Arc suivant : ' + ARCS[nx].n + '.', ch: [{ t: 'Continuer', f: () => setTimeout(() => SNG.saga(nx), 50) }, { t: 'Plus tard' }] }]); }, 1200); }
+  SNG.saga = function (a) { const A = ARCS[a]; if (!A) return; startGame('creative', { biome: A.biome }); G.cheats.god = false; G.ngSaga = S = { a, i: -1, qte: [] };
+    const cb = document.getElementById('creabtn'); if (cb) cb.hidden = true; for (const v of G.units) if (v.dummy) { v.hp = 0; v.dead = true; }
+    SE35.say([{ who: A.era, k: A.k, c: '#4fd6ff', t: 'Arc ' + (a + 1) + ' — ' + A.n }], next); ev('sagaStart'); };
+  // fin de combat : plus aucun ennemi de l'arc en vie
+  const bup = updateProjs; updateProjs = function (dt) { const r = bup.apply(this, arguments);
+    if (S && S.beat && S.beat.type === 'fight' && S.wave && S.wave.length && !G.paused) { if (!S.wave.some((v) => alive(v))) { S.wave = null; setTimeout(next, 900); } } return r; };
+  // on ne meurt pas dans la Saga : on se relève (une fois par combat), puis on recommence le combat
+  const bdd = dealDamage; dealDamage = function (src, tgt, base, o) {
+    if (S && tgt && tgt.isPlayer && alive(tgt) && typeof base === 'number' && base >= tgt.hp) { if (!S.up) { S.up = 1; tgt.hp = tgt.maxHp * 0.5; tgt.iframe = 1.5; banner('Je ne renoncerai pas !', 'TU TE RELÈVES', '#ffd27a'); ev('getUp'); return 0; }
+      S.up = 0; tgt.hp = tgt.maxHp; tgt.iframe = 2; for (const v of S.wave || []) if (alive(v)) v.hp = v.maxHp; banner('Encore une fois', 'COMBAT RECOMMENCÉ', '#ff6b1a'); ev('retry'); return 0; }
+    return bdd.apply(this, arguments); };
+  // ---------- panneau Saga ----------
+  SNG.sagaPanel = function () { const o = sp(); let el = document.getElementById('ngpanel'); if (!el) { el = document.createElement('div'); el.id = 'ngpanel'; document.body.appendChild(el); }
+    const card = (A, i) => { const lock = i > 0 && !o.done[ARCS[i - 1].id] && !o.done[A.id]; const daily = A.beats.filter((b) => b.type === 'scene').length, fights = A.beats.filter((b) => b.type === 'fight').length;
+      return `<div class="c" style="--c:${o.done[A.id] ? '#ffd27a' : '#4fd6ff'}"><b>${A.k} ${i + 1}. ${esc(A.n)}</b><small>${esc(A.era)} · ${daily} scène${daily > 1 ? 's' : ''} · ${fights} combat${fights > 1 ? 's' : ''}${o.done[A.id] ? ' · ✓' : ''}</small><br><button data-arc="${i}" ${lock ? 'disabled' : ''}>${lock ? '🔒' : o.done[A.id] ? 'Rejouer' : 'Jouer'}</button></div>`; };
+    el.innerHTML = `<div class="w"><button class="ghost x" id="ngx">Fermer</button><h2>Saga</h2><small style="color:#93a1b8">De Naruto à Boruto : combats, mais aussi Ichiraku, Académie, famille, missions et festivals.</small><h3>Arcs</h3><div class="g">${ARCS.map(card).join('')}</div></div>`;
+    el.querySelector('#ngx').onclick = () => el.remove(); el.querySelectorAll('[data-arc]').forEach((b) => (b.onclick = () => { el.remove(); SNG.saga(+b.dataset.arc); })); };
+  const bt = UI.title; UI.title = function () { const r = bt.apply(this, arguments); try { const nav = document.querySelector('#scr-title .mainnav'); if (nav && !nav.querySelector('[data-saga]')) { nav.insertAdjacentHTML('afterbegin', `<button class="big" data-saga="1">${seal('伝', '#4fd6ff')}<span><b>Saga</b><small>De Naruto à Boruto</small></span></button>`); nav.querySelector('[data-saga]').onclick = () => { if (!P()) return this.create('hub'); SNG.sagaPanel(); }; } } catch (e) { console.warn(e); } return r; };
+  SNG.release(11, 'Next Generation 4 — La Saga', [
+    ['伝', '#4fd6ff', 'Mode Saga', '12 arcs de Naruto à Boruto : Académie, Pays des Vagues, Examen Chūnin, Vallée de la Fin, Pain, Grande Guerre, mariage et famille, Boruto à l’Académie, Momoshiki, Kara, Jigen, Mode Baryon.'],
+    ['楽', '#ffd27a', 'La vie quotidienne', 'Pas que des combats : Ichiraku, entraînements, épreuve écrite, mariage, festival du feu, dîners en famille, missions. En scènes QTE (rythme, martèlement, équilibre, séquence de signes) avec des dialogues courts.'],
+    ['起', '#ff6b1a', 'On se relève', 'Dans la Saga, tu te relèves une fois par combat. Sinon, le combat recommence, sans écran de défaite.'],
   ]);
 })();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */
