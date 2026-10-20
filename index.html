@@ -12462,9 +12462,9 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   const SE40 = (window.SE40 = { ev: {}, npcs: [], shops: [], villages: [] });
   const SE35 = window.SE35; const BLD = { house40: 1, shop40: 1, gate40: 1, wall40: 1, tower40: 1 };
   const VIL = [
-    { z: 'village', n: 'Konoha', k: '木', roof: '#a8321e', wall: '#e8d8b8', R: 620, houses: 26, shops: [['Ichiraku Ramen', '麺', 'ramen'], ['Armurerie Tenten', '武', 'arme'], ['Librairie de parchemins', '巻', 'scroll'], ['Fleuriste Yamanaka', '花', 'soin']] },
+    { z: 'village', n: 'Konoha', k: '木', roof: '#a8321e', wall: '#e8d8b8', R: 620, houses: 26, shops: [['Ichiraku Ramen', '麺', 'ramen'], ['Armurerie Tenten', '武', 'arme'], ['Librairie de parchemins', '巻', 'scroll'], ['Fleuriste Yamanaka', '花', 'soin'], ['Outils ninja', '具', 'outils']] },
     { z: 'suna', n: 'Sunagakure', k: '砂', roof: '#c8a070', wall: '#e0c898', R: 420, houses: 14, round: 1, shops: [['Marchand du désert', '商', 'scroll'], ['Marionnettiste', '傀', 'arme']] },
-    { z: 'kiri', n: 'Kirigakure', k: '霧', roof: '#4a6a8a', wall: '#c8d0d8', R: 420, houses: 14, shops: [['Poissonnerie de la Brume', '魚', 'ramen'], ['Forge de Kiri', '鍛', 'arme']] },
+    { z: 'kiri', n: 'Kirigakure', k: '霧', roof: '#4a6a8a', wall: '#c8d0d8', R: 420, houses: 14, shops: [['Poissonnerie de la Brume', '魚', 'ramen'], ['Forge de Kiri', '鍛', 'arme'], ['Outils ninja de la Brume', '具', 'outils']] },
     { z: 'myoboku', n: 'Hameau des crapauds', k: '蝦', roof: '#3a8a6a', wall: '#d8e0b0', R: 280, houses: 7, shops: [['Huile de crapaud', '油', 'soin']] },
   ];
   SE40.VIL = VIL;
@@ -12544,7 +12544,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   SE35.start = function () { const r = baseStart.apply(this, arguments); try { const have = new Set(G.obstacles); for (const o of G.map.obs) if (BLD[o.t] && !G.obstacles.some((q) => q.t === o.t && q.x === o.x && q.y === o.y)) G.obstacles.push(Object.assign({}, o)); } catch (e) {} populate(); const D = G.director; if (D) { const up = D.update; D.t40 = 0; SE40.near = {}; SE40.lastZone = null; D.update = (dt) => { up(dt); D.t40 += dt; tick(dt); }; } return r; };
   function tick(dt) { const u = G.players[0]; if (!u) return; tickNPC(dt);
     if (G.paused) return; const z = SE35.zoneAt(u.x, u.y); if (SE40.lastZone && z !== SE40.lastZone && window.SE39) { SE39.wipe(); SE40.ev.cross = (SE40.ev.cross || 0) + 1; } SE40.lastZone = z;
-    for (const o of SE40.shops) { const d = dist(u.x, u.y, o.x, o.y + 60); if (d < 70 && !SE40.near[o.n]) { SE40.near[o.n] = 1; shop(o); } else if (d > 160) SE40.near[o.n] = 0; }
+    SE40.nearShop = null; let bd = 95; for (const o of SE40.shops) { const d = dist(u.x, u.y, o.x, o.y + 60); if (d < bd) { bd = d; SE40.nearShop = o; } }
     for (const n of SE40.npcs) { if (!n || n.dead) continue; const d = dist(u.x, u.y, n.x, n.y); if (d < 60 && !SE40.near[n.id] && n._npc40.kind !== 'garde') { SE40.near[n.id] = 1; n._npc40.talk = 4; n.face = u.x > n.x ? 1 : -1; FX.text(n.x, n.y - 80, pick(n._npc40.kind === 'marchand' ? ['La route est longue jusqu’à Suna…', 'Des bandits sur la route, prudence !', 'Je vends mes épices au prochain village.'] : ['Belle journée, n’est-ce pas ?', 'Les boutiques sont sur la place.', 'Le Hokage veille sur nous.', 'J’ai vu un maître passer par la porte est !']), '#e8e4dc', 13); } else if (d > 140) SE40.near[n.id] = 0; } }
   // HUD : heure du jour et villages sur la mini-carte
   const baseHUD = drawHUD;
@@ -12722,26 +12722,27 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
 
   /* ================= 7. Touches (codes physiques event.code, libellés AZERTY par défaut) ================= */
   const ACT = [['up', 'Haut'], ['down', 'Bas'], ['left', 'Gauche'], ['right', 'Droite'], ['atk', 'Coup (M1)'], ['dash', 'Esquive / dash'], ['charge', 'Charge (C)'],
-    ['j0', 'Technique 1'], ['j1', 'Technique 2'], ['j2', 'Technique 3'], ['j3', 'Technique 4'], ['sec', 'Ultime / secrète'], ['mode', 'Charge de mode'], ['eye', 'Dōjutsu'],
+    ['j0', 'Technique 1'], ['j1', 'Technique 2'], ['j2', 'Technique 3'], ['j3', 'Technique 4'], ['j0a', 'Technique 1 (secours)'], ['j1a', 'Technique 2 (secours)'], ['j2a', 'Technique 3 (secours)'], ['j3a', 'Technique 4 (secours)'], ['sec', 'Ultime / secrète'], ['mode', 'Mode : stade maximal'], ['eye', 'Dōjutsu'],
     ['beast', 'Mode Jinchūriki'], ['wheel', 'Tourner la roue'], ['shur', 'Shuriken (C + = outil)'], ['edo', 'Edo Tensei'], ['swap', 'Changer de corps']];
   V.ACT = ACT;
-  const BASE = { atk: 'KeyJ', dash: 'KeyK', charge: 'KeyC', j0: 'KeyU', j1: 'KeyI', j2: 'KeyO', j3: 'KeyP', sec: 'Space', eye: 'KeyX', beast: 'KeyF', wheel: 'KeyQ', shur: 'KeyE', edo: 'KeyT', swap: 'KeyR' };
+  const BASE = { atk: 'KeyJ', dash: 'KeyK', charge: 'KeyC', j0: 'Digit1', j1: 'Digit2', j2: 'Digit3', j3: 'Digit4', j0a: 'KeyU', j1a: 'KeyI', j2a: 'KeyO', j3a: 'KeyP', inter: 'KeyE', sec: 'Space', eye: 'KeyX', beast: 'KeyF', wheel: 'KeyQ', shur: 'KeyE', edo: 'KeyT', swap: 'KeyR' };
   V.PRESETS = {
-    azerty: Object.assign({}, BASE, { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', mode: 'KeyW' }), // Z sur AZERTY = KeyW physique ; déplacement aux flèches
+    // Next Gen : ZQSD (codes physiques KeyW/KeyA/KeyS/KeyD) + flèches, techniques 1-4 (U I O P en secours), W AZERTY (KeyZ) = stade max
+    azerty: Object.assign({}, BASE, { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', mode: 'KeyZ' }),
     qwerty: Object.assign({}, BASE, { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', mode: 'KeyZ' }),
   };
   V.layout = () => (st().layout14 === 'qwerty' ? 'qwerty' : 'azerty');
-  V.binds = () => Object.assign({}, V.PRESETS[V.layout()], st().binds14 || {});
+  V.binds = () => { const S0 = st(); if (S0.kbv !== 77 && prof()) { S0.kbv = 77; S0.binds14 = {}; } return Object.assign({}, V.PRESETS[V.layout()], S0.binds14 || {}); };
   V.B = (k) => V.binds()[k];
-  const bcl = codeLabel; codeLabel = function (code) { if (V.layout() === 'azerty' && AZERTY[code]) return AZERTY[code]; if (V.layout() === 'qwerty' && /^Key[A-Z]$/.test(code)) return code.slice(3); return bcl.apply(this, arguments); };
+  const bcl = codeLabel; codeLabel = function (code) { if (/^Digit\d$/.test(code)) return code.slice(5); if (/^Arrow/.test(code)) return { ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' }[code]; if (V.layout() === 'azerty' && AZERTY[code]) return AZERTY[code]; if (V.layout() === 'qwerty' && /^Key[A-Z]$/.test(code)) return code.slice(3); return bcl.apply(this, arguments); };
   V.applyMove = function () {
     const S = SCHEMES.kb1, B = V.binds();
-    Object.assign(S, { up: B.up, down: B.down, left: B.left, right: B.right, atk: [B.atk], dash: [B.dash, 'ShiftLeft'], charge: [B.charge], j: [[B.j0, 'Digit1'], [B.j1, 'Digit2'], [B.j2, 'Digit3'], [B.j3, 'Digit4']], sec: [B.sec], eye: [B.eye], beast: [B.beast], wheel: [B.wheel], pause: ['Escape'], mode: [B.mode] });
+    Object.assign(S, { up: B.up, down: B.down, left: B.left, right: B.right, atk: [B.atk], dash: [B.dash, 'ShiftLeft'], charge: [B.charge], j: [[B.j0, B.j0a || 'KeyU'], [B.j1, B.j1a || 'KeyI'], [B.j2, B.j2a || 'KeyO'], [B.j3, B.j3a || 'KeyP']], sec: [B.sec], eye: [B.eye], beast: [B.beast], wheel: [B.wheel], pause: ['Escape'], mode: [B.mode] });
   };
   V.applyMove();
   V.modeCode = () => V.B('mode');
   const K = (code) => codeLabel(code);
-  V.keys = () => { const B = V.binds(); return { move: [B.up, B.left, B.down, B.right].map(K).join(' '), mode: K(B.mode), eye: K(B.eye), shur: K(B.shur), charge: K(B.charge), dash: K(B.dash) + ' / Maj', edo: K(B.edo), swap: K(B.swap), beast: K(B.beast), wheel: K(B.wheel), atk: K(B.atk), j: [B.j0, B.j1, B.j2, B.j3].map(K).join(' '), sec: K(B.sec) }; };
+  V.keys = () => { const B = V.binds(); return { move: [B.up, B.left, B.down, B.right].map(K).join(' ') + ' + flèches', mode: K(B.mode), eye: K(B.eye), shur: K(B.shur), charge: K(B.charge), dash: K(B.dash) + ' / Maj', edo: K(B.edo), swap: K(B.swap), beast: K(B.beast), wheel: K(B.wheel), atk: K(B.atk), j: [B.j0, B.j1, B.j2, B.j3].map(K).join(' ') + ' (ou ' + [B.j0a, B.j1a, B.j2a, B.j3a].map(K).join(' ') + ')', inter: K(B.inter), sec: K(B.sec) }; };
   /* ================= 2. Shuriken inné (E) et projectiles spéciaux (C + E) ================= */
   T('shur_inne', 'Shuriken', 'outil', 'neutre', 'proj', 0, 0.42, 7, 1, { cnt: 1, spr: 0, spd: 1000, r: 6, life: 0.62, shape: 'shuriken', innate: 1 }, 'Un shuriken, lancé avec E. Gratuit, toujours disponible.');
   if (TECH.shuriken) TECH.shuriken.innate = 1;
@@ -12827,12 +12828,11 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     if (kb) {
       const mc = V.modeCode(); const now = G.t;
       // W : appui court = meilleur mode / stade suivant, maintien = charge de chakra
-      if (down(mc)) { if (!held.w) held.w = { t: now }; if (now - held.w.t > 0.28) c.charge = true; }
-      else if (held.w) { const tap = now - held.w.t <= 0.28; held.w = null; if (tap && !unitDisabled(u)) V.bestMode(u); }
+      if (down(mc)) { if (!held.w) { held.w = { t: now }; if (!unitDisabled(u)) V.maxMode(u); } } else held.w = null;
       // X maintenu dans une pupille = stade suivant
       if (down(V.B('eye')) && u.mode && MODES[u.mode.id].kind === 'eye') { held.x = held.x || { t: now }; if (!held.x.done && now - held.x.t > 0.55) { held.x.done = 1; stageUp(u); } } else held.x = null;
       // E : shuriken / C + E : projectile spécial
-      if (down(V.B('shur'))) { if (!held.e) { held.e = 1; if (!unitDisabled(u)) { if (down(V.B('charge'))) V.special(u); else V.shuriken(u); } } } else held.e = 0;
+      if (down(V.B('shur')) && !(window.SE40 && SE40.nearShop)) { if (!held.e) { held.e = 1; if (!unitDisabled(u)) { if (down(V.B('charge'))) V.special(u); else V.shuriken(u); } } } else held.e = 0;
       // Mode : double appui pour les techniques hors roue
       if (u.mode && V.hidden(u).length) {
         const pr = []; for (let i = 0; i < 4; i++) if (c.jP[i]) pr.push(i);
@@ -12847,6 +12847,11 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
       // En mode : pas de ruée de base (techniques normales bloquées)
     }
     return bpc.apply(this, arguments);
+  };
+  V.maxMode = function (u) {
+    if (!u.mode && !V.bestMode(u)) return false;
+    let n = 0; while (u.mode && u.mode.stage < maxStage(u.mode.id) && n++ < 8) { if (stageUp(u) === false) break; }
+    if (u.mode) { V.ev.max = u.mode.stage; FX.text(u.x, u.y - 120 * u.size, 'STADE MAX', modeColor(u), 17, true); } return !!u.mode;
   };
   V.bestMode = function (u) {
     if (u.mode) { const r = stageUp(u); if (r !== false) V.ev.stage = (V.ev.stage || 0) + 1; return r; }
@@ -13081,13 +13086,13 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   addEventListener('keydown', (e) => { if (!V.capture) return; e.preventDefault(); e.stopImmediatePropagation(); const k = V.capture; V.capture = null; if (e.code !== 'Escape') { const s = st(); s.binds14 = s.binds14 || {}; const B = V.binds(); for (const [a] of ACT) if (a !== k && B[a] === e.code) s.binds14[a] = B[k]; s.binds14[k] = e.code; Profile.save(); V.applyMove(); } UI.tab_opts(); }, true);
   const bopt = UI.tab_opts; UI.tab_opts = function () { const r = bopt.apply(this, arguments); try { const tb = $('#tabbody'); if (tb && !$('#kb14')) { const B = V.binds();
     tb.insertAdjacentHTML('afterbegin', `<section class="panel" id="kb14"><h3>${seal('鍵', '#ffd27a')} Touches</h3>
-      <div class="row"><label class="field">Disposition<select id="lay14"><option value="azerty">AZERTY (défaut) — déplacement aux flèches, Z = charge de mode</option><option value="qwerty">QWERTY — WASD, Z = charge de mode</option></select></label><button id="rst14">Réinitialiser</button></div>
+      <div class="row"><label class="field">Disposition<select id="lay14"><option value="azerty">AZERTY (défaut) — ZQSD + flèches, 1-4 techniques, W = stade max</option><option value="qwerty">QWERTY — WASD + flèches, 1-4 techniques, Z = stade max</option></select></label><button id="rst14">Réinitialiser</button></div>
       <div class="kbgrid14">${ACT.map(([a, n]) => `<div><span>${n}</span><button data-rb="${a}" class="${V.capture === a ? 'on' : ''}">${V.capture === a ? 'Appuie sur une touche…' : esc(K(B[a]))}</button></div>`).join('')}</div>
       <p class="muted small">Clique une action puis appuie sur la touche voulue (Échap annule). Une touche déjà prise est échangée. ${V.guideLine()}</p></section>`);
     const l = $('#lay14'); l.value = V.layout(); l.onchange = () => { st().layout14 = l.value; st().binds14 = {}; Profile.save(); V.applyMove(); UI.tab_opts(); };
     $('#rst14').onclick = () => { st().binds14 = {}; Profile.save(); V.applyMove(); UI.tab_opts(); };
     $$('#tabbody [data-rb]').forEach((b) => (b.onclick = () => { V.capture = b.dataset.rb; b.textContent = 'Appuie sur une touche…'; b.classList.add('on'); })); } } catch (e) { console.warn('kb14', e.message); } return r; };
-  V.guideLine = () => { const k = V.keys(); return `Bouger ${k.move} · ${k.mode} : appui = meilleur mode / stade suivant, maintien = charge de chakra · ${k.eye} : dōjutsu (maintenir = stade suivant) · ${k.shur} : shuriken · ${k.charge} + ${k.shur} : outil spécial · ${k.charge} + esquive : prédiction de substitution · ${k.edo} : Edo Tensei · ${k.swap} : changer de corps · en mode, deux touches de technique ensemble = techniques hors roue`; };
+  V.guideLine = () => { const k = V.keys(); return `Bouger ${k.move} · Techniques ${k.j} · ${k.mode} : stade maximal du mode (entre dans le meilleur mode si besoin) · ${k.charge} maintenu : charge de chakra · ${k.inter} près d’une boutique : interagir · ${k.eye} : dōjutsu (maintenir = stade suivant) · ${k.shur} : shuriken · ${k.charge} + ${k.shur} : outil spécial · ${k.charge} + esquive : prédiction de substitution · ${k.edo} : Edo Tensei · ${k.swap} : changer de corps · en mode, deux touches de technique ensemble = techniques hors roue`; };
   const bcx = UI.tab_codex; UI.tab_codex = function () { const r = bcx.apply(this, arguments); try { if (!$('#tabbody [data-ct2="guide"].on') || $('#g14')) return r; const g = $('#tabbody .guide') || $('#tabbody'); const k = V.keys();
     g.insertAdjacentHTML('afterbegin', `<article id="g14"><h4>${seal('鍵', '#ffd27a')} Touches et nouveautés (mise à jour 14)</h4><p>${V.guideLine()}</p>
       <p><b>Substitution = prédiction</b> : ${k.charge} + esquive te met en garde 2 s ; touché pendant ce temps, tu esquives sur place (balancement, invulnérable) et ton coup suivant est un contre +50 %. Aucune esquive ne téléporte plus. 3 charges, une charge revient toutes les 10 s. Esquiver après un coup ne permute plus.</p>
@@ -13110,6 +13115,19 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   document.head.appendChild(css);
 
   S2.note('v14', '#ffd27a', 'Mise à jour 14 — Edo Tensei, prédiction et nouvelles touches', 'W : meilleur mode (maintien = charge). X : dōjutsu. E : shuriken inné, C+E : outil spécial (boutique Outils ninja). C+esquive : prédiction de substitution (3 charges, 10 s). T : Edo Tensei (4 Hokage ou n’importe quel personnage, 50 % d’échec), R : contrôler un réincarné. Modes : double appui pour les techniques hors roue. Clans : ultime + passif, élément libre. Listes triées de la plus rare à la plus commune. Créatif : sélecteur avec recherche, filtres et tri. Bouton « Équiper le meilleur » (auto au départ de mission). Rythme plus posé.');
+})();
+/* Correctif : Préparation vide quand on possède des techniques de maîtres/personnages (sous-classes « unique » / « special » absentes). */
+(function () {
+  if (typeof SUBCLASS !== 'undefined') {
+    if (!SUBCLASS.unique) SUBCLASS.unique = { n: 'Signature', k: '極', c: '#ffd27a', d: 'Technique signature d’un personnage ou d’un maître.' };
+    if (!SUBCLASS.special) SUBCLASS.special = { n: 'Spéciale', k: '特', c: '#ff8ad8', d: 'Technique spéciale (mode, forme ou arme unique).' };
+    if (!SUBCLASS.misc) SUBCLASS.misc = { n: 'Divers', k: '雑', c: '#a69db8', d: 'Autres techniques.' };
+    if (typeof SUB_ORDER !== 'undefined') for (const k of ['unique', 'special']) if (!SUB_ORDER.includes(k)) SUB_ORDER.push(k);
+  }
+  const bts = techSub; techSub = function (T) { let s; try { s = bts.apply(this, arguments); } catch (e) { s = 'misc'; } return SUBCLASS[s] ? s : (SUBCLASS.misc ? 'misc' : Object.keys(SUBCLASS)[0]); };
+  // profils anciens : clan inconnu, bête équipée absente
+  const bh = UI.hubHeader; UI.hubHeader = function () { const p = P(); if (p && !CLANS[p.clan]) p.clan = Object.keys(CLANS)[0]; return bh.apply(this, arguments); };
+  if (typeof BEASTS !== 'undefined') { const bp = UI.tab_prep; UI.tab_prep = function () { const p = P(); if (p && p.beastEq && !BEASTS.some((b) => b.id === p.beastEq)) p.beastEq = null; return bp.apply(this, arguments); }; }
 })();
 /* Shinobi Next Generation — socle : notes de version, sol streamé par tronçons (chunks), mise en veille des unités lointaines,
    couleurs de mode étendues, thème d'interface « ère Boruto ». */
@@ -13836,6 +13854,140 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   SNG.release(10, 'Next Generation 6 — Rencontres', [
     ['暁', '#c4161c', 'Rencontres refaites', EV.length + ' rencontres, toutes au même taux. Akatsuki : ciel rouge, nuages, musique sombre et 4 duels à la suite ; chaque membre vaincu te donne son moveset. Minato scelle une bête en toi, Momoshiki t’offre son mode. Nouveau : Sommet des Kage (aider Sasuke ou les Kage), assaut de Pain, Zabuza sur le pont, examen Chūnin d’Orochimaru, Kaguya, Itachi & Kisame, Kinshiki.'],
   ]);
+})();
+/* Next Gen 7 — touches ZQSD + flèches / 1-4, boutiques à l'interaction (E) avec écran plein « gacha » et aperçu animé. */
+(function () {
+  const V = S2.v14; const X = (window.SNG77 = { ev: {} });
+  /* ---------- flèches en plus de ZQSD (sauf si un 2e joueur clavier utilise les flèches) ---------- */
+  const kb2Used = () => G.players && G.players.some((p) => p.ctrl && (p.ctrl.kind === 'kb2' || (p.ctrl.parts && p.ctrl.parts.some((c) => c.kind === 'kb2'))));
+  const braw = KbCtrl.prototype.raw;
+  KbCtrl.prototype.raw = function () {
+    const r = braw.apply(this, arguments);
+    if (r && this.kind === 'kb1' && !kb2Used() && !X.open) {
+      let mx = (Keys.ArrowRight ? 1 : 0) - (Keys.ArrowLeft ? 1 : 0), my = (Keys.ArrowDown ? 1 : 0) - (Keys.ArrowUp ? 1 : 0);
+      if (mx || my) { mx += r.mx; my += r.my; const l = Math.hypot(mx, my) || 1; r.mx = Math.max(-1, Math.min(1, mx / l)); r.my = Math.max(-1, Math.min(1, my / l)); X.ev.arrows = 1; }
+    }
+    if (r && X.open) { r.mx = r.my = 0; r.atk = r.dash = r.charge = r.sec = r.eye = r.beast = r.wheel = false; r.j = [false, false, false, false]; }
+    return r;
+  };
+  /* ---------- invite « E · Interagir » ---------- */
+  const tip = document.createElement('div'); tip.id = 'int77'; document.body.appendChild(tip);
+  const inWorld = () => G.mode === 'monde' && !G.paused;
+  setInterval(() => { const o = window.SE40 && SE40.nearShop; const on = !!(o && inWorld() && !X.open);
+    tip.style.display = on ? 'block' : 'none'; if (on) tip.innerHTML = `<kbd>${esc(codeLabel(V.B('inter')))}</kbd> Interagir — ${esc(o.k + ' ' + o.n)}`; }, 120);
+  addEventListener('keydown', (e) => {
+    if (X.open) { if (e.code === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); X.close(); } return; }
+    if (e.repeat || V.capture) return;
+    if (e.code === V.B('inter') && window.SE40 && SE40.nearShop && inWorld() && !(() => { const d = document.getElementById('dlg35'); return d && d.offsetParent && getComputedStyle(d).display !== 'none'; })()) { e.preventDefault(); e.stopImmediatePropagation(); X.openShop(SE40.nearShop); }
+  }, true);
+  /* ---------- catalogue ---------- */
+  const prof = () => P();
+  const seeded = (s) => { let h = hashStr(s); return () => ((h = (h * 1103515245 + 12345) >>> 0) / 4294967296); };
+  function items(o) {
+    const p = prof(); const heal = (ch) => () => { for (const u of G.players) { healUnit(u, u.maxHp, null, true); if (ch) u.ch = u.maxCh; } };
+    if (o.kind === 'ramen') return [{ id: 'ramen', n: 'Bol de ramen', k: '麺', c: '#ffb04a', r: 2, prix: 40, d: 'PV et chakra au maximum.', pv: 'food', f: heal(1) }, { id: 'ramen2', n: 'Ramen spécial Ichiraku', k: '極', c: '#ffd27a', r: 3, prix: 90, d: 'PV et chakra au maximum, +25 % de chakra max pour ce voyage.', pv: 'food', f: () => { heal(1)(); for (const u of G.players) { u.maxCh = Math.round(u.maxCh * 1.25); u.ch = u.maxCh; } } }];
+    if (o.kind === 'soin') return [{ id: 'pomm', n: 'Pommade', k: '薬', c: '#9be37a', r: 1, prix: 30, d: 'PV au maximum.', pv: 'food', f: heal(0) }, { id: 'pil', n: 'Pilule du soldat', k: '丸', c: '#c88a4a', r: 2, prix: 60, d: 'PV et chakra au maximum.', pv: 'food', f: heal(1) }];
+    if (o.kind === 'arme') { const acc = SE35.prof().acc; return Object.entries(SE35.ACC).filter(([id]) => id !== 'kama').map(([id, A]) => ({ id, n: A.n, k: A.k, c: A.c, r: /cape|arme/.test(A.slot + id) ? 4 : 3, prix: 400, d: 'Accessoire (' + A.slot + '). À équiper dans Apparence.', pv: 'gear', acc: A, owned: acc.includes(id), f: () => SE35.giveAcc(id) })); }
+    if (o.kind === 'scroll') { const rnd = seeded(todayKey() + o.n); const pool = Object.keys(TECH).filter((k) => TECH[k].rar <= 3 && TECH[k].n && !TECH[k].innate && TECH[k].cat !== 'secret' && !TECH[k].s33 && !TECH[k].beast && !TECH[k].mode).sort();
+      const pick8 = []; while (pick8.length < 8 && pool.length) pick8.push(pool.splice(Math.floor(rnd() * pool.length), 1)[0]);
+      return pick8.map((id) => { const T0 = TECH[id]; return { id, n: T0.n, k: '巻', c: (EL[T0.el] || { c: '#ffd27a' }).c, r: T0.rar, prix: 150 + T0.rar * 50, d: T0.desc || '', pv: 'tech', tech: T0, owned: p.techs.includes(id), f: () => { grantTech(p, T0); toast('Parchemin', T0.n, 'Ajouté à ta collection.', '#ffd27a', '巻'); } }; }); }
+    if (o.kind === 'outils') { const O = V.outils(); return Object.entries(V.SPECIAL).map(([id, S]) => ({ id, n: S.n, k: S.k, c: S.c, r: S.prix >= 80 ? 3 : 2, prix: S.prix, d: S.d + ' (stock ×' + (O.stock[id] || 0) + (O.eq === id ? ', équipé' : '') + ')', pv: 'tech', tech: TECH[id], stack: 1, eq: O.eq === id, f: (n) => { O.stock[id] = (O.stock[id] || 0) + (n || 1); if (!O.eq) O.eq = id; } })); }
+    return [];
+  }
+  /* ---------- écran de boutique ---------- */
+  const root = document.createElement('div'); root.id = 'sh77'; root.className = 'hidden'; document.body.appendChild(root);
+  let cur = null, sel = 0, raf = 0, wasPaused = false;
+  X.openShop = function (o) { cur = o; sel = 0; X.open = true; wasPaused = G.paused; G.paused = true; X.ev.opened = (X.ev.opened || 0) + 1; X.ev.last = o.kind; try { Audio.play('seal'); } catch (e) {} root.classList.remove('hidden'); render(); loop(); };
+  X.close = function () { X.open = false; root.classList.add('hidden'); cancelAnimationFrame(raf); G.paused = wasPaused; Profile.save(); };
+  function render() {
+    const p = prof(); const L = items(cur); if (sel >= L.length) sel = 0; const it = L[sel]; const rc = (r) => (RAR[r] ? RAR[r].c : '#aaa');
+    root.innerHTML = `<div class="bg"></div><header><span class="kj">${esc(cur.k)}</span><div><h2>${esc(cur.n)}</h2><small>${esc(cur.vil || '')} · Boutique</small></div><b class="ryo">${p.ryo | 0} 両 ryō</b><button id="x77">Sortir (Échap)</button></header>
+      <main><section class="grid">${L.map((x, i) => `<button class="it${i === sel ? ' on' : ''}${x.owned ? ' own' : ''}" data-i="${i}" style="--rc:${rc(x.r)};--ic:${x.c}"><span class="ik">${esc(x.k)}</span><b>${esc(x.n)}</b><em>${RAR[x.r] ? RAR[x.r].n : ''}</em><i>${x.owned ? 'Possédé' : x.prix + ' ryō'}</i></button>`).join('') || '<p>Rien à vendre.</p>'}</section>
+      <aside>${it ? `<canvas id="pv77" width="460" height="300"></canvas><h3 style="color:${rc(it.r)}">${esc(it.n)}</h3><p>${esc(it.d)}</p>
+        <div class="buy"><button class="primary" data-b="1" ${it.owned || p.ryo < it.prix ? 'disabled' : ''}>${it.owned ? 'Déjà possédé' : 'Acheter — ' + it.prix + ' ryō'}</button>${it.stack ? `<button data-b="5" ${p.ryo < it.prix * 5 ? 'disabled' : ''}>×5 — ${it.prix * 5}</button><button data-eq="1">${it.eq ? 'Équipé' : 'Équiper'}</button>` : ''}</div>` : ''}</aside></main>`;
+    $('#x77').onclick = X.close;
+    root.querySelectorAll('.it').forEach((b) => (b.onclick = () => { sel = +b.dataset.i; X.ev.sel = sel; try { Audio.play('tick'); } catch (e) {} render(); }));
+    root.querySelectorAll('[data-b]').forEach((b) => (b.onclick = () => { const n = +b.dataset.b, c = it.prix * n; if (p.ryo < c || it.owned) return; p.ryo -= c; it.f(n); X.ev.bought = (X.ev.bought || 0) + 1; if (window.SE40) SE40.ev.bought = (SE40.ev.bought || 0) + 1; try { Audio.play('coin'); } catch (e) {} Profile.save(); flash(); render(); }));
+    const e = root.querySelector('[data-eq]'); if (e) e.onclick = () => { V.outils().eq = it.id; Profile.save(); render(); };
+    X.item = it;
+  }
+  function flash() { const f = document.createElement('div'); f.className = 'fl77'; root.appendChild(f); setTimeout(() => f.remove(), 700); }
+  /* ---------- aperçu animé ---------- */
+  function ninja(c, x, y, s, acc, t, pose) {
+    const bob = Math.sin(t * 3) * 2; c.save(); c.translate(x, y + bob); c.scale(s, s);
+    c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(0, 52 - bob, 26, 7, 0, 0, 7); c.fill();
+    if (acc && acc.slot === 'cape') { c.fillStyle = acc.c; c.beginPath(); c.moveTo(-18, -14); c.lineTo(18, -14); c.lineTo(26 + Math.sin(t * 4) * 3, 46); c.lineTo(-26, 46); c.fill(); if (/akatsuki/.test(acc.n.toLowerCase()) || acc.k === '暁') { c.fillStyle = '#d63c3c'; } }
+    if (acc && acc.slot === 'dos') { c.fillStyle = acc.c; c.save(); c.rotate(-0.5); c.fillRect(-6, -40, 12, 70); c.restore(); }
+    c.fillStyle = '#2a3550'; c.fillRect(-14, 10, 11, 38); c.fillRect(3, 10, 11, 38); // jambes
+    c.fillStyle = '#ff8a2a'; c.fillRect(-17, -16, 34, 32); // veste
+    const arm = pose ? -0.9 : 0.2; c.save(); c.translate(15, -10); c.rotate(arm); c.fillStyle = '#ff8a2a'; c.fillRect(0, -4, 22, 9); c.fillStyle = '#f2c9a0'; c.beginPath(); c.arc(24, 0, 5, 0, 7); c.fill(); c.restore();
+    if (acc && acc.slot === 'cou') { c.fillStyle = acc.c; c.fillRect(-18, -18, 36, 9); }
+    c.fillStyle = '#f2c9a0'; c.beginPath(); c.arc(0, -32, 15, 0, 7); c.fill();
+    c.fillStyle = '#f2d24a'; for (let i = -3; i <= 3; i++) { c.beginPath(); c.moveTo(i * 5 - 4, -40); c.lineTo(i * 6, -58 - (i % 2 ? 4 : 0)); c.lineTo(i * 5 + 4, -40); c.fill(); }
+    c.fillStyle = '#222'; c.fillRect(-6, -34, 3, 3); c.fillRect(4, -34, 3, 3);
+    if (acc && acc.slot === 'tete') { c.fillStyle = '#3a4a7a'; c.fillRect(-16, -44, 32, 7); c.fillStyle = acc.c; c.fillRect(-7, -45, 14, 9); c.fillStyle = '#334'; c.font = '700 8px sans-serif'; c.textAlign = 'center'; c.fillText(acc.k, 0, -38); }
+    if (acc && acc.slot === 'visage') { c.fillStyle = acc.c; c.beginPath(); acc.n.includes('tissu') ? c.fillRect(-14, -30, 28, 13) : c.arc(0, -32, 14, 0, 7); c.fill(); if (!acc.n.includes('tissu')) { c.fillStyle = '#222'; c.fillRect(-7, -35, 4, 3); c.fillRect(4, -35, 4, 3); } }
+    c.restore();
+  }
+  function shape(c, sh, x, y, r, col, t) {
+    c.fillStyle = col; c.strokeStyle = col; c.save(); c.translate(x, y);
+    if (sh === 'shuriken') { c.rotate(t * 20); c.beginPath(); for (let i = 0; i < 8; i++) { const a = (i * Math.PI) / 4, rr = i % 2 ? r * 0.4 : r * 1.4; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.fill(); }
+    else if (sh === 'kunai' || sh === 'needle') { c.fillRect(-r * 2, -r * 0.3, r * 3, r * 0.6); c.beginPath(); c.moveTo(r, -r * 0.7); c.lineTo(r * 2.2, 0); c.lineTo(r, r * 0.7); c.fill(); }
+    else { const g = c.createRadialGradient(0, 0, 1, 0, 0, r * 1.8); g.addColorStop(0, '#fff'); g.addColorStop(0.35, col); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.beginPath(); c.arc(0, 0, r * 1.8, 0, 7); c.fill(); }
+    c.restore();
+  }
+  function loop() {
+    const cv = $('#pv77'); const it = X.item; const t = performance.now() / 1000;
+    if (cv && it) { const c = cv.getContext('2d'), W = cv.width, H = cv.height; const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#2a1c3c'); g.addColorStop(1, '#120c1c'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+      c.strokeStyle = 'rgba(255,210,122,.12)'; for (let i = 0; i < 12; i++) { c.beginPath(); c.arc(W / 2, H + 40, 60 + i * 30 + ((t * 30) % 30), Math.PI, 2 * Math.PI); c.stroke(); }
+      c.fillStyle = '#3a2a1e'; c.fillRect(0, H - 50, W, 50);
+      if (it.pv === 'gear') { ninja(c, W / 2, H - 110, 2.1, it.acc, t, 0); c.fillStyle = it.c; c.font = '900 28px sans-serif'; c.globalAlpha = 0.5 + Math.sin(t * 2) * 0.3; c.fillText(it.k, 26, 46); c.globalAlpha = 1; }
+      else if (it.pv === 'food') { ninja(c, W / 2 - 60, H - 100, 1.6, null, t, 0); c.fillStyle = it.c; c.beginPath(); c.arc(W / 2 + 80, H - 80, 34, 0, Math.PI); c.fill(); for (let i = 0; i < 3; i++) { c.strokeStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.moveTo(W / 2 + 64 + i * 16, H - 90); c.quadraticCurveTo(W / 2 + 54 + i * 16 + Math.sin(t * 3 + i) * 8, H - 120, W / 2 + 66 + i * 16, H - 150); c.stroke(); } }
+      else { const T0 = it.tech || {}; const pp = T0.p || {}; const col = it.c; const cyc = (t % 1.6) / 1.6; const sx = 110, ex = W - 80, y = H - 120;
+        ninja(c, 80, H - 100, 1.5, null, t, cyc < 0.5 ? 1 : 0);
+        c.fillStyle = '#7a5a3a'; c.fillRect(ex - 10, y - 30, 20, 80); c.fillStyle = '#a8845a'; c.beginPath(); c.arc(ex, y - 34, 14, 0, 7); c.fill(); // mannequin
+        if (T0.kind === 'proj' || !T0.kind) { const n = pp.cnt || 1; for (let i = 0; i < Math.min(n, 5); i++) { const k = Math.min(1, cyc * 1.6); const x = sx + (ex - sx) * k, yy = y + (i - (n - 1) / 2) * 14 * k; if (k < 1) shape(c, pp.shape, x, yy, Math.max(5, Math.min(14, pp.r || 8)), col, t); }
+          if (cyc > 0.62) { const a = 1 - (cyc - 0.62) / 0.38; c.globalAlpha = a; c.strokeStyle = col; c.lineWidth = 4; c.beginPath(); c.arc(ex, y, 20 + (1 - a) * (pp.ex ? 70 : 30), 0, 7); c.stroke(); c.globalAlpha = 1; c.lineWidth = 1; } }
+        else { const R0 = 30 + cyc * 160; c.globalAlpha = 1 - cyc; c.fillStyle = col; c.beginPath(); c.arc(T0.kind === 'melee' ? ex - 40 : W / 2, y, R0, 0, 7); c.fill(); c.globalAlpha = 1; }
+        c.fillStyle = '#fff'; c.font = '700 13px sans-serif'; c.fillText('Aperçu : ' + (T0.n || it.n), 14, 22); }
+    }
+    raf = requestAnimationFrame(loop);
+  }
+  /* ---------- plus d'achat depuis les menus : seulement au comptoir ---------- */
+  const bto = UI.tab_outils; UI.tab_outils = function () { bto.apply(this, arguments); $$('#tabbody [data-buy14],#tabbody [data-buy14x]').forEach((b) => b.remove());
+    const h = $('#tabbody h3'); if (h) h.insertAdjacentHTML('afterend', `<p class="muted small">Les achats se font au comptoir « 具 Outils ninja » des villages (Konoha, Kirigakure) : approche-toi et appuie sur ${esc(codeLabel(V.B('inter')))}. Ici, tu peux seulement équiper ton stock.</p>`); };
+  const css = document.createElement('style'); css.textContent = `
+  #int77{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:70;display:none;background:rgba(14,10,22,.88);border:1px solid #ffd27a;color:#fff4d6;padding:8px 16px;border-radius:999px;font:700 15px system-ui,sans-serif;box-shadow:0 0 18px rgba(255,210,122,.35);pointer-events:none}
+  #int77 kbd{display:inline-block;min-width:22px;text-align:center;background:#ffd27a;color:#201028;border-radius:5px;padding:1px 6px;margin-right:6px}
+  #sh77{position:fixed;inset:0;z-index:9500;display:flex;flex-direction:column;color:#f4eee4;font-family:system-ui,sans-serif;overflow:hidden}
+  #sh77.hidden{display:none}
+  #sh77 .bg{position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 70% 30%,#5a2a6a 0,#22122e 45%,#0a0610 100%)}
+  #sh77 .bg::after{content:'';position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 70% 30%,rgba(255,210,122,.05) 0 6deg,transparent 6deg 12deg);animation:sp77 40s linear infinite}
+  @keyframes sp77{to{transform:rotate(360deg)}}
+  #sh77 header{display:flex;align-items:center;gap:14px;padding:14px 22px;background:linear-gradient(90deg,rgba(214,60,60,.55),rgba(30,16,40,.4));border-bottom:2px solid #ffd27a}
+  #sh77 .kj{font:900 40px serif;color:#ffd27a;text-shadow:0 0 14px #ff8a2a}
+  #sh77 h2{margin:0;font-size:24px} #sh77 header small{color:#cbbfe0}
+  #sh77 .ryo{margin-left:auto;font-size:20px;color:#ffd27a}
+  #sh77 button{all:unset;cursor:pointer;box-sizing:border-box}
+  #sh77 header button{border:1px solid #ffd27a;padding:8px 14px;border-radius:8px}
+  #sh77 main{flex:1;min-height:0;display:grid;grid-template-columns:1fr minmax(320px,480px);gap:18px;padding:18px 22px}
+  #sh77 .grid{overflow-y:auto;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));grid-auto-rows:max-content;gap:12px;align-content:start}
+  #sh77 .it{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.3));border:2px solid var(--rc);box-shadow:inset 0 0 22px color-mix(in srgb,var(--rc) 30%,transparent);text-align:center;transition:transform .15s}
+  #sh77 .it:hover,#sh77 .it.on{transform:translateY(-3px) scale(1.03);box-shadow:0 0 22px var(--rc),inset 0 0 22px color-mix(in srgb,var(--rc) 40%,transparent)}
+  #sh77 .it.on{outline:2px solid #fff}
+  #sh77 .it.own{opacity:.55}
+  #sh77 .ik{font:900 34px serif;color:var(--ic);text-shadow:0 0 10px var(--ic)}
+  #sh77 .it b{font-size:13px;line-height:1.2} #sh77 .it em{font-style:normal;font-size:11px;color:var(--rc)} #sh77 .it i{font-style:normal;font-size:12px;color:#ffd27a}
+  #sh77 aside{min-height:0;overflow-y:auto;background:rgba(10,6,16,.7);border:1px solid rgba(255,210,122,.4);border-radius:14px;padding:14px}
+  #sh77 canvas{width:100%;border-radius:10px;display:block}
+  #sh77 aside h3{margin:10px 0 4px;font-size:20px} #sh77 aside p{margin:0 0 10px;color:#d8cfe8;line-height:1.4}
+  #sh77 .buy{display:flex;gap:8px;flex-wrap:wrap} #sh77 .buy button{padding:10px 16px;border-radius:9px;border:1px solid #ffd27a;font-weight:700}
+  #sh77 .buy .primary{background:linear-gradient(180deg,#ffd27a,#e0902a);color:#201028} #sh77 .buy button[disabled]{opacity:.4;cursor:default}
+  #sh77 .fl77{position:absolute;inset:0;background:radial-gradient(circle,#fff6,transparent 60%);animation:fl77 .7s forwards;pointer-events:none}
+  @keyframes fl77{from{opacity:1}to{opacity:0}}
+  @media (max-width:820px){#sh77 main{grid-template-columns:1fr;grid-template-rows:auto 1fr}#sh77 aside{order:-1;max-height:48vh}}`;
+  document.head.appendChild(css);
+  if (window.SNG && SNG.release) try { SNG.release(11, 'Touches ZQSD et boutiques vivantes', ['ZQSD + flèches, techniques 1 2 3 4 (U I O P en secours)', 'W : stade maximal du mode, C : charge, X : dōjutsu', 'Boutiques : approche-toi du comptoir et appuie sur E, écran plein avec aperçu animé', 'Nouveaux comptoirs Outils ninja à Konoha et Kirigakure']); } catch (e) {}
 })();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */
 (function(){

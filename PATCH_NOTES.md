@@ -120,3 +120,22 @@ Tout se réaffecte dans **Options → Touches** (clic puis touche, échange auto
 - Les arcs se débloquent dans l’ordre. Le premier passage donne de l’XP (×5).
 - **684 techniques** au total (`tools/count_moves.js`).
 - Le bandeau des modes de l’ère Boruto affiche « ÈRE BORUTO ».
+
+## Next Gen 7 — Touches ZQSD et boutiques vivantes
+- **Touches AZERTY par défaut** :
+  - déplacement : ZQSD et flèches ;
+  - techniques : 1 2 3 4, avec U I O P en secours ;
+  - **W** : stade maximal du mode (entre d’abord dans le meilleur mode si besoin) ;
+  - **C** : charge de chakra ;
+  - **X** : dōjutsu ;
+  - **E** : shuriken, ou interagir près d’une boutique ;
+  - A : roue ; F : Jinchūriki ; B : mode Boruto ; T / R : Edo Tensei.
+- **Préréglage QWERTY** : WASD et flèches, mêmes touches physiques. Les anciennes réaffectations sont réinitialisées une seule fois.
+- **Boutiques** : on s’approche du comptoir et on appuie sur E (invite « E Interagir »). La boutique s’ouvre en plein écran façon gacha, avec un aperçu animé :
+  - personnage portant l’accessoire ;
+  - démonstration de la technique ou du projectile ;
+  - plat servi.
+  - Parchemins : 8 offres du jour ; Armurerie : catalogue complet.
+- **Nouveaux comptoirs** : « Outils ninja » à Konoha et à Kirigakure.
+- On n’achète plus depuis les menus ; l’onglet Outils ninja sert seulement à équiper son stock.
+- **Correctif Préparation** (sous-classes manquantes), le même que dans Shinobi 2.
