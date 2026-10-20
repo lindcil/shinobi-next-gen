@@ -1,3 +1,7 @@
+NG 8 — M1 : les effets M1 hérités de Shinobi 1 (slash, anneaux, fumée, éclairs, éclats, kanji, onde de choc) sont supprimés ; il ne reste que les smears en croissant ZZZ à la couleur du personnage (mains nues, finisseurs, sabre). Saga : loadouts canon par arc (techniques, ultime, maîtrise, modes et stades autorisés) appliqués au héros sans toucher ta sauvegarde ; édition du loadout verrouillée en Saga.
+
+Mode Créatif intégré (commun aux 3 jeux) : fini le panneau créatif flottant. Menu titre › Créatif (ou Tab en jeu) ouvre le Mode Créatif avec son panneau : Choc de Bijūdama, Choc de ruées, Choc de techniques, Simulation de moveset, Simulateur de boss, Labo libre (outils intégrés), Éditeur de maîtrise. Chaque jeu finit sur Revanche · Changer de jeu · Réglages · Quitter, rejouable à l'infini. Défaites unifiées (Recommencer / Retour au menu), réapparition en monde ouvert.
+
 # Shinobi Next Generation — Notes de version
 
 ## NG 6 — Carrière, rencontres et Ninjutsu (20 octobre 2026)
