@@ -2972,7 +2972,7 @@ function tryCast(u, id, ang, tgt) {
   u.castEl = T.el; u.aim = ang;
   if (Math.cos(ang) !== 0) u.face = Math.cos(ang) >= 0 ? 1 : -1;
   /* v13 : plus de lancement instantané */
-  u.act = { type: 'cast', t: 0, dur: ct + 0.12, fireAt: ct, T, ang, tgt, fired: false, seals };
+  u.act = { type: 'cast', t: 0, dur: ct * 1.3 + 0.3, fireAt: ct * 1.3, T, ang, tgt, fired: false, seals };
   u.pose = T.cat === 'outil' ? 'throw' : 'seal'; u.poseT = 0;
   // les signes s'affichent au-dessus de la tête (09h) ; ici seulement le claquement des mains
   if (seals) for (let i = 0; i < Math.min(6, seals); i++) G.delayed.push({ t: (i * ct) / Math.min(6, seals), f: () => { if (!u.dead) Audio.play('seal'); } });
@@ -4226,7 +4226,7 @@ const LOOK_SFX = { fireball: 'fireroar', windblade: 'whistle', airbullet: 'whist
       if (o.proj && o.proj.gen && alive(tgt) && Math.random() < (o.proj.gen.ch || 1)) applyGen(src, tgt, o.proj.gen.eff, o.proj.gen.dur, false);
       if (!o.zone && !o.quiet && FX.quality > 0.3 && G.t - (tgt._hfx || -1) > 0.07) { tgt._hfx = G.t; hitFeel(o.el || 'neutre', tgt, dmg, src); }
       // ennemis et bots malins : permutation quand ils encaissent
-      if (alive(tgt) && tgt.ai && !tgt.isPlayer && !tgt.isClone && !tgt.boss && !o.zone && !(tgt.subCd > 0) && tgt.ch >= SUB_COST && (tgt.kind === 'bot' || tgt.ai.type === 'shinobi' || (tgt.kind === 'mob' && (tgt.skill || 0) >= 0.6 && (tgt.mind || 0) >= 0.5)) && Math.random() < 0.1 + (tgt.skill || 0.4) * 0.12) { const t2 = tgt; G.delayed.push({ t: 0.1, f: () => { if (alive(t2) && !(t2.subCd > 0)) substitution(t2, null); } }); }
+      if (alive(tgt) && tgt.ai && !tgt.isPlayer && !tgt.isClone && !tgt.boss && !o.zone && !(tgt.subCd > 0) && tgt.ch >= SUB_COST && (tgt.kind === 'bot' || tgt.ai.type === 'shinobi' || (tgt.kind === 'mob' && (tgt.skill || 0) >= 0.6 && (tgt.mind || 0) >= 0.5)) && Math.random() < 0.1 + (tgt.skill || 0.4) * 0.12) { const t2 = tgt; /* v14 : plus de substitution réactive (prédiction) */ }
     }
     return dmg;
   };
@@ -4464,7 +4464,7 @@ function startMelee(u) {
   if (a && !(a.type === 'melee' && a.t >= a.dur * 0.5)) return;
   let idx = 1; if (a && a.type === 'melee') idx = (a.idx % u.maxCombo) + 1; else if (G.t - (u.lastMeleeT || -9) < 0.45) idx = ((u.lastIdx || 0) % u.maxCombo) + 1;
   const fast = (u.buffs.thunder > 0 ? 0.75 : 1) * (u.buffs.gates > 0 ? 0.8 : 1);
-  const dur = (idx === u.maxCombo ? 0.36 : 0.26) * fast * (u.sword ? 1.12 : 1);
+  const dur = (idx === u.maxCombo ? 0.42 : 0.31) * fast * (u.sword ? 1.12 : 1);
   u.act = { type: 'melee', idx, t: 0, dur, hitAt: dur * 0.42, done: false };
   u.pose = u.sword ? ['slash1', 'slash2', 'slash3', 'slash1'][idx - 1] : (u.body === 'ninja' || !u.body ? ['atk1', 'atk2', 'atk3', 'atk4'][idx - 1] : 'atk1');
   u.poseT = 0; u.lastIdx = idx; u.lastMeleeT = G.t;
@@ -4628,7 +4628,7 @@ function slotUnlocked(u, i) {
 /* ---------- Boucle principale ---------- */
 function stepWorld(dt) {
   if (G.hitStop > 0) { G.hitStop -= dt; FX.update(dt * 0.15); return; }
-  let s = G.cheats.time || 1; if (G.slowT > 0) { G.slowT -= dt; s *= G.slowS; }
+  let s = (G.cheats.time || 1) * (G.paceMul || 1); if (G.slowT > 0) { G.slowT -= dt; s *= G.slowS; }
   const sdt = Math.min(0.05, dt * s); G.t += sdt;
   for (let i = G.delayed.length - 1; i >= 0; i--) { const d = G.delayed[i]; d.t -= sdt; if (d.t <= 0) { G.delayed.splice(i, 1); try { d.f(); } catch (e) { console.error(e); } } }
   updateZones(sdt);
@@ -5715,7 +5715,7 @@ function tryDodge(u) {
     ai.dodgeCd = G.t + 2.6 - u.skill * 1.6;
     if (Math.random() > u.skill) return false;
     const side = Math.random() < 0.5 ? 1 : -1; const a = Math.atan2(p.vy, p.vx) + side * Math.PI / 2;
-    if (u.skill > 0.45 && u.body === 'ninja' && Math.random() < 0.5) { FX.add({ type: 'log', x: u.x, y: u.y, z: 20, vz: 200, g: 1000, c: '#8a5a2a', size: 11, life: 1, vr: 3 }); FX.smoke(u.x, u.y, 20, '#e8e4f0', 6, 14, 80); u.x += Math.cos(a) * 110; u.y += Math.sin(a) * 110; FX.smoke(u.x, u.y, 20, '#e8e4f0', 4, 12, 60); Audio.play('poof'); }
+    if (u.skill > 0.45 && u.body === 'ninja' && Math.random() < 0.5) { S2.v14.sway(u, Math.atan2(-p.vy, -p.vx)); }
     else { u.vx = Math.cos(a) * 620; u.vy = Math.sin(a) * 620; u.kbT = 0.14; u.pose = 'dash'; }
     bark(u, 'dodge', 0.4); return true;
   }
@@ -7679,7 +7679,7 @@ function drawBarSlot(ctx, u, s, x, y, S) {
   // cadre : rareté, secrète, mode
   ctx.strokeStyle = s.sec ? '#ffd27a' : s.col || rgba(RAR[T.rar].c, 0.95); ctx.lineWidth = s.sec ? 2.5 : 1.8; roundRect(ctx, x, y, S, S, R); ctx.stroke();
   // rôle (sous-classe) en haut à droite
-  if (typeof techSub === 'function') { const SC = SUBCLASS[techSub(T)]; const rx = x + S - 7, ry = y + 7; ctx.fillStyle = mixHex(SC.c, '#120d1c', 0.45); ctx.beginPath(); ctx.arc(rx, ry, 8, 0, TAU); ctx.fill(); ctx.strokeStyle = SC.c; ctx.lineWidth = 1.2; ctx.stroke(); ctx.fillStyle = '#ffffff'; ctx.font = '400 10px "Yuji Syuku", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(SC.k, rx, ry + 0.5); ctx.textBaseline = 'alphabetic'; }
+  if (typeof techSub === 'function') { const SC = SUBCLASS[techSub(T)] || Object.values(SUBCLASS)[0]; const rx = x + S - 7, ry = y + 7; ctx.fillStyle = mixHex(SC.c, '#120d1c', 0.45); ctx.beginPath(); ctx.arc(rx, ry, 8, 0, TAU); ctx.fill(); ctx.strokeStyle = SC.c; ctx.lineWidth = 1.2; ctx.stroke(); ctx.fillStyle = '#ffffff'; ctx.font = '400 10px "Yuji Syuku", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(SC.k, rx, ry + 0.5); ctx.textBaseline = 'alphabetic'; }
   // coût
   ctx.font = '800 10px "Zen Kaku Gothic New", sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = poor ? '#ff9a9a' : '#9ac4ff'; ctx.fillText(Math.ceil(techCost(u, T) * (u.chHeld ? EMP_COST : 1)), x + S - 5, y + S - 5);
   keyChip();
@@ -9247,7 +9247,7 @@ const UI = {
     const ligs = LIGNEES.filter((l) => LIGNEE_OK(p, l)).map((l) => `<span class="chip" style="--cc:${EL[l].c}">${EL[l].k} ${EL[l].n}${p.lignees.includes(l) ? '' : ' (à éveiller)'}</span>`).join('') || '<span class="muted small">Combinez deux éléments compatibles pour révéler une lignée (Eau + Vent = Glace…).</span>';
     const slots = [0, 1, 2, 3].map((i) => { const lock = !slotUnlocked({ lv: p.lv, ui: 1 }, i); return `<div class="slotwrap${this.selSlot === i ? ' on' : ''}" data-slot="${i}"><small>${['U · X', 'I · Y', 'O · LB', 'P · RB'][i]}</small>${lock ? `<div class="tcard empty">Débloqué au niveau ${[1, SYS_UNLOCK.jutsu2.lv, SYS_UNLOCK.jutsu3.lv, SYS_UNLOCK.jutsu4.lv][i]}</div>` : techCard(p.slots[i], { empty: 'Choisir…', sel: this.selSlot === i })}</div>`; }).join('');
     const cats = ['tous', 'outil', 'ninjutsu', 'taijutsu', 'kenjutsu', 'genjutsu', 'fuinjutsu', 'iryo', 'lignee', 'secret', 'dojutsu'];
-    const owned = p.techs.filter((id) => TECH[id] && (this.filter === 'tous' || TECH[id].cat === this.filter)).sort((a, b) => TECH[b].rar - TECH[a].rar);
+    const owned = p.techs.filter((id) => TECH[id] && (this.filter === 'tous' || TECH[id].cat === this.filter)).sort((a, b) => TECH[b].rar - TECH[a].rar || (usableTech(p, b) - usableTech(p, a)));
     const lib = owned.map((id) => { const ok = usableTech(p, id); return techCard(id, { sel: this.selTech === id, dim: !ok, lock: ok ? null : (BASE_EL.includes(TECH[id].el) ? 'Élément ' + EL[TECH[id].el].n + ' requis' : 'Indisponible') }); }).join('');
     const eyeOk = p.lv >= SYS_UNLOCK.dojutsu.lv && C.eye; const beastOk = p.beasts.length;
     $('#tabbody').innerHTML = `<div class="cols"><section class="panel"><h3>${seal('族')} Clan</h3><div class="clangrid small">${clans}</div>
@@ -9301,7 +9301,7 @@ const UI = {
     const nM = Object.keys(MOBS).length + BEASTS.length, kM = Object.keys(cx.mob).length;
     const pct = Math.round(((ownT / totalT) + kR / nR + kF / nF + Math.min(1, kM / nM) + p.beasts.length / 9) / 5 * 100);
     let body = '';
-    if (this.codexTab === 'tech') body = `<div class="lib codexgrid">${Object.values(TECH).filter((T) => !T.beast && !T.mode).sort((a, b) => a.cat.localeCompare(b.cat) || a.rar - b.rar).map((T) => p.techs.includes(T.id) ? techCard(T.id) : `<div class="tcard unknown" style="--rc:${RAR[T.rar].c}"><span class="tk">?</span><span class="tn">???</span><span class="tm">${CATS[T.cat].n} · ${RAR[T.rar].n}</span></div>`).join('')}</div>`;
+    if (this.codexTab === 'tech') body = `<div class="lib codexgrid">${Object.values(TECH).filter((T) => !T.beast && !T.mode).sort((a, b) => b.rar - a.rar || a.cat.localeCompare(b.cat)).map((T) => p.techs.includes(T.id) ? techCard(T.id) : `<div class="tcard unknown" style="--rc:${RAR[T.rar].c}"><span class="tk">?</span><span class="tn">???</span><span class="tm">${CATS[T.cat].n} · ${RAR[T.rar].n}</span></div>`).join('')}</div>`;
     if (this.codexTab === 'reac') body = `<ul class="codexlist">${Object.entries(REACTIONS).map(([k, R]) => cx.reac[k] ? `<li>${seal('発', R.c)}<div><b style="color:${R.c}">${R.n}</b><p>${esc(R.d)}</p><small>Déclenchée ${cx.reac[k]} fois</small></div></li>` : `<li class="unk">${seal('?', '#3a3044')}<div><b>???</b><p>Indice : ${esc(R.d.split(':')[0].split(' ').slice(0, 3).join(' '))}…</p></div></li>`).join('')}</ul>`;
     if (this.codexTab === 'fus') body = `<p class="muted small">Une fusion naît quand deux projectiles d’alliés différents (joueurs, bots ou clones) se touchent. La Sphère Tourbillon absorbe aussi l’élément d’une zone alliée.</p><ul class="codexlist">${Object.entries(FUSIONS).map(([k, F]) => { const [a, b] = k.split('|'); return cx.fus[k] ? `<li>${seal('合', (EL[F.el] || EL.neutre).c)}<div><b>${F.n}</b><p>${EL[a].n} + ${EL[b].n}</p><small>Réussie ${cx.fus[k]} fois</small></div></li>` : `<li class="unk">${seal('?', '#3a3044')}<div><b>???</b><p>${EL[a].n} + ???</p></div></li>`; }).join('')}</ul>`;
     if (this.codexTab === 'clans') body = `<div class="clangrid">${CLAN_ORDER.map((k) => { const C = CLANS[k]; const on = p.clans.includes(k); return `<article class="clan${on ? '' : ' locked'}" style="--cc:${C.c}">${seal(C.k[0], on ? C.c : '#3a3044')}<b>${C.n}</b><small>${EL[C.el].n}${C.eye ? ' · ' + EYES[C.eye].n : ''}</small><p>${on ? esc(C.p + ' : ' + C.pd) : 'Débloqué au niveau ' + CLAN_UNLOCK[k]}</p></article>`; }).join('')}</div>`;
@@ -9373,13 +9373,13 @@ const UI = {
   controlsHTML() {
     const k = (c) => `<kbd>${esc(codeLabel(c))}</kbd>`;
     return `<table class="ctl"><thead><tr><th>Action</th><th>Clavier 1</th><th>Clavier 2</th><th>Manette</th></tr></thead><tbody>
-      <tr><td>Se déplacer</td><td>${k('KeyW')}${k('KeyA')}${k('KeyS')}${k('KeyD')}</td><td>Flèches</td><td>Stick gauche</td></tr>
+      <tr><td>Se déplacer</td><td>${k(SCHEMES.kb1.up)}${k(SCHEMES.kb1.left)}${k(SCHEMES.kb1.down)}${k(SCHEMES.kb1.right)}</td><td>Flèches</td><td>Stick gauche</td></tr>
       <tr><td>Viser</td><td>Souris (sinon auto)</td><td>Auto</td><td>Stick droit (sinon auto)</td></tr>
       <tr><td>Attaque / combo</td><td>${k('KeyJ')} ou clic gauche</td><td>${k('Numpad1')} ou ${k('Comma')}</td><td>A</td></tr>
-      <tr><td>Esquive · Substitution juste après un coup</td><td>${k('KeyK')} ou clic droit</td><td>${k('Numpad2')} ou ${k('Period')}</td><td>B</td></tr>
+      <tr><td>Esquive (dash) · ${k(SCHEMES.kb1.charge[0])} + esquive = prédiction de substitution</td><td>${k(SCHEMES.kb1.dash[0])} ou clic droit</td><td>${k('Numpad2')} ou ${k('Period')}</td><td>B</td></tr>
       <tr><td>Techniques 1 à 4</td><td>${k('KeyU')}${k('KeyI')}${k('KeyO')}${k('KeyP')} ou 1-4</td><td>${k('Numpad4')}${k('Numpad5')}${k('Numpad6')}${k('Numpad8')}</td><td>X, Y, LB, RB</td></tr>
       <tr><td>Technique secrète</td><td>${k('Space')}</td><td>${k('Numpad0')}</td><td>RT</td></tr>
-      <tr><td>Pupille (appui : activer puis lancer, maintien : couper)</td><td>${k('KeyE')}</td><td>${k('Numpad7')}</td><td>R3</td></tr>
+      <tr><td>Pupille (appui : activer, maintien : stade suivant)</td><td>${k('KeyX')}</td><td>${k('Numpad7')}</td><td>R3</td></tr>
       <tr><td>Bête à queues (jauge ≥ 50 %)</td><td>${k('KeyF')}</td><td>${k('Numpad9')}</td><td>L3</td></tr>
       <tr><td>Charger le chakra (maintenir)</td><td>${k('KeyC')} / ${k('KeyL')}</td><td>${k('Numpad3')}</td><td>LT</td></tr>
       <tr><td>Tourner la roue de techniques</td><td>${k('KeyQ')} ou molette</td><td>${k('NumpadAdd')}</td><td>Select</td></tr>
@@ -9671,7 +9671,7 @@ UI.hub = function (tab) {
   refreshBoard(p); this.stopPreview();
   startDemo(); this.show('scr-hub'); $('#touch').hidden = true; $('#creative').hidden = true; document.body.classList.remove('crea-open'); $('#hudbtns').hidden = true; this.tutorialStep(0);
   const newItems = (p.inv || []).filter((i) => i.isNew).length;
-  const tabs = [['missions', '任', 'Missions'], ['prep', '備', 'Préparation'], ['equip', '鎧', 'Équipement'], ['voies', '道', 'Voies'], ['biblio', '書', 'Bibliothèque'], ['codex', '典', 'Codex'], ['ach', '誉', 'Hauts faits'], ['look', '装', 'Apparence'], ['opts', '設', 'Options']];
+  const tabs = [['missions', '任', 'Missions'], ['prep', '備', 'Préparation'], ['equip', '鎧', 'Équipement'], ['outils', '具', 'Outils ninja'], ['voies', '道', 'Voies'], ['biblio', '書', 'Bibliothèque'], ['codex', '典', 'Codex'], ['ach', '誉', 'Hauts faits'], ['look', '装', 'Apparence'], ['opts', '設', 'Options']];
   const lockV = p.lv < SYS_UNLOCK.voies.lv; const parPts = p.par ? p.par.pts : 0;
   $('#scr-hub').innerHTML = `${this.hubHeader()}<nav class="tabs" role="tablist">${tabs.map(([k, s, n]) => {
     const pip = k === 'voies' && !lockV && (p.sp + parPts) > 0 ? p.sp + parPts : k === 'equip' && newItems ? newItems : 0;
@@ -10961,7 +10961,7 @@ function techCard2(id, p, opts = {}) {
     const all = p.techs.filter((id) => TECH[id] && !TECH[id].beast && !TECH[id].mode && !TECH[id].ult && (this.filter === 'tous' || TECH[id].cat === this.filter));
     const elCount = {}, roleCount = {}; for (const id of all) { const T = TECH[id]; elCount[T.el] = (elCount[T.el] || 0) + 1; const r = techSub(T); roleCount[r] = (roleCount[r] || 0) + 1; }
     let list = all.filter((id) => (UI.elFilter === 'tous' || TECH[id].el === UI.elFilter) && (UI.subFilter === 'tous' || techSub(TECH[id]) === UI.subFilter) && (!UI.onlyUsable || usableTech(p, id)));
-    list.sort((a, b) => (usableTech(p, b) - usableTech(p, a)) || TECH[b].rar - TECH[a].rar || TECH[a].n.localeCompare(TECH[b].n));
+    list.sort((a, b) => TECH[b].rar - TECH[a].rar || (usableTech(p, b) - usableTech(p, a)) || TECH[a].n.localeCompare(TECH[b].n));
     const groups = new Map(); const gkey = (id) => (UI.libGroup === 'role' ? techSub(TECH[id]) : UI.libGroup === 'cat' ? TECH[id].cat : TECH[id].el);
     for (const id of list) { const k = gkey(id); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(id); }
     const order = UI.libGroup === 'role' ? SUB_ORDER : UI.libGroup === 'cat' ? Object.keys(CATS) : EL_ORDER.concat(Object.keys(EL));
@@ -12507,7 +12507,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   const foeNear = (u) => G.units.filter((v) => alive(v) && v.team !== u.team && v.team !== -1).sort((a, b) => dist(u.x, u.y, a.x, a.y) - dist(u.x, u.y, b.x, b.y))[0];
   const clearFoes = () => { for (const v of G.units) if (v.team !== 0 && v.team !== -1 && !v.dummy && v.kind !== 'dummy') v.dead = true; };
   const opt = (v, n, sel) => `<option value="${v}"${sel ? ' selected' : ''}>${esc(n)}</option>`;
-  const techOpts = (f) => Object.values(TECH).filter(f).sort((a, b) => a.n.localeCompare(b.n)).map((T) => opt(T.id, T.n)).join('');
+  const techOpts = (f) => Object.values(TECH).filter(f).sort((a, b) => b.rar - a.rar || a.n.localeCompare(b.n)).map((T) => opt(T.id, T.n)).join('');
   // 1. Choc de Bijūdama
   C44.bijuuClash = function (bid) { const u = P0(); if (!u) return; clearFoes(); u.beast = bid; const B = BEASTS.find((b) => b.id === bid); if (B) { u.tailC = (EL[B.el] || EL.feu).c; u.tailC2 = (EL[B.el] || EL.feu).c2; }
     u.ch = u.maxCh = Math.max(u.maxCh, 400); u.lv = Math.max(u.lv || 1, 60); try { enterMode(u, 'bete', 3); } catch (e) {}
@@ -12564,7 +12564,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   /* ---------- QoL ---------- */
   // C maintenu + E / F : monter directement au stade maximal accessible
   let cHeld = false; addEventListener('keydown', (e) => { if (e.code === 'KeyC') cHeld = true;
-    if (cHeld && (e.code === 'KeyE' || e.code === 'KeyF') && G.mode && !G.paused) { const u = P0(); if (!u || !u.mode) return; let guard = 0, s0 = u.mode.stage; while (guard++ < 10 && u.mode && stageUp(u) !== false) {} if (u.mode && u.mode.stage > s0) { FX.text(u.x, u.y - 120, 'Stade ' + u.mode.stage + ' !', modeColor(u), 18); S2.ev.maxStage = u.mode.stage; } } });
+    if (cHeld && e.code === 'KeyF' && G.mode && !G.paused) { const u = P0(); if (!u || !u.mode) return; let guard = 0, s0 = u.mode.stage; while (guard++ < 10 && u.mode && stageUp(u) !== false) {} if (u.mode && u.mode.stage > s0) { FX.text(u.x, u.y - 120, 'Stade ' + u.mode.stage + ' !', modeColor(u), 18); S2.ev.maxStage = u.mode.stage; } } });
   addEventListener('keyup', (e) => { if (e.code === 'KeyC') cHeld = false; });
   // Transitions : onglets et entrée en jeu (encre)
   const css = document.createElement('style'); css.textContent = `@keyframes tab39{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}#tabbody.t39{animation:tab39 .28s cubic-bezier(.2,.8,.2,1) both}
@@ -12640,6 +12640,407 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   FX.add = function (o) { const k = o && LIGHT[o.type]; if (k && Math.random() < k) return null; if (o && o.type === 'glow' && o.a == null) o.a = 0.7; return ba(o); };
   const bban = banner; banner = function (title, sub, c, small) { return bban.call(this, title, sub, c, small && String(small).length < 40 ? small : undefined); };
   S2.note('v13', '#b47cff', 'Signes des mains, auras, IA, confort', 'Les signes sont de vrais mudras dessinés (deux mains) au-dessus de la tête, sans texte. Auras de mode plus légères : orange pour les bijū, violet pour les pupilles. Toute technique a un court temps d’incantation. Les ennemis paient chakra et recharges comme toi, esquivent, punissent tes incantations et se rapprochent par ruée. XP ×5, deux fois moins de texte à l’écran, effets visuels allégés.');
+})();
+/* Shinobi 2 — Mise à jour 14 : modes à double appui, Edo Tensei jouable, clans (ultime + passif) et élément libre,
+   créatif plus clair, « Équiper le meilleur », nouvelles touches W / X / E, shuriken inné, Outils ninja,
+   substitution par prédiction, rythme plus posé. */
+(function () {
+  const V = (S2.v14 = { ev: {}, edo: [], body: null });
+  const P0 = () => G.players[0];
+  const prof = () => { try { return P(); } catch (e) { return null; } };
+  const st = () => { const p = prof(); if (!p) return {}; p.settings = p.settings || {}; return p.settings; };
+  const human = (u) => u && u.isPlayer && !u.net && u.ctrl && (u.ctrl.kind === 'kb1' || u.ctrl.primary === 'kb1' || (u.ctrl.parts && u.ctrl.parts.some((c) => c.kind === 'kb1')));
+  const inv = (u) => G.cheats && G.cheats.inf && u.team === 0;
+
+  /* ================= 7. Touches (codes physiques event.code, libellés AZERTY par défaut) ================= */
+  const ACT = [['up', 'Haut'], ['down', 'Bas'], ['left', 'Gauche'], ['right', 'Droite'], ['atk', 'Coup (M1)'], ['dash', 'Esquive / dash'], ['charge', 'Charge (C)'],
+    ['j0', 'Technique 1'], ['j1', 'Technique 2'], ['j2', 'Technique 3'], ['j3', 'Technique 4'], ['sec', 'Ultime / secrète'], ['mode', 'Charge de mode'], ['eye', 'Dōjutsu'],
+    ['beast', 'Mode Jinchūriki'], ['wheel', 'Tourner la roue'], ['shur', 'Shuriken (C + = outil)'], ['edo', 'Edo Tensei'], ['swap', 'Changer de corps']];
+  V.ACT = ACT;
+  const BASE = { atk: 'KeyJ', dash: 'KeyK', charge: 'KeyC', j0: 'KeyU', j1: 'KeyI', j2: 'KeyO', j3: 'KeyP', sec: 'Space', eye: 'KeyX', beast: 'KeyF', wheel: 'KeyQ', shur: 'KeyE', edo: 'KeyT', swap: 'KeyR' };
+  V.PRESETS = {
+    azerty: Object.assign({}, BASE, { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', mode: 'KeyW' }), // Z sur AZERTY = KeyW physique ; déplacement aux flèches
+    qwerty: Object.assign({}, BASE, { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', mode: 'KeyZ' }),
+  };
+  V.layout = () => (st().layout14 === 'qwerty' ? 'qwerty' : 'azerty');
+  V.binds = () => Object.assign({}, V.PRESETS[V.layout()], st().binds14 || {});
+  V.B = (k) => V.binds()[k];
+  const bcl = codeLabel; codeLabel = function (code) { if (V.layout() === 'azerty' && AZERTY[code]) return AZERTY[code]; if (V.layout() === 'qwerty' && /^Key[A-Z]$/.test(code)) return code.slice(3); return bcl.apply(this, arguments); };
+  V.applyMove = function () {
+    const S = SCHEMES.kb1, B = V.binds();
+    Object.assign(S, { up: B.up, down: B.down, left: B.left, right: B.right, atk: [B.atk], dash: [B.dash, 'ShiftLeft'], charge: [B.charge], j: [[B.j0, 'Digit1'], [B.j1, 'Digit2'], [B.j2, 'Digit3'], [B.j3, 'Digit4']], sec: [B.sec], eye: [B.eye], beast: [B.beast], wheel: [B.wheel], pause: ['Escape'], mode: [B.mode] });
+  };
+  V.applyMove();
+  V.modeCode = () => V.B('mode');
+  const K = (code) => codeLabel(code);
+  V.keys = () => { const B = V.binds(); return { move: [B.up, B.left, B.down, B.right].map(K).join(' '), mode: K(B.mode), eye: K(B.eye), shur: K(B.shur), charge: K(B.charge), dash: K(B.dash) + ' / Maj', edo: K(B.edo), swap: K(B.swap), beast: K(B.beast), wheel: K(B.wheel), atk: K(B.atk), j: [B.j0, B.j1, B.j2, B.j3].map(K).join(' '), sec: K(B.sec) }; };
+  /* ================= 2. Shuriken inné (E) et projectiles spéciaux (C + E) ================= */
+  T('shur_inne', 'Shuriken', 'outil', 'neutre', 'proj', 0, 0.42, 7, 1, { cnt: 1, spr: 0, spd: 1000, r: 6, life: 0.62, shape: 'shuriken', innate: 1 }, 'Un shuriken, lancé avec E. Gratuit, toujours disponible.');
+  if (TECH.shuriken) TECH.shuriken.innate = 1;
+  for (const k of ['sp_explosif']) {}
+
+  const SP = (V.SPECIAL = {
+    sp_explosif: { n: 'Shuriken explosif', k: '爆', c: '#ff6a2b', prix: 60, d: 'Explose à l’impact (feu, zone).', t: ['sp_explosif', 'Shuriken explosif', 'outil', 'feu', 'proj', 0, 0.8, 26, 2, { cnt: 1, spd: 900, r: 8, life: 0.7, shape: 'shuriken', ex: 90 }] },
+    sp_fuma: { n: 'Fūma géant', k: '風', c: '#bfe3ff', prix: 90, d: 'Grand shuriken qui traverse les ennemis.', t: ['sp_fuma', 'Fūma Shuriken', 'outil', 'vent', 'proj', 0, 0.8, 30, 3, { cnt: 1, spd: 760, r: 18, life: 0.95, shape: 'shuriken', pierce: 1 }] },
+    sp_kunai_ex: { n: 'Kunai à parchemin', k: '札', c: '#ffd27a', prix: 70, d: 'Se plante puis explose.', t: ['sp_kunai_ex', 'Kunai à parchemin explosif', 'outil', 'feu', 'proj', 0, 0.8, 32, 2, { cnt: 1, spd: 980, r: 6, life: 0.6, shape: 'kunai', ex: 110 }] },
+    sp_senbon: { n: 'Senbon empoisonnés', k: '針', c: '#9be37a', prix: 40, d: 'Trois aiguilles qui empoisonnent.', t: ['sp_senbon', 'Senbon empoisonnés', 'outil', 'neutre', 'proj', 0, 0.8, 6, 2, { cnt: 3, spr: 0.12, spd: 1150, r: 4, life: 0.55, shape: 'needle', st: { poison: 3 } }] },
+    sp_fumi: { n: 'Bombe fumigène', k: '煙', c: '#c8c0d8', prix: 35, d: 'Nuage qui aveugle et désoriente.', t: ['sp_fumi', 'Bombe fumigène', 'outil', 'neutre', 'proj', 0, 0.8, 4, 2, { cnt: 1, spd: 700, r: 9, life: 0.5, shape: 'orb', ex: 120, st: { confuse: 1.6 } }] },
+    sp_eclair: { n: 'Kunai éclair', k: '雷', c: '#ffe23f', prix: 80, d: 'Kunai chargé de foudre (paralyse).', t: ['sp_eclair', 'Kunai éclair', 'outil', 'foudre', 'proj', 0, 0.8, 22, 3, { cnt: 1, spd: 1250, r: 6, life: 0.6, shape: 'kunai', st: { shock: 0.5 } }] },
+  });
+  for (const k in SP) { T(...SP[k].t); TECH[k].innate = 1; }
+  const but = usableTech; usableTech = function (p, id) { const T0 = TECH[id]; if (T0 && T0.innate) return false; return but.apply(this, arguments); };
+  const blp = libraryPool; libraryPool = function () { return blp.apply(this, arguments).filter((T0) => !T0.innate); };
+  V.outils = () => { const p = prof(); if (!p) return { stock: {}, eq: null }; p.out14 = p.out14 || { stock: { sp_explosif: 5 }, eq: 'sp_explosif' }; return p.out14; };
+  const throwT = (u, id) => {
+    const T0 = TECH[id]; if (!T0) return false; if ((u.cds[id] || 0) > 0) return false; if (unitDisabled(u) || (u.act && !u.act.cancelable)) return false;
+    u.cds[id] = T0.cd; u.pose = 'throw'; u.poseT = 0; u.act = { type: 'cast', t: 0, dur: 0.24, fireAt: 0.08, T: T0, ang: u.aim, tgt: u.target, fired: false, seals: 0 };
+    return true;
+  };
+  V.shuriken = (u) => throwT(u, 'shur_inne');
+  V.special = (u) => {
+    const O = V.outils(); const id = O.eq; if (!id || !SP[id]) { denyCast(u, 'Aucun projectile spécial — boutique « Outils ninja »', 'sec'); return false; }
+    if (!(O.stock[id] > 0) && G.mode !== 'creative') { denyCast(u, SP[id].n + ' : stock vide', 'sec'); return false; }
+    if (throwT(u, id)) { if (G.mode !== 'creative') O.stock[id]--; V.ev.special = (V.ev.special || 0) + 1; return true; } return false;
+  };
+
+  /* ================= 1. Modes : techniques hors roue au double appui ================= */
+  const PAIRS = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
+  V.hidden = (u) => { if (!u.mode) return []; const all = kitAll(u).filter(Boolean); const vis = new Set(visibleKit(u).filter(Boolean)); return all.filter((id) => !vis.has(id)); };
+  V.dual = function (u, a, b) { const k = PAIRS.findIndex((p) => (p[0] === Math.min(a, b) && p[1] === Math.max(a, b))); const id = V.hidden(u)[k]; if (!id) { denyCast(u, 'Aucune technique sur ce double appui', a); return false; } V.ev.dual = (V.ev.dual || 0) + 1; return castWith(u, id, u.target, !!u.chHeld, a); };
+  V.dualHint = (u) => V.hidden(u).slice(0, 6).map((id, i) => [PAIRS[i], id]);
+
+  /* ================= 3 & 8. Substitution par prédiction ================= */
+  const SUBN = 3, SUB_RT = 10, SUB_WIN = 2;
+  const subInit = (u) => { if (u.subChg == null) { u.subChg = SUBN; u.subRT = 0; } };
+  V.predict = function (u) {
+    subInit(u);
+    if (u.st.freeze > 0 || u.st.bound > 0 || u.st.trance > 0) { denyCast(u, 'Immobilisé !', 'dash'); return false; }
+    if (u.subPred > 0) return false;
+    if (u.subChg <= 0) { denyCast(u, `Permutation : recharge ${Math.ceil(SUB_RT - u.subRT)} s`, 'dash'); return false; }
+    u.subChg--; if (u.subChg < SUBN && !u.subRT) u.subRT = 0.001; u.subPred = SUB_WIN;
+    u.pose = 'dash'; u.poseT = 0; u.vz = 260; if (u.rig) u.rig.sq = -0.7; u.act = null;
+    FX.ring(u.x, u.y, '#e0c08a', 10, 70, 0.3, 4); Audio.play('dash', 0.8, u.x);
+    if (u.isPlayer) V.ev.predict = (V.ev.predict || 0) + 1;
+    return true;
+  };
+  substitution = function (u) { return V.predict(u); };
+  // Esquive « Ultra Instinct » : on reste sur place, balancement latéral court, image rémanente, invulnérable, puis contre
+  V.sway = function (u, from) {
+    const base = from != null ? from : u.aim; const side = Math.random() < 0.5 ? 1 : -1;
+    u.swayT = 0.34; u.swayA = base + side * Math.PI / 2; u.iframe = Math.max(u.iframe || 0, 0.42); u.counterT = 0.9; u.act = null; u.hurtT = 0; u.kbT = 0; u.vx = u.vy = 0;
+    try { (G.ghosts = G.ghosts || []).push({ x: u.x, y: u.y, u, t: 0, life: 0.32, face: u.face, pp: u.rig && u.rig.pp ? JSON.parse(JSON.stringify(u.rig.pp)) : null }); } catch (e) {}
+    FX.ring(u.x, u.y, '#d8e2f0', 18, 46, 0.25, 2); Audio.play('swing', 0.6, u.x); V.ev.sway = (V.ev.sway || 0) + 1;
+  };
+  V.doSub = function (u, a) {
+    u.subPred = 0; if (a && alive(a)) { const ang = Math.atan2(a.y - u.y, a.x - u.x); u.face = Math.cos(ang) >= 0 ? 1 : -1; u.aim = ang; if (a.ai) { a.ai.think = 0.5; } }
+    V.sway(u, a && alive(a) ? Math.atan2(a.y - u.y, a.x - u.x) : null);
+    try { discover('reac', 'substitution', u); } catch (e) {} if (G.run && u.isPlayer) G.run.subs = (G.run.subs || 0) + 1; if (u.isPlayer) V.ev.sub = (V.ev.sub || 0) + 1;
+  };
+  const bdw = drawUnit; drawUnit = function (ctx, gl, u) {
+    if (!(u.swayT > 0)) return bdw.apply(this, arguments);
+    const k = 1 - u.swayT / 0.34, off = Math.sin(k * Math.PI) * 22; const ox = u.x, oy = u.y; u.x += Math.cos(u.swayA) * off; u.y += Math.sin(u.swayA) * off * 0.6;
+    try { gl.globalAlpha = 0.12 * Math.sin(k * Math.PI); gl.drawImage(FX.glowSprite('#cfd8e6'), u.x - 30, u.y - (u.z || 0) - 80, 60, 86); gl.globalAlpha = 1; } catch (e) {}
+    try { return bdw.apply(this, arguments); } finally { u.x = ox; u.y = oy; }
+  };
+  const bdd = dealDamage; dealDamage = function (src, tgt, base, o) {
+    if (src && src.counterT > 0 && tgt && tgt.team !== src.team && base > 0) { src.counterT = 0; base *= 1.5; arguments[2] = base; V.ev.counter = (V.ev.counter || 0) + 1; }
+    if (tgt && tgt.swayT > 0 && src && src.team !== tgt.team) return 0;
+    if (tgt && tgt.subPred > 0 && src && src !== tgt && src.team !== tgt.team && !(o && (o.dot || o.self))) { V.doSub(tgt, src.owner && alive(src.owner) ? src.owner : src); return 0; }
+    return bdd.apply(this, arguments);
+  };
+
+  /* ================= 9. Rythme ================= */
+  G.paceMul = 0.9;
+
+  /* ================= Contrôle joueur ================= */
+  const held = {}; const down = (c) => !!Keys[c];
+  const bpc = playerControl; playerControl = function (u, dt) {
+    const c = u.ctrl && u.ctrl.state; const kb = human(u) && c;
+    if (kb) {
+      const mc = V.modeCode(); const now = G.t;
+      // W : appui court = meilleur mode / stade suivant, maintien = charge de chakra
+      if (down(mc)) { if (!held.w) held.w = { t: now }; if (now - held.w.t > 0.28) c.charge = true; }
+      else if (held.w) { const tap = now - held.w.t <= 0.28; held.w = null; if (tap && !unitDisabled(u)) V.bestMode(u); }
+      // X maintenu dans une pupille = stade suivant
+      if (down(V.B('eye')) && u.mode && MODES[u.mode.id].kind === 'eye') { held.x = held.x || { t: now }; if (!held.x.done && now - held.x.t > 0.55) { held.x.done = 1; stageUp(u); } } else held.x = null;
+      // E : shuriken / C + E : projectile spécial
+      if (down(V.B('shur'))) { if (!held.e) { held.e = 1; if (!unitDisabled(u)) { if (down(V.B('charge'))) V.special(u); else V.shuriken(u); } } } else held.e = 0;
+      // Mode : double appui pour les techniques hors roue
+      if (u.mode && V.hidden(u).length) {
+        const pr = []; for (let i = 0; i < 4; i++) if (c.jP[i]) pr.push(i);
+        const q = u._dq;
+        if (pr.length >= 2) { u._dq = null; for (let i = 0; i < 4; i++) c.jP[i] = false; V.dual(u, pr[0], pr[1]); }
+        else if (pr.length === 1) {
+          c.jP[pr[0]] = false;
+          if (q && now - q.t < 0.13 && q.i !== pr[0]) { u._dq = null; V.dual(u, q.i, pr[0]); }
+          else { if (q) c.jP[q.i] = true; u._dq = { i: pr[0], t: now }; }
+        } else if (q && now - q.t >= 0.13) { u._dq = null; c.jP[q.i] = true; }
+      } else u._dq = null;
+      // En mode : pas de ruée de base (techniques normales bloquées)
+    }
+    return bpc.apply(this, arguments);
+  };
+  V.bestMode = function (u) {
+    if (u.mode) { const r = stageUp(u); if (r !== false) V.ev.stage = (V.ev.stage || 0) + 1; return r; }
+    const cre = G.mode === 'creative';
+    if (u.beast && (cre || u.beastM >= 50) && !modeReqOk(u, 'bete', 1)) { beastKey(u); V.ev.best = 'bete'; return true; }
+    if (sageUnlocked(u) && MODES.ermite && (cre || u.ch >= u.maxCh * 0.5)) { if (!cre && !inv(u)) u.ch -= u.maxCh * 0.3; enterMode(u, 'ermite', 1); V.ev.best = 'ermite'; return true; }
+    if (u.eye && MODES[u.eye]) { eyeKey(u); V.ev.best = 'eye'; return !!u.mode; }
+    denyCast(u, 'Aucun mode prêt — maintiens ' + K(V.modeCode()) + ' pour charger', 'awk'); return false;
+  };
+
+  /* ================= Boucle d'unité ================= */
+  const bup = updateUnit; updateUnit = function (u, dt) {
+    if (u.swayT > 0) u.swayT -= dt; if (u.counterT > 0) u.counterT -= dt;
+    if (u.subPred > 0) { u.subPred -= dt; if (Math.random() < 0.3) FX.add({ type: 'glow', x: u.x, y: u.y, z: 30, c: '#e0c08a', size: 16, life: 0.25, a: 0.5 }); }
+    if (u.subChg != null && u.subChg < SUBN) { u.subRT += dt; if (u.subRT >= SUB_RT) { u.subChg++; u.subRT = u.subChg < SUBN ? 0.001 : 0; } }
+    if (u.subChg != null) u.subCd = u.subChg > 0 ? 0 : SUB_RT - u.subRT;
+    if (u.edo && !u.dead) { u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.02 * dt); if (Math.random() < dt * 2) FX.add({ type: 'glow', x: u.x + rand(-12, 12), y: u.y, z: rand(20, 60), c: '#d8d0c0', size: 6, life: 0.6, a: 0.5 }); }
+    return bup.apply(this, arguments);
+  };
+  // IA : prédit la substitution quand un adversaire proche déclenche une attaque
+  const bai = aiUpdate; aiUpdate = function (u, dt) {
+    try {
+      if (u.ai && !u.boss && (u.kind === 'bot' || u.ai.type === 'shinobi' || (u.skill || 0) >= 0.6) && !(u.subPred > 0)) {
+        subInit(u); if (u.subChg > 0 && (u._pT || 0) < G.t) { u._pT = G.t + 0.5;
+          const f = G.units.find((v) => alive(v) && v.team !== u.team && v.team !== -1 && v.act && (v.act.type === 'melee' || v.act.type === 'cast' || v.act.type === 'rush') && v.act.t < 0.12 && dist(u.x, u.y, v.x, v.y) < 220);
+          if (f && Math.random() < 0.08 + (u.skill || 0.3) * 0.12) V.predict(u); }
+      }
+    } catch (e) {}
+    return bai.apply(this, arguments);
+  };
+
+  /* ================= 4. Clans : ultime + passif, élément libre ================= */
+  syncClanTechs = function (p) { if (!p.elements || !p.elements.length) p.elements = [CLANS[p.clan].el]; p.elements = p.elements.slice(0, maxElements(p)); if (!p.techs.length) p.techs.push('kunai_ex'); };
+  const bab = applyBuild; applyBuild = function (u, b) { bab.apply(this, arguments); if (b.elements && b.elements[0]) { u.el = b.elements[0]; u.elemMain = b.elements[0]; } u.slots = (u.slots || []).map((s) => (s === 'shuriken' ? null : s)); };
+  const bpb = playerBuild; playerBuild = function (prof, over) { const b = bpb.apply(this, arguments); b.slots = (b.slots || []).map((s) => (s === 'shuriken' ? null : s)); return b; };
+
+  /* ================= 6. Équiper le meilleur ================= */
+  V.itemScore = (it) => it.rar * 100 + (it.ilvl || 0) * 3 + (it.uniq ? 60 : 0);
+  V.techScore = (p, id) => { const T = TECH[id]; return T.rar * 100 + (T.dmg || 0) * (T.cnt || 1) * 0.5 + Math.min(80, (p.mast && p.mast[id]) || 0) * 0.3 - (T.cost || 0) * 0.2; };
+  V.equipBest = function (quiet) {
+    const p = prof(); if (!p) return; p.inv = p.inv || []; p.equip = p.equip || {}; let ng = 0, ns = 0;
+    for (const sl of GEAR_ORDER) { const best = p.inv.filter((i) => i.slot === sl).sort((a, b) => V.itemScore(b) - V.itemScore(a))[0]; if (best && p.equip[sl] !== best.id) { p.equip[sl] = best.id; ng++; } }
+    const pool = p.techs.filter((id) => TECH[id] && !TECH[id].beast && !TECH[id].mode && !TECH[id].ult && usableTech(p, id)).sort((a, b) => V.techScore(p, b) - V.techScore(p, a));
+    const out = []; const kinds = {};
+    for (const id of pool) { const k = TECH[id].kind; if ((kinds[k] || 0) >= 2) continue; out.push(id); kinds[k] = (kinds[k] || 0) + 1; if (out.length >= 8) break; }
+    for (const id of pool) { if (out.length >= 8) break; if (!out.includes(id)) out.push(id); }
+    p.slots = p.slots || []; let j = 0;
+    const used = new Set(); for (let i = 0; i < 8; i++) { if (!slotUnlocked({ lv: p.lv, ui: 1 }, i)) continue; let id = out[j++] || null; if (!id && p.slots[i] && !used.has(p.slots[i]) && !out.includes(p.slots[i])) id = p.slots[i]; if (id) used.add(id); if (p.slots[i] !== id) ns++; p.slots[i] = id; }
+    try { Profile.save(); } catch (e) {} V.ev.best2 = (V.ev.best2 || 0) + 1;
+    if (!quiet) toast('Équipement', 'Meilleur équipement', `${ng} pièce${ng > 1 ? 's' : ''} · ${ns} technique${ns > 1 ? 's' : ''}`, '#ffd27a', '備');
+    return { ng, ns };
+  };
+  const NOAUTO = ['creative', 'pvp', 'tutorial', 'netguest', 'demo', 'duel'];
+  const bsg = startGame; startGame = function (mode, opts) { try { if (!NOAUTO.includes(mode) && st().autoBest !== false && prof()) V.equipBest(true); } catch (e) {} return bsg.apply(this, arguments); };
+  const bestBtn = () => `<button class="primary" id="best14" title="Pièces et techniques les plus fortes">★ Équiper le meilleur</button><label class="chk" style="margin-left:10px"><input type="checkbox" id="auto14" ${st().autoBest !== false ? 'checked' : ''}> Auto au départ de mission</label>`;
+  const wireBest = (ui, tab) => { const b = $('#best14'); if (b) b.onclick = () => { V.equipBest(); Audio.play('equip'); ui['tab_' + tab](); }; const a = $('#auto14'); if (a) a.onchange = () => { st().autoBest = a.checked; Profile.save(); }; };
+  for (const tab of ['equip', 'prep']) { const bt = UI['tab_' + tab]; if (!bt) continue; UI['tab_' + tab] = function () { const r = bt.apply(this, arguments); try { const tb = $('#tabbody'); if (tb && !$('#best14')) { tb.insertAdjacentHTML('afterbegin', `<div class="row best14" style="margin:0 0 10px">${bestBtn()}</div>`); wireBest(this, tab); } if (tab === 'prep') V.prepEl(this); } catch (e) { console.warn('best', e.message); } return r; }; }
+  // Préparation : élément principal libre (plus de verrou de clan)
+  V.prepEl = function (ui) {
+    const p = prof(); const maxE = maxElements(p); p.slots = (p.slots || []).map((s) => (s === 'shuriken' ? null : s));
+    $$('#tabbody .elbtn').forEach((b) => { const e = b.dataset.e; const on = p.elements.includes(e); b.classList.remove('locked'); b.removeAttribute('aria-disabled'); if (on && p.elements[0] === e) b.classList.add('main14');
+      b.setAttribute('data-tip-t', EL[e].n); b.setAttribute('data-tip', on ? (p.elements[0] === e ? 'Élément principal (choisi librement).' : 'Clic : en faire l’élément principal · clic droit : retirer.') : (p.elements.length < maxE ? 'Clique pour ajouter.' : 'Affinités pleines : retire-en une (clic droit).'));
+      b.onclick = () => { if (on) { p.elements = [e, ...p.elements.filter((x) => x !== e)]; } else if (p.elements.length < maxE) p.elements.push(e); else { p.elements[p.elements.length - 1] = e; } p.slots = p.slots.map((s) => (s && usableTech(p, s) ? s : null)); Profile.save(); Audio.play('seal'); ui.tab_prep(); };
+      b.oncontextmenu = (ev) => { ev.preventDefault(); if (on && p.elements.length > 1) { p.elements = p.elements.filter((x) => x !== e); Profile.save(); ui.tab_prep(); } };
+    });
+    $$('#tabbody .clan.mini').forEach((b) => { const C = CLANS[b.dataset.c]; if (!C || b.classList.contains('locked')) return; const U = TECH[C.sec]; b.setAttribute('data-tip-t', C.n); b.setAttribute('data-tip', 'Ultime : ' + (U ? U.n : '—') + '\nPassif : ' + C.p + ' — ' + C.pd + '\nL’élément se choisit librement.'); });
+  };
+
+  /* ================= Outils ninja (boutique) ================= */
+  UI.tab_outils = function () {
+    const p = prof(); const O = V.outils();
+    $('#tabbody').innerHTML = `<section class="panel"><h3>${seal('具', '#ffd27a')} Outils ninja <small class="muted">${p.ryo | 0} ryō · ${K(V.B('charge'))} + ${K(V.B('shur'))} lance l’outil équipé · ${K(V.B('shur'))} seul = shuriken (gratuit)</small></h3>
+      <div class="sp14">${Object.entries(SP).map(([id, S]) => `<article class="voie${O.eq === id ? ' on' : ''}">${seal(S.k, S.c)}<div><b>${esc(S.n)} <em>×${O.stock[id] || 0}</em></b><p>${esc(S.d)}</p></div>
+        <button data-buy14="${id}" ${p.ryo >= S.prix ? '' : 'disabled'}>${S.prix} ryō</button><button data-buy14x="${id}" ${p.ryo >= S.prix * 5 ? '' : 'disabled'}>×5</button><button class="primary" data-eq14="${id}">${O.eq === id ? 'Équipé' : 'Équiper'}</button></article>`).join('')}</div></section>`;
+    const buy = (id, n) => { const c = SP[id].prix * n; if (p.ryo < c) return; p.ryo -= c; O.stock[id] = (O.stock[id] || 0) + n; Profile.save(); Audio.play('equip'); V.ev.buy = (V.ev.buy || 0) + 1; UI.tab_outils(); };
+    $$('#tabbody [data-buy14]').forEach((b) => (b.onclick = () => buy(b.dataset.buy14, 1)));
+    $$('#tabbody [data-buy14x]').forEach((b) => (b.onclick = () => buy(b.dataset.buy14x, 5)));
+    $$('#tabbody [data-eq14]').forEach((b) => (b.onclick = () => { O.eq = b.dataset.eq14; Profile.save(); Audio.play('seal'); UI.tab_outils(); }));
+  };
+
+  /* ================= 2. Edo Tensei ================= */
+  const R = (id, n, el, eye, hair, outfit, scarf, extra) => Object.assign({ id, n, el, eye, look: { hair, outfit, scarf } }, extra || {});
+  V.ROSTER = [
+    R('hashirama', 'Hashirama Senju', 'terre', '', '#2a1c14', '#8a2a2a', '#c8a050', { kage: 1, lig: 'bois', t: 'Premier Hokage' }),
+    R('tobirama', 'Tobirama Senju', 'eau', '', '#e8e8e8', '#2a3a5a', '#ffffff', { kage: 1, t: 'Deuxième Hokage' }),
+    R('hiruzen', 'Hiruzen Sarutobi', 'feu', '', '#d8d8d8', '#3a2a2a', '#ffffff', { kage: 1, t: 'Troisième Hokage' }),
+    R('minato', 'Minato Namikaze', 'foudre', '', '#ffd23a', '#2a4a2a', '#ffffff', { kage: 1, t: 'Quatrième Hokage' }),
+    R('madara', 'Madara Uchiha', 'feu', 'sh', '#101018', '#4a1a1a', '#a02020', { t: 'Fondateur Uchiha' }), R('izuna', 'Izuna Uchiha', 'feu', 'sh', '#101018', '#2a1a2a', '#a02020'),
+    R('itachi', 'Itachi Uchiha', 'feu', 'sh', '#101018', '#1a1a2a', '#c02a2a'), R('shisui', 'Shisui Uchiha', 'feu', 'sh', '#101018', '#2a2a3a', '#7a8aff'),
+    R('obito', 'Obito Uchiha', 'feu', 'sh', '#101018', '#2a1a3a', '#ff7a2a'), R('nagato', 'Nagato', 'eau', 'ri', '#c02a2a', '#1a1a2a', '#c02a2a', { t: 'Rinnegan' }),
+    R('konan', 'Konan', 'vent', '', '#7a6aff', '#1a1a2a', '#c02a2a'), R('yahiko', 'Yahiko', 'eau', '', '#ff8a2a', '#2a2a3a', '#c02a2a'),
+    R('jiraiya', 'Jiraiya', 'feu', '', '#f0f0f0', '#4a7a3a', '#c02a2a', { sage: 1 }), R('tsunade', 'Tsunade', 'terre', '', '#ffd27a', '#3a6a3a', '#ffffff'),
+    R('orochimaru', 'Orochimaru', 'vent', '', '#101018', '#e8e0d0', '#7a5cff'), R('kakashi', 'Kakashi Hatake', 'foudre', 'sh', '#e8e8e8', '#2a3a5a', '#4a6a3a'),
+    R('guy', 'Might Guy', 'neutre', '', '#101018', '#2a7a2a', '#ff7a2a', { tai: 1 }), R('rocklee', 'Rock Lee', 'neutre', '', '#101018', '#2a7a2a', '#ff7a2a', { tai: 1 }),
+    R('neji', 'Neji Hyūga', 'vent', 'by', '#3a2a1a', '#e8e0d0', '#4a3a6a'), R('hinata', 'Hinata Hyūga', 'eau', 'by', '#2a1a4a', '#c8b8e8', '#4a3a6a'),
+    R('hiashi', 'Hiashi Hyūga', 'vent', 'by', '#3a2a1a', '#d8d0c0', '#4a3a3a'), R('asuma', 'Asuma Sarutobi', 'vent', '', '#101018', '#2a4a2a', '#ffffff', { sword: 1 }),
+    R('kurenai', 'Kurenai Yūhi', 'feu', '', '#101018', '#c02a2a', '#ffffff'), R('shikamaru', 'Shikamaru Nara', 'terre', '', '#101018', '#2a4a2a', '#4a4a3a'),
+    R('shikaku', 'Shikaku Nara', 'terre', '', '#101018', '#2a4a2a', '#4a4a3a'), R('inoichi', 'Inoichi Yamanaka', 'terre', '', '#ffe8a0', '#3a3a5a', '#7a5cff'),
+    R('choza', 'Chōza Akimichi', 'feu', '', '#c02a2a', '#2a4a2a', '#c02a2a'), R('zabuza', 'Zabuza Momochi', 'eau', '', '#101018', '#4a5a6a', '#d8d8d8', { sword: 1 }),
+    R('haku', 'Haku', 'eau', '', '#101018', '#2a5a5a', '#d8f0ff', { t: 'Hyōton' }), R('kimimaro', 'Kimimaro', 'terre', '', '#f0f0f0', '#d8d0c0', '#7a5cff'),
+    R('gaara', 'Gaara', 'terre', '', '#c02a2a', '#5a2a2a', '#c8a050'), R('rasa', 'Rasa (4e Kazekage)', 'terre', '', '#c06a2a', '#2a3a5a', '#ffffff', { kage: 2 }),
+    R('a3', 'Troisième Raikage', 'foudre', '', '#f0f0f0', '#2a2a2a', '#ffe23f', { kage: 2, tai: 1 }), R('mu', 'Mū (2e Tsuchikage)', 'terre', '', '#d8d0c0', '#3a3a3a', '#c98c4b', { kage: 2 }),
+    R('gengetsu', 'Gengetsu Hōzuki', 'eau', '', '#e8e8e8', '#3a5a6a', '#3f9dff', { kage: 2 }), R('kisame', 'Kisame Hoshigaki', 'eau', '', '#3a5a8a', '#1a1a2a', '#c02a2a', { sword: 1 }),
+    R('deidara', 'Deidara', 'terre', '', '#ffd23a', '#1a1a2a', '#c02a2a'), R('sasori', 'Sasori', 'vent', '', '#c02a2a', '#1a1a2a', '#c02a2a'),
+    R('kakuzu', 'Kakuzu', 'foudre', '', '#2a2a2a', '#1a1a2a', '#c02a2a'), R('hidan', 'Hidan', 'neutre', '', '#e8e8e8', '#1a1a2a', '#c02a2a', { sword: 1 }),
+    R('kushina', 'Kushina Uzumaki', 'eau', '', '#c02a2a', '#d8d0c0', '#3a7a3a'), R('dan', 'Dan Katō', 'neutre', '', '#3a5a5a', '#3a4a3a', '#ffffff'),
+    R('kinkaku', 'Kinkaku', 'vent', '', '#ffd27a', '#2a2a2a', '#ff7a2a'), R('ginkaku', 'Ginkaku', 'foudre', '', '#e8e8e8', '#2a2a2a', '#ff7a2a'),
+    R('hanzo', 'Hanzō la Salamandre', 'eau', '', '#2a2a2a', '#3a3a3a', '#7a5cff'), R('chiyo', 'Chiyo', 'vent', '', '#d8d8d8', '#5a2a2a', '#c8a050'),
+    R('sakumo', 'Sakumo Hatake', 'foudre', '', '#e8e8e8', '#2a3a3a', '#ffffff', { sword: 1 }), R('naruto', 'Naruto Uzumaki', 'vent', '', '#ffd23a', '#ff7a2a', '#1a1a2a', { sage: 1 }),
+    R('sasuke', 'Sasuke Uchiha', 'foudre', 'sh', '#101018', '#e8e0d0', '#7a5cff', { sword: 1 }), R('sakura', 'Sakura Haruno', 'terre', '', '#ff9ad0', '#c02a2a', '#ffffff', { tai: 1 }),
+  ];
+  const eyeFor = (k) => { const ids = Object.keys(EYES); const pickE = (...c) => c.find((x) => EYES[x] && MODES[x]) || null; return k === 'sh' ? pickE('solaire', 'lunaire', 'miroir') : k === 'by' ? pickE('celeste') : k === 'ri' ? pickE('neant') : null; };
+  const clanFor = (el) => CLAN_ORDER.find((c) => CLANS[c].el === el) || 'hibana';
+  V.kitFor = function (Rc) {
+    const els = Rc.el === 'neutre' ? ['neutre'] : [Rc.el, 'neutre'];
+    let pool = Object.values(TECH).filter((T) => !T.clan && !T.eye && !T.beast && !T.mode && !T.ult && T.cat !== 'secret' && (els.includes(T.el) || (Rc.lig && T.el === Rc.lig)) && (T.dmg || 0) > 0);
+    if (Rc.tai) pool = pool.filter((T) => T.cat === 'taijutsu' || T.el === 'neutre').concat(Object.values(TECH).filter((T) => T.cat === 'taijutsu' && !T.clan && !T.mode && !T.beast));
+    pool.sort((a, b) => b.rar - a.rar || (b.dmg || 0) - (a.dmg || 0)); const top = pool.slice(0, 14); const out = [];
+    let g = 0; while (out.length < 4 && g++ < 60 && top.length) { const T = top[Math.floor(Math.random() * top.length)]; if (!out.includes(T.id)) out.push(T.id); }
+    return out;
+  };
+  V.edoCd = 0;
+  V.edoAlive = () => V.edo.filter((u) => alive(u));
+  V.summon = function (id, forced) {
+    const pl = P0(); const caster = V.body && alive(V.body) ? V.body : pl; if (!caster || !G.mode) return null;
+    const Rc = V.ROSTER.find((r) => r.id === id); if (!Rc) return null;
+    if (V.edoAlive().length >= 4) { denyCast(pl, 'Quatre réincarnés au maximum', 'sec'); return null; }
+    if (V.edoAlive().some((u) => u.edoId === id)) { denyCast(pl, Rc.n + ' est déjà réincarné', 'sec'); return null; }
+    const a = rand(TAU); const x = clamp(caster.x + Math.cos(a) * 120, 60, G.map.w - 60), y = clamp(caster.y + Math.sin(a) * 90, 60, G.map.h - 60);
+    // cercueil
+    FX.ring(x, y, '#8a5a2a', 10, 120, 0.6, 8); FX.smoke(x, y, 20, '#c8c0b0', 18, 26, 120); FX.kanji(x, y, 120, '穢', '#d8d0c0', 46, 1.2); Audio.play('poof', 1.2, x);
+    const ok = forced != null ? forced : Math.random() < 0.5; V.ev.tries = (V.ev.tries || 0) + 1;
+    if (!ok) {
+      for (let i = 0; i < 26; i++) FX.add({ type: 'glow', x: x + rand(-20, 20), y, z: rand(10, 80), vx: rand(-60, 60), vz: rand(20, 120), c: pick(['#bfb5a5', '#8a8070', '#e8e0d0']), size: rand(4, 10), life: rand(0.6, 1.3), drag: 0.08 });
+      FX.text(x, y - 90, Rc.n + ' — l’âme se brise', '#c8c0b0', 15, true); V.ev.fail = (V.ev.fail || 0) + 1; return null;
+    }
+    const lv = Math.max(25, (prof() && prof().lv) || 25);
+    const b = botBuild(clanFor(Rc.el === 'neutre' ? 'terre' : Rc.el), lv, true); b.slots = V.kitFor(Rc); b.eye = eyeFor(Rc.eye); b.name = 'Edo · ' + Rc.n;
+    b.look = Object.assign({}, b.look, Rc.look, { skin: '#c9c2b6', band: Rc.look.scarf });
+    const u = makePlayerUnit(b, 0, 9 + V.edo.length, false); u.kind = 'mob'; u.isBot = false; u.ai = { type: 'shinobi', st: 'idle', t: 0, leader: caster };
+    u.x = x; u.y = y; u.edo = true; u.edoId = id; u.xpVal = 0; u.ryoVal = 0; u.sword = !!Rc.sword || u.sword; u.maxHp *= Rc.kage === 1 ? 2.2 : 1.6; u.hp = u.maxHp; u.maxCh *= 1.5; u.ch = u.maxCh; u.name = 'Edo · ' + Rc.n;
+    if (Rc.sage) u._edoSage = 1; addUnit(u); V.edo.push(u); V.ev.ok = (V.ev.ok || 0) + 1;
+    FX.text(x, y - 100, Rc.n, '#ffd27a', 17, true); banner(Rc.n, 'EDO TENSEI', '#d8d0c0', K(V.B('swap')) + ' : prendre le contrôle');
+    return u;
+  };
+  V.summonKage = () => ['hashirama', 'tobirama', 'hiruzen', 'minato'].map((id, i) => { let r = null; G.delayed.push({ t: i * 0.35, f: () => { r = V.summon(id); } }); return id; });
+  // ---- Contrôle : R passe d'un corps à l'autre (ton ninja → réincarnés → ton ninja)
+  V.possess = function (tgt) {
+    const cur = P0(); if (!cur || !tgt || cur === tgt || !alive(tgt)) return false;
+    if (!V.body) V.body = cur;
+    tgt.ctrl = cur.ctrl; tgt.isPlayer = true; tgt._kind = tgt._kind || tgt.kind; tgt.kind = 'player'; tgt._ai = tgt.ai; tgt.ai = null; tgt.pIndex = cur.pIndex;
+    cur.ctrl = null; cur.isPlayer = false; cur.ai = cur._ai || { type: 'shinobi', st: 'idle', t: 0 }; cur.ai.leader = tgt; if (cur === V.body) { cur._kind = 'player'; cur.kind = 'bot'; } else cur.kind = cur._kind || 'mob';
+    const i = G.players.indexOf(cur); if (i >= 0) G.players[i] = tgt; else G.players.unshift(tgt);
+    if (cur !== V.body && G.players.indexOf(cur) >= 0) G.players.splice(G.players.indexOf(cur), 1);
+    if (tgt === V.body) { V.body.kind = 'player'; V.body = null; }
+    FX.ring(tgt.x, tgt.y, '#d8d0c0', 10, 120, 0.4, 6); Audio.play('seal', 1, tgt.x); V.ev.swap = (V.ev.swap || 0) + 1;
+    return true;
+  };
+  V.cycle = function () {
+    const cur = P0(); if (!cur) return; const list = [V.body || cur].concat(V.edoAlive()); const i = list.indexOf(cur);
+    if (list.length < 2) { denyCast(cur, 'Aucun réincarné — ' + K(V.B('edo')) + ' : Edo Tensei', 'sec'); return; }
+    V.possess(list[(i + 1) % list.length]);
+  };
+  V.tick = function () {
+    if (!G.mode) { V.edo = []; V.body = null; return; }
+    V.edo = V.edo.filter((u) => G.units.includes(u));
+    const cur = P0(); if (V.body && cur && cur !== V.body && (!alive(cur) || !alive(V.body) || !G.units.includes(cur))) { const b = V.body; if (G.units.includes(b)) { V.possess(b); } else V.body = null; }
+  };
+  // ---- Fenêtre Edo Tensei (T)
+  V.open = function () {
+    if (!G.mode || G.over || $('#edo14')) return; const wasP = G.paused; G.paused = true;
+    const el = document.createElement('div'); el.id = 'edo14';
+    const card = (r) => `<button class="edoc${r.kage === 1 ? ' kage' : ''}" data-edo="${r.id}" style="--h:${r.look.hair};--o:${r.look.outfit};--s:${r.look.scarf}"><i></i><b>${esc(r.n)}</b><small>${esc(r.t || EL[r.el].n)}</small></button>`;
+    el.innerHTML = `<div class="box"><h2>穢土転生 <span>Edo Tensei</span></h2><p class="muted">Chaque réincarnation a 50 % de chances d’échouer : le corps tombe en poussière. Réussie, tu peux en prendre le contrôle (${K(V.B('swap'))}).</p>
+      <div class="row"><button class="primary" id="edokage">Invoquer les 4 Kage</button><input id="edoq" type="search" placeholder="Rechercher un personnage…"><button id="edox">Fermer (Échap)</button></div>
+      <h4>Les Hokage</h4><div class="edogrid">${V.ROSTER.filter((r) => r.kage === 1).map(card).join('')}</div>
+      <h4>Tous les personnages</h4><div class="edogrid" id="edoall">${V.ROSTER.filter((r) => r.kage !== 1).map(card).join('')}</div></div>`;
+    document.body.appendChild(el);
+    const close = () => { el.remove(); G.paused = wasP; removeEventListener('keydown', esc1, true); };
+    const esc1 = (e) => { if (e.code === 'Escape' || e.code === V.B('edo')) { e.preventDefault(); e.stopPropagation(); close(); } };
+    addEventListener('keydown', esc1, true);
+    el.querySelector('#edox').onclick = close; el.querySelector('#edokage').onclick = () => { close(); V.summonKage(); };
+    el.querySelectorAll('[data-edo]').forEach((b) => (b.onclick = () => { close(); V.summon(b.dataset.edo); }));
+    const q = el.querySelector('#edoq'); q.oninput = () => { const s = q.value.trim().toLowerCase(); el.querySelectorAll('#edoall [data-edo]').forEach((b) => (b.hidden = !!s && !b.textContent.toLowerCase().includes(s))); }; setTimeout(() => q.focus(), 30);
+  };
+  addEventListener('keydown', (e) => {
+    if (!G.mode || G.over || e.repeat || G.dlg || (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) return;
+    if (e.code === V.B('edo') && !G.paused && G.mode !== 'netguest') { e.preventDefault(); V.open(); }
+    else if (e.code === V.B('swap') && !G.paused) { e.preventDefault(); V.cycle(); }
+  });
+  setInterval(() => { try { V.tick(); } catch (e) {} }, 200);
+
+  /* ================= 5. Créatif : sélecteur de techniques ================= */
+  V.picker = { q: '', cat: 'tous', el: 'tous', rar: 0, sort: 'rar', slot: 0, only: 'tous' };
+  V.openPicker = function () {
+    const u = P0(); if (!u) return; $('#pick14') && $('#pick14').remove();
+    const S = V.picker; const el = document.createElement('div'); el.id = 'pick14';
+    const render = () => {
+      let L = Object.values(TECH).filter((T) => !T.beast && !T.innate);
+      if (S.only === 'normal') L = L.filter((T) => !T.mode && !T.ult && T.cat !== 'secret'); else if (S.only === 'mode') L = L.filter((T) => T.mode); else if (S.only === 'ult') L = L.filter((T) => T.ult || T.cat === 'secret');
+      if (S.cat !== 'tous') L = L.filter((T) => T.cat === S.cat); if (S.el !== 'tous') L = L.filter((T) => T.el === S.el); if (S.rar) L = L.filter((T) => T.rar === S.rar);
+      const q = S.q.trim().toLowerCase(); if (q) L = L.filter((T) => (T.n + ' ' + (T.desc || '') + ' ' + T.id).toLowerCase().includes(q));
+      const so = { rar: (a, b) => b.rar - a.rar || a.n.localeCompare(b.n), nom: (a, b) => a.n.localeCompare(b.n), dmg: (a, b) => (b.dmg || 0) * (b.cnt || 1) - (a.dmg || 0) * (a.cnt || 1), cout: (a, b) => (a.cost || 0) - (b.cost || 0), cd: (a, b) => (a.cd || 0) - (b.cd || 0) }[S.sort];
+      L.sort(so); const cnt = L.length; L = L.slice(0, 240);
+      const cats = ['tous'].concat(Object.keys(CATS)); const els = ['tous'].concat(Object.keys(EL).filter((k) => Object.values(TECH).some((T) => T.el === k)));
+      const slots = [0, 1, 2, 3].map((i) => { const T = TECH[u.slots[i]]; return `<button class="${S.slot === i ? 'on' : ''}" data-ps="${i}">${i + 1} · ${T ? esc(T.n) : '—'}</button>`; }).join('') + `<button class="${S.slot === 4 ? 'on' : ''}" data-ps="4">秘 · ${TECH[u.secret] ? esc(TECH[u.secret].n) : '—'}</button>`;
+      el.innerHTML = `<div class="box"><h2>Sélecteur de techniques <span>${cnt} résultats</span></h2>
+        <div class="row">${slots}</div>
+        <div class="row"><input id="pq" type="search" placeholder="Rechercher (nom, effet)…" value="${esc(S.q)}">
+          <select id="psort"><option value="rar">Rareté ↓</option><option value="nom">Nom</option><option value="dmg">Dégâts ↓</option><option value="cout">Coût ↑</option><option value="cd">Recharge ↑</option></select>
+          <select id="ponly"><option value="tous">Tout</option><option value="normal">Techniques</option><option value="mode">Techniques de mode</option><option value="ult">Ultimes / secrètes</option></select><button id="px">Fermer</button></div>
+        <div class="chips">${cats.map((c) => `<button class="${S.cat === c ? 'on' : ''}" data-pc="${c}">${c === 'tous' ? 'Tous types' : esc(CATS[c].n)}</button>`).join('')}</div>
+        <div class="chips">${els.map((c) => `<button class="${S.el === c ? 'on' : ''}" data-pe="${c}" style="--cc:${c === 'tous' ? '#aaa' : EL[c].c}">${c === 'tous' ? 'Tous éléments' : esc(EL[c].n)}</button>`).join('')}</div>
+        <div class="chips">${[0, 5, 4, 3, 2, 1].map((r) => `<button class="${S.rar === r ? 'on' : ''}" data-pr="${r}" style="--cc:${r ? RAR[r].c : '#aaa'}">${r ? RAR[r].n : 'Toutes raretés'}</button>`).join('')}</div>
+        <div class="plist">${L.map((T) => `<button data-pt="${T.id}" style="--cc:${RAR[T.rar] ? RAR[T.rar].c : '#aaa'}"><b>${esc(T.n)}</b><small>${esc((CATS[T.cat] || { n: T.cat }).n)} · ${esc((EL[T.el] || EL.neutre).n)} · ${T.dmg || 0} dég · ${T.cost || 0} ch</small></button>`).join('')}</div></div>`;
+      el.querySelector('#psort').value = S.sort; el.querySelector('#ponly').value = S.only;
+      el.querySelector('#px').onclick = () => el.remove();
+      const pq = el.querySelector('#pq'); pq.oninput = () => { S.q = pq.value; const pos = pq.selectionStart; render(); const n = el.querySelector('#pq'); n.focus(); n.setSelectionRange(pos, pos); };
+      el.querySelector('#psort').onchange = (e) => { S.sort = e.target.value; render(); }; el.querySelector('#ponly').onchange = (e) => { S.only = e.target.value; render(); };
+      el.querySelectorAll('[data-pc]').forEach((b) => (b.onclick = () => { S.cat = b.dataset.pc; render(); }));
+      el.querySelectorAll('[data-pe]').forEach((b) => (b.onclick = () => { S.el = b.dataset.pe; render(); }));
+      el.querySelectorAll('[data-pr]').forEach((b) => (b.onclick = () => { S.rar = +b.dataset.pr; render(); }));
+      el.querySelectorAll('[data-ps]').forEach((b) => (b.onclick = () => { S.slot = +b.dataset.ps; render(); }));
+      el.querySelectorAll('[data-pt]').forEach((b) => (b.onclick = () => { const id = b.dataset.pt; if (S.slot === 4) u.secret = id; else { u.slots[S.slot] = id; S.slot = Math.min(3, S.slot + 1); } u.cds = {}; try { if (window.CreativeLoadout) CreativeLoadout.slots = u.slots.slice(0, 4); } catch (e) {} Audio.play('seal'); V.ev.pick = (V.ev.pick || 0) + 1; render(); }));
+    };
+    document.body.appendChild(el); render();
+  };
+  const bbc = UI.buildCreative; UI.buildCreative = function () { const r = bbc.apply(this, arguments); try { const c = $('#creative'); if (c && !$('#pick14b')) c.insertAdjacentHTML('afterbegin', `<button class="primary" id="pick14b" style="width:100%;margin-bottom:8px">☰ Sélecteur de techniques (recherche, filtres, tri)</button>`); const b = $('#pick14b'); if (b) b.onclick = () => V.openPicker(); } catch (e) {} return r; };
+
+  /* ================= Options : réaffectation complète des touches ================= */
+  V.capture = null;
+  addEventListener('keydown', (e) => { if (!V.capture) return; e.preventDefault(); e.stopImmediatePropagation(); const k = V.capture; V.capture = null; if (e.code !== 'Escape') { const s = st(); s.binds14 = s.binds14 || {}; const B = V.binds(); for (const [a] of ACT) if (a !== k && B[a] === e.code) s.binds14[a] = B[k]; s.binds14[k] = e.code; Profile.save(); V.applyMove(); } UI.tab_opts(); }, true);
+  const bopt = UI.tab_opts; UI.tab_opts = function () { const r = bopt.apply(this, arguments); try { const tb = $('#tabbody'); if (tb && !$('#kb14')) { const B = V.binds();
+    tb.insertAdjacentHTML('afterbegin', `<section class="panel" id="kb14"><h3>${seal('鍵', '#ffd27a')} Touches</h3>
+      <div class="row"><label class="field">Disposition<select id="lay14"><option value="azerty">AZERTY (défaut) — déplacement aux flèches, Z = charge de mode</option><option value="qwerty">QWERTY — WASD, Z = charge de mode</option></select></label><button id="rst14">Réinitialiser</button></div>
+      <div class="kbgrid14">${ACT.map(([a, n]) => `<div><span>${n}</span><button data-rb="${a}" class="${V.capture === a ? 'on' : ''}">${V.capture === a ? 'Appuie sur une touche…' : esc(K(B[a]))}</button></div>`).join('')}</div>
+      <p class="muted small">Clique une action puis appuie sur la touche voulue (Échap annule). Une touche déjà prise est échangée. ${V.guideLine()}</p></section>`);
+    const l = $('#lay14'); l.value = V.layout(); l.onchange = () => { st().layout14 = l.value; st().binds14 = {}; Profile.save(); V.applyMove(); UI.tab_opts(); };
+    $('#rst14').onclick = () => { st().binds14 = {}; Profile.save(); V.applyMove(); UI.tab_opts(); };
+    $$('#tabbody [data-rb]').forEach((b) => (b.onclick = () => { V.capture = b.dataset.rb; b.textContent = 'Appuie sur une touche…'; b.classList.add('on'); })); } } catch (e) { console.warn('kb14', e.message); } return r; };
+  V.guideLine = () => { const k = V.keys(); return `Bouger ${k.move} · ${k.mode} : appui = meilleur mode / stade suivant, maintien = charge de chakra · ${k.eye} : dōjutsu (maintenir = stade suivant) · ${k.shur} : shuriken · ${k.charge} + ${k.shur} : outil spécial · ${k.charge} + esquive : prédiction de substitution · ${k.edo} : Edo Tensei · ${k.swap} : changer de corps · en mode, deux touches de technique ensemble = techniques hors roue`; };
+  const bcx = UI.tab_codex; UI.tab_codex = function () { const r = bcx.apply(this, arguments); try { if (!$('#tabbody [data-ct2="guide"].on') || $('#g14')) return r; const g = $('#tabbody .guide') || $('#tabbody'); const k = V.keys();
+    g.insertAdjacentHTML('afterbegin', `<article id="g14"><h4>${seal('鍵', '#ffd27a')} Touches et nouveautés (mise à jour 14)</h4><p>${V.guideLine()}</p>
+      <p><b>Substitution = prédiction</b> : ${k.charge} + esquive te met en garde 2 s ; touché pendant ce temps, tu esquives sur place (balancement, invulnérable) et ton coup suivant est un contre +50 %. Aucune esquive ne téléporte plus. 3 charges, une charge revient toutes les 10 s. Esquiver après un coup ne permute plus.</p>
+      <p><b>Modes</b> : tes techniques normales sont remplacées. Double appui (deux touches de technique ensemble : ${k.j}) = techniques du mode qui ne sont pas dans la roue affichée.</p>
+      <p><b>Edo Tensei</b> (${k.edo}) : les 4 Hokage ou n’importe quel personnage ; 50 % d’échec. ${k.swap} pour contrôler un réincarné. <b>Clans</b> : ultime + passif seulement, l’élément se choisit librement (Préparation).</p></article>`); } catch (e) { console.warn('g14', e.message); } return r; };
+  /* ================= Styles ================= */
+  const css = document.createElement('style'); css.textContent = `
+  #edo14,#pick14{position:fixed;inset:0;z-index:9000;background:rgba(8,5,14,.82);display:flex;align-items:center;justify-content:center;font-family:inherit}
+  #edo14 .box,#pick14 .box{width:min(1100px,94vw);max-height:90vh;overflow:auto;background:linear-gradient(160deg,#241834,#120c1c);border:1px solid #c8a050;border-radius:12px;padding:18px 20px;color:#eee}
+  #edo14 h2,#pick14 h2{margin:0 0 6px;color:#ffd27a}#edo14 h2 span,#pick14 h2 span{font-size:14px;color:#b9add0;margin-left:8px}
+  #edo14 .row,#pick14 .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}#edo14 input,#pick14 input{flex:1;min-width:160px}
+  .edogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .edoc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;background:#1c1428;border:1px solid #3a2e4a;border-radius:8px;color:#eee;text-align:left;cursor:pointer}
+  .edoc i{width:100%;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--h),var(--o),var(--s))}.edoc.kage{border-color:#c8a050}.edoc:hover{border-color:#ffd27a}.edoc small{color:#a99cc0}
+  #pick14 .chips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}#pick14 .chips button{border:1px solid var(--cc,#555);background:#1a1426;color:#ddd;border-radius:999px;padding:2px 9px;font-size:12px}#kb14 .kbgrid14{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}#kb14 .kbgrid14 div{display:flex;justify-content:space-between;align-items:center;gap:6px}#kb14 .kbgrid14 button{min-width:90px}#kb14 .kbgrid14 button.on{background:#ffd27a;color:#1a1026}
+  #pick14 .chips button.on,#pick14 .row button.on{background:#ffd27a;color:#1a1026}
+  #pick14 .plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;margin-top:8px}#pick14 .plist button{text-align:left;background:#1a1426;border:1px solid #2e2440;border-left:4px solid var(--cc);border-radius:6px;color:#eee;padding:6px 8px}#pick14 .plist small{display:block;color:#a99cc0;font-size:11px}
+  .elbtn.main14{outline:2px solid #ffd27a}.sp14 article{display:flex;gap:10px;align-items:center;margin:6px 0}.sp14 article>div{flex:1}.sp14 article.on{outline:1px solid #ffd27a;border-radius:8px}`;
+  document.head.appendChild(css);
+
+  S2.note('v14', '#ffd27a', 'Mise à jour 14 — Edo Tensei, prédiction et nouvelles touches', 'W : meilleur mode (maintien = charge). X : dōjutsu. E : shuriken inné, C+E : outil spécial (boutique Outils ninja). C+esquive : prédiction de substitution (3 charges, 10 s). T : Edo Tensei (4 Hokage ou n’importe quel personnage, 50 % d’échec), R : contrôler un réincarné. Modes : double appui pour les techniques hors roue. Clans : ultime + passif, élément libre. Listes triées de la plus rare à la plus commune. Créatif : sélecteur avec recherche, filtres et tri. Bouton « Équiper le meilleur » (auto au départ de mission). Rythme plus posé.');
 })();
 /* Shinobi Next Generation — socle : notes de version, sol streamé par tronçons (chunks), mise en veille des unités lointaines,
    couleurs de mode étendues, thème d'interface « ère Boruto ». */
@@ -12900,7 +13301,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     G.cheats.god = false; const u = G.players[0]; const b = spawnBoss(Mst.boss, u.x + 420, u.y, 1); b._ngDuel = 1; banner(Mst.n, 'DUEL', Mst.c); ev('duel'); return b; };
   const bk = killUnit; killUnit = function (u) { const r = bk.apply(this, arguments); try { if (u && u._ngDuel && G.ngDuel) { const Mst = MASTERS[G.ngDuel.i]; G.ngDuel = null; reward(Mst); } } catch (e) { console.warn(e); } return r; };
   // touche B : entre / sort du mode de l'ère Boruto équipé
-  addEventListener('keydown', (e) => { if (e.code !== 'KeyB' || e.repeat || !G.players || !G.players[0] || G.paused || G.over) return; const tag = (e.target && e.target.tagName) || ''; if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  addEventListener('keydown', (e) => { if (e.code !== ((S2.v14 && S2.v14.B('ngmode')) || 'KeyB') || e.repeat || !G.players || !G.players[0] || G.paused || G.over) return; const tag = (e.target && e.target.tagName) || ''; if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     const u = G.players[0]; if (!u.isPlayer || u.dead) return; const o = ngp(); const id = (o && o.mode) || (G.mode === 'creative' ? 'karma_b' : null);
     if (!id || !unlocked(id)) { denyCast(u, 'Aucun mode de l’ère Boruto : affronte un maître (menu Ère Boruto)', 'eye'); return; }
     if (u.mode && MODES[u.mode.id] && MODES[u.mode.id].ng) { exitMode(u); return; } const prev = u.eye; u.eye = id; eyeKey(u); if (!u.mode) u.eye = prev; ev('ngKey'); });
@@ -13100,6 +13501,32 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     ['伝', '#4fd6ff', 'Mode Saga', '12 arcs de Naruto à Boruto : Académie, Pays des Vagues, Examen Chūnin, Vallée de la Fin, Pain, Grande Guerre, mariage et famille, Boruto à l’Académie, Momoshiki, Kara, Jigen, Mode Baryon.'],
     ['楽', '#ffd27a', 'La vie quotidienne', 'Pas que des combats : Ichiraku, entraînements, épreuve écrite, mariage, festival du feu, dîners en famille, missions. En scènes QTE (rythme, martèlement, équilibre, séquence de signes) avec des dialogues courts.'],
     ['起', '#ff6b1a', 'On se relève', 'Dans la Saga, tu te relèves une fois par combat. Sinon, le combat recommence, sans écran de défaite.'],
+  ]);
+})();
+/* Next Generation 5 — portage de la mise à jour 14 de Shinobi 2, adapté à l'ère Boruto */
+(function () {
+  const V = S2.v14; if (!V) return;
+  // Charge de mode (Z) : priorité au mode de l'ère Boruto équipé (Karma, Baryon, Jōgan…), sinon bijū / ermite / pupille
+  const bbm = V.bestMode; V.bestMode = function (u) {
+    try { if (!u.mode) { const o = SNG.ngp(); const id = (o && o.mode) || (G.mode === 'creative' ? 'karma_b' : null); if (id && SNG.unlocked(id) && MODES[id]) { const prev = u.eye; u.eye = id; eyeKey(u); if (!u.mode) u.eye = prev; else { V.ev.best = id; return true; } } } } catch (e) {}
+    return bbm.apply(this, arguments);
+  };
+  V.PRESETS.azerty.ngmode = V.PRESETS.qwerty.ngmode = 'KeyB';
+  V.ACT.push(['ngmode', 'Mode ère Boruto (on/off)']);
+  // Edo Tensei : personnages de l'ère Boruto en plus
+  const R = (id, n, el, eye, hair, outfit, scarf, extra) => Object.assign({ id, n, el, eye, look: { hair, outfit, scarf } }, extra || {});
+  V.ROSTER.push(
+    R('isshiki', 'Isshiki Ōtsutsuki', 'neutre', '', '#e8e8e8', '#e8e0d0', '#7a5cff', { t: 'Ōtsutsuki' }), R('momoshiki', 'Momoshiki Ōtsutsuki', 'feu', 'ri', '#f0f0f0', '#e8e0d0', '#c02a2a', { t: 'Ōtsutsuki' }),
+    R('kinshiki', 'Kinshiki Ōtsutsuki', 'terre', '', '#f0f0f0', '#d8d0c0', '#7a5a3a', { t: 'Ōtsutsuki', tai: 1 }), R('urashiki', 'Urashiki Ōtsutsuki', 'vent', '', '#2a5aaa', '#e8e0d0', '#7a5cff', { t: 'Ōtsutsuki' }),
+    R('toneri', 'Toneri Ōtsutsuki', 'vent', 'by', '#e8e8f0', '#e8e0d0', '#7ab8ff'), R('hizashi', 'Hizashi Hyūga', 'vent', 'by', '#3a2a1a', '#d8d0c0', '#4a3a3a'),
+    R('deepa', 'Deepa (Kara)', 'terre', '', '#2a2a2a', '#3a2a2a', '#c02a2a', { t: 'Kara' }), R('boro', 'Boro (Kara)', 'eau', '', '#4a2a4a', '#3a2a2a', '#9be37a', { t: 'Kara' }),
+    R('victor', 'Victor (Kara)', 'feu', '', '#c8a050', '#2a2a2a', '#c02a2a', { t: 'Kara' }), R('kurama_naruto', 'Naruto (Mode Baryon)', 'vent', '', '#ffd23a', '#ff7a2a', '#1a1a2a', { sage: 1, t: 'Hokage' }),
+  );
+  SNG.release(9, 'Next Generation 5 — Edo Tensei, prédiction, touches', [
+    ['鍵', '#ffd27a', 'Touches AZERTY réaffectables', 'Flèches pour bouger, Z charge de mode (priorité au mode Boruto équipé), X dōjutsu, E shuriken, C+E outil spécial, B mode Boruto, T Edo Tensei, R changer de corps. Options → Touches : tout se réaffecte, préréglages AZERTY/QWERTY.'],
+    ['穢', '#d8d0c0', 'Edo Tensei', 'Les 4 Hokage ou 56 personnages (dont Ōtsutsuki et Kara), 50 % d’échec, contrôle jouable.'],
+    ['避', '#cfd8e6', 'Esquive Ultra Instinct', 'Plus aucune esquive ne téléporte : balancement sur place, invulnérable, contre +50 %. Substitution par prédiction (3 charges, 10 s).'],
+    ['変', '#b47cff', 'Modes et double appui', 'Techniques du mode hors roue au double appui. Clans : ultime + passif, élément libre. Listes triées par rareté, sélecteur créatif, Équiper le meilleur, Outils ninja, rythme plus posé.'],
   ]);
 })();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */
