@@ -58,7 +58,7 @@
   - Kara ;
   - Jigen ;
   - Mode Baryon.
-- **Pas que des combats** : 21 scènes de vie quotidienne en QTE (rythme, martèlement, équilibre, séquence de signes), avec des dialogues courts :
+- **Pas que des combats** : 18 scènes, dont 15 de vie quotidienne en QTE (rythme, martèlement, équilibre, séquence de signes), avec des dialogues courts :
   - Ichiraku ;
   - clones et grimpe aux arbres ;
   - épreuve écrite ;
@@ -69,7 +69,7 @@
   - concours de ramen ;
   - escorte au festival ;
   - adieux à Kurama.
-- 13 combats canon :
+- 11 combats canon :
   - Mizuki, Zabuza, Gaara, Sasuke, Pain, Madara ;
   - Momoshiki, Delta et Kashin Kōji, Jigen ;
   - Isshiki en Mode Baryon.
