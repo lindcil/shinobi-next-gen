@@ -11089,32 +11089,36 @@ function techCard2(id, p, opts = {}) {
   N.list = function () {
     let L = Object.values(TECH).filter((T) => T && T.n && !T.innate);
     if (N.mode === 'normal') L = L.filter((T) => !isMode(T) && !isUlt(T)); else if (N.mode === 'mode') L = L.filter(isMode); else if (N.mode === 'ult') L = L.filter(isUlt);
-    if (N.sub !== 'tous') L = L.filter((T) => sub(T) === N.sub); if (N.el !== 'tous') L = L.filter((T) => T.el === N.el); if (N.rar) L = L.filter((T) => T.rar === N.rar); if (N.cat !== 'tous') L = L.filter((T) => T.cat === N.cat);
+    if (N.sub !== 'tous') { const lab = subInfo(N.sub)[0]; L = L.filter((T) => subInfo(sub(T))[0] === lab); } if (N.el !== 'tous') L = L.filter((T) => T.el === N.el); if (N.rar) L = L.filter((T) => T.rar === N.rar); if (N.cat !== 'tous') L = L.filter((T) => T.cat === N.cat);
     const q = N.q.trim().toLowerCase(); if (q) L = L.filter((T) => (T.n + ' ' + (T.desc || '') + ' ' + T.id).toLowerCase().includes(q));
     const so = { rar: (a, b) => (b.rar || 0) - (a.rar || 0) || a.n.localeCompare(b.n), nom: (a, b) => a.n.localeCompare(b.n), dmg: (a, b) => (b.dmg || 0) * (b.cnt || 1) - (a.dmg || 0) * (a.cnt || 1), cout: (a, b) => (a.cost || 0) - (b.cost || 0) }[N.sort];
     return L.sort(so);
   };
   N.open = function () {
     let el = document.getElementById('njb'); if (el) el.remove(); el = document.createElement('div'); el.id = 'njb'; document.body.appendChild(el); N.ev.open = (N.ev.open || 0) + 1;
-    const all = Object.values(TECH).filter((T) => T && T.n && !T.innate); const subs = Array.from(new Set(all.map(sub))); const els = Array.from(new Set(all.map((T) => T.el))).filter((e) => EL[e]);
+    const all = Object.values(TECH).filter((T) => T && T.n && !T.innate); const subs = []; const seenL = new Set(); for (const x of new Set(all.map(sub))) { const l = subInfo(x)[0]; if (!seenL.has(l)) { seenL.add(l); subs.push(x); } } const els = Array.from(new Set(all.map((T) => T.el))).filter((e) => EL[e]);
     const cats = typeof CATS !== 'undefined' ? Object.keys(CATS).filter((c) => all.some((T) => T.cat === c)) : [];
+    const lite = (c) => { try { const h = c.replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map((x) => x + x).join('') : h, 16); const L = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255); return L < 110 ? '#c9bfe0' : c; } catch (e) { return c; } };
+    const card = (T) => { const rc = RAR[T.rar] ? RAR[T.rar].c : '#aaa'; const ec = lite((EL[T.el] || { c: '#aaa' }).c); const si = subInfo(sub(T)); return `<button data-t="${T.id}" class="njc${N.sel === T.id ? ' on' : ''}" style="--cc:${rc}"><b class="n">${esc2(T.n)}</b><span class="tg"><em style="--tc:${ec}">${esc2((EL[T.el] || { n: T.el }).n)}</em><em style="--tc:${rc}">${esc2(RAR[T.rar] ? RAR[T.rar].n : '')}</em><em style="--tc:${si[1]}">${esc2(si[0])}</em>${isMode(T) ? '<em style="--tc:#b47cff">mode</em>' : ''}</span><small class="d">${esc2((T.desc || '').slice(0, 90))}</small></button>`; };
+    N.shown = 120;
     const render = () => {
-      const L = N.list(); const S = N.sel && TECH[N.sel];
+      const key = [N.q, N.sub, N.el, N.rar, N.mode, N.cat, N.sort].join('|'); if (key !== N._key) { N._key = key; N.shown = 120; } const L = N.list(); const S = N.sel && TECH[N.sel]; const st0 = el.querySelector('.list') ? el.querySelector('.list').scrollTop : 0;
       const chip = (attr, v, lab, col, on) => `<button data-${attr}="${v}" class="${on ? 'on' : ''}" style="--cc:${col || '#a69db8'}">${esc2(lab)}</button>`;
       el.innerHTML = `<div class="box"><header><h2>忍 Ninjutsu <small>${L.length} / ${all.length} techniques</small></h2><button id="njbx">Fermer (Échap)</button></header>
         <div class="row"><input id="njq" type="search" placeholder="Rechercher (nom, effet)…" value="${esc2(N.q)}"><select id="njs"><option value="rar">Rareté ↓</option><option value="nom">Nom</option><option value="dmg">Dégâts ↓</option><option value="cout">Coût ↑</option></select>
           <select id="njm"><option value="tous">Tout</option><option value="normal">Techniques</option><option value="mode">Techniques de mode</option><option value="ult">Ultimes / secrètes</option></select>
           ${cats.length ? `<select id="njc"><option value="tous">Tous les types</option>${cats.map((c) => `<option value="${c}">${esc2(CATS[c].n)}</option>`).join('')}</select>` : ''}</div>
         <div class="chips"><span>Rôle</span>${chip('sub', 'tous', 'Tous', '', N.sub === 'tous')}${subs.map((s) => chip('sub', s, subInfo(s)[0], subInfo(s)[1], N.sub === s)).join('')}</div>
-        <div class="chips"><span>Élément</span>${chip('el', 'tous', 'Tous', '', N.el === 'tous')}${els.map((e) => chip('el', e, EL[e].n, EL[e].c, N.el === e)).join('')}</div>
+        <div class="chips"><span>Élément</span>${chip('el', 'tous', 'Tous', '', N.el === 'tous')}${els.map((e) => chip('el', e, EL[e].n, lite(EL[e].c), N.el === e)).join('')}</div>
         <div class="chips"><span>Rareté</span>${[0, 5, 4, 3, 2, 1].filter((r) => !r || RAR[r]).map((r) => chip('rar', r, r ? RAR[r].n : 'Toutes', r ? RAR[r].c : '', N.rar === r)).join('')}</div>
-        <div class="main"><div class="list">${L.slice(0, 400).map((T) => `<button data-t="${T.id}" class="${N.sel === T.id ? 'on' : ''}" style="--cc:${RAR[T.rar] ? RAR[T.rar].c : '#aaa'}"><b>${esc2(T.n)}</b><small>${esc2(subInfo(sub(T))[0])} · ${esc2((EL[T.el] || { n: T.el }).n)}${isMode(T) ? ' · mode' : ''}</small></button>`).join('') || '<p>Aucune technique.</p>'}</div>
+        <div class="main"><div class="list">${L.slice(0, N.shown).map(card).join('') || '<p>Aucune technique.</p>'}${L.length > N.shown ? '<div class="more">Chargement…</div>' : ''}</div>
         <aside>${S ? `<h3 style="color:${RAR[S.rar] ? RAR[S.rar].c : '#fff'}">${esc2(S.n)}</h3><p class="r">${RAR[S.rar] ? RAR[S.rar].n : ''} · ${esc2(subInfo(sub(S))[0])} · ${esc2((EL[S.el] || { n: S.el }).n)}</p><p>${esc2(S.desc || '')}</p><table><tr><td>Dégâts</td><td>${S.dmg || 0}${S.cnt > 1 ? ' ×' + S.cnt : ''}</td></tr><tr><td>Chakra</td><td>${S.cost || 0}</td></tr><tr><td>Recharge</td><td>${S.cd || 0} s</td></tr><tr><td>Signes</td><td>${S.seals || 0}</td></tr></table>` : '<p class="r">Choisis une technique pour voir sa fiche.</p>'}</aside></div></div>`;
       el.querySelector('#njs').value = N.sort; el.querySelector('#njm').value = N.mode; const nc = el.querySelector('#njc'); if (nc) { nc.value = N.cat; nc.onchange = () => { N.cat = nc.value; render(); }; }
       el.querySelector('#njbx').onclick = () => el.remove();
       const q = el.querySelector('#njq'); q.oninput = () => { N.q = q.value; const p = q.selectionStart; render(); const n = el.querySelector('#njq'); n.focus(); n.setSelectionRange(p, p); };
       el.querySelector('#njs').onchange = (e) => { N.sort = e.target.value; render(); }; el.querySelector('#njm').onchange = (e) => { N.mode = e.target.value; render(); };
       el.querySelectorAll('[data-sub]').forEach((b) => (b.onclick = () => { N.sub = b.dataset.sub; render(); })); el.querySelectorAll('[data-el]').forEach((b) => (b.onclick = () => { N.el = b.dataset.el; render(); }));
+      const lst = el.querySelector('.list'); lst.scrollTop = st0; lst.onscroll = () => { if (L.length > N.shown && lst.scrollTop + lst.clientHeight > lst.scrollHeight - 300) { N.shown += 120; const more = lst.querySelector('.more'); const frag = L.slice(N.shown - 120, N.shown).map(card).join(''); if (more) more.insertAdjacentHTML('beforebegin', frag); if (L.length <= N.shown && more) more.remove(); lst.querySelectorAll('[data-t]').forEach((b) => (b.onclick = () => { N.sel = b.dataset.t; render(); })); } };
       el.querySelectorAll('[data-rar]').forEach((b) => (b.onclick = () => { N.rar = +b.dataset.rar; render(); })); el.querySelectorAll('[data-t]').forEach((b) => (b.onclick = () => { N.sel = b.dataset.t; render(); }));
     };
     render();
@@ -11126,9 +11130,16 @@ function techCard2(id, p, opts = {}) {
   #njb header{display:flex;justify-content:space-between;align-items:center}#njb h2{margin:0;color:#ffd27a}#njb h2 small{font-size:13px;color:#b9add0;margin-left:8px}
   #njb .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}#njb input{flex:1;min-width:180px}#njb input,#njb select,#njb header button{background:#1a1426;color:#eee;border:1px solid #3a2e4a;border-radius:6px;padding:6px 8px}
   #njb .chips{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0;align-items:center}#njb .chips span{width:62px;color:#9a8fb0;font-size:12px}#njb .chips button{border:1px solid var(--cc);background:#1a1426;color:#ddd;border-radius:999px;padding:2px 9px;font-size:12px;cursor:pointer}#njb .chips button.on{background:var(--cc);color:#14101c}
-  #njb .main{flex:1;display:flex;gap:12px;min-height:0;margin-top:8px}#njb .list{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;align-content:start}
-  #njb .list button{text-align:left;background:#1a1426;border:1px solid #2e2440;border-left:4px solid var(--cc);border-radius:6px;color:#eee;padding:6px 8px;cursor:pointer}#njb .list button.on{outline:2px solid #ffd27a}#njb .list small{display:block;color:#a99cc0;font-size:11px}
-  #njb aside{width:280px;background:#150f20;border-radius:8px;padding:10px;overflow:auto}#njb aside .r{color:#a99cc0}#njb aside table{width:100%}#njb aside td:last-child{text-align:right;color:#ffd27a}`;
+  #njb .main{flex:1 1 auto;display:flex;gap:12px;min-height:0;margin-top:8px;overflow:hidden}
+  #njb .list{flex:1 1 auto;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));grid-auto-rows:auto;gap:8px;align-content:start;padding-right:4px}
+  #njb .list .njc{all:unset;box-sizing:border-box;display:flex !important;flex-direction:column;gap:4px;height:max-content !important;min-height:92px;max-height:none !important;padding:8px 10px !important;line-height:1.25 !important;white-space:normal !important;text-align:left;background:#1a1426;border:1px solid #2e2440;border-left:4px solid var(--cc);border-radius:6px;color:#eee;cursor:pointer;font:13px system-ui,sans-serif !important;text-transform:none !important;letter-spacing:normal !important;transform:none !important}
+  #njb .list .njc:hover{border-color:var(--cc)}#njb .list .njc.on{outline:2px solid #ffd27a}#njb .list .njc .n{font-weight:700;font-size:14px;color:#fff;white-space:normal;overflow-wrap:anywhere}
+  #njb .list .njc>*{flex:0 0 auto}#njb .list .njc .tg{display:flex;flex-wrap:wrap;gap:3px}#njb .list .njc em{font-style:normal;font-size:10.5px;padding:0 6px;border-radius:999px;border:1px solid var(--tc);color:var(--tc);line-height:16px}
+  #njb .list .njc .d{color:#b9add0;font-size:11.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #njb .list .more{grid-column:1/-1;text-align:center;color:#9a8fb0;padding:10px}
+  #njb .chips button{all:unset;box-sizing:border-box;border:1px solid var(--cc);background:#1a1426;color:#ddd;border-radius:999px;padding:2px 9px;font:12px system-ui,sans-serif;cursor:pointer;line-height:18px}#njb .chips button.on{background:var(--cc);color:#14101c}
+  @media (max-width:820px){#njb aside{display:none}#njb .list{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}#njb .chips span{width:100%}}
+  #njb aside{flex:0 0 280px;width:280px;min-height:0;background:#150f20;border-radius:8px;padding:10px;overflow:auto}#njb aside .r{color:#a99cc0}#njb aside table{width:100%}#njb aside td:last-child{text-align:right;color:#ffd27a}`;
   document.head.appendChild(css);
   const b = document.createElement('button'); b.id = 'njbbtn'; b.textContent = '忍 Ninjutsu'; b.onclick = () => N.open();
   setInterval(() => { if (document.body && !document.getElementById('njbbtn')) document.body.appendChild(b); let menu = true; try { menu = !G.mode || G.mode === 'demo'; } catch (e) {} b.style.display = menu ? 'block' : 'none'; }, 300);
@@ -13093,7 +13104,8 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   .edoc i{width:100%;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--h),var(--o),var(--s))}.edoc.kage{border-color:#c8a050}.edoc:hover{border-color:#ffd27a}.edoc small{color:#a99cc0}
   #pick14 .chips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}#pick14 .chips button{border:1px solid var(--cc,#555);background:#1a1426;color:#ddd;border-radius:999px;padding:2px 9px;font-size:12px}#kb14 .kbgrid14{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}#kb14 .kbgrid14 div{display:flex;justify-content:space-between;align-items:center;gap:6px}#kb14 .kbgrid14 button{min-width:90px}#kb14 .kbgrid14 button.on{background:#ffd27a;color:#1a1026}
   #pick14 .chips button.on,#pick14 .row button.on{background:#ffd27a;color:#1a1026}
-  #pick14 .plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;margin-top:8px}#pick14 .plist button{text-align:left;background:#1a1426;border:1px solid #2e2440;border-left:4px solid var(--cc);border-radius:6px;color:#eee;padding:6px 8px}#pick14 .plist small{display:block;color:#a99cc0;font-size:11px}
+  #pick14 .plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));grid-auto-rows:minmax(56px,auto);gap:6px;margin-top:8px}#pick14 .plist button{all:unset;box-sizing:border-box;display:flex !important;flex-direction:column;gap:3px;height:auto !important;min-height:56px;white-space:normal !important;line-height:1.25 !important;text-align:left;background:#1a1426;border:1px solid #2e2440;border-left:4px solid var(--cc);border-radius:6px;color:#eee;padding:7px 9px !important;font:13px system-ui,sans-serif !important;cursor:pointer;text-transform:none !important}#pick14 .plist button b{font-weight:700}#pick14 .plist small{display:block;color:#a99cc0;font-size:11px}
+  #pick14 .chips button,#pick14 .row button{line-height:18px}
   .elbtn.main14{outline:2px solid #ffd27a}.sp14 article{display:flex;gap:10px;align-items:center;margin:6px 0}.sp14 article>div{flex:1}.sp14 article.on{outline:1px solid #ffd27a;border-radius:8px}`;
   document.head.appendChild(css);
 
