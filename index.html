@@ -12923,6 +12923,65 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     ['敵', '#ff5a5a', 'Kara et les Ōtsutsuki', 'Kashin Kōji, Delta, Boro, Deepa, Ao, Kawaki, Momoshiki, Kinshiki, Urashiki et Code.'],
   ]);
 })();
+/* Shinobi Next Generation — NG 3 : Jigen, réceptacle d'Isshiki Ōtsutsuki. Boss en trois phases. */
+(function () {
+  const ev = SNG.evc;
+  const J = (id, n, el, kind, cost, cd, dmg, p, desc) => T(id, n, 'secret', el, kind, cost, cd, dmg, 5, Object.assign({ ng: 'Jigen / Isshiki' }, p || {}), desc);
+  J('jg_pieux', 'Daikokuten : Pieux', 'neutre', 'line', 18, 5, 52, { rng: 520, cnt: 9 }, 'Des pieux noirs sortis du temps arrêté.');
+  J('jg_pieux_pluie', 'Daikokuten : Pluie de Pieux', 'neutre', 'rain', 30, 10, 54, { cnt: 9, r: 55, rng: 560 }, 'Des pieux tombent tout autour de la cible.');
+  J('jg_cube', 'Daikokuten : Cube', 'terre', 'meteor', 26, 8, 110, { r: 130, cnt: 1, delay: 0.8, cube: 1, cs: 150 }, 'Un cube géant tombe sur la cible.');
+  J('jg_megacube', 'Daikokuten : Cube Colossal', 'terre', 'meteor', 44, 16, 190, { r: 230, cnt: 1, delay: 1.1, cube: 1, cs: 300 }, 'Un cube colossal écrase toute une zone.');
+  J('jg_sukuna', 'Sukunahikona', 'neutre', 'proj', 16, 4, 66, { cnt: 3, spr: 0.25, r: 9, spd: 720, life: 0.8, grow: 1, look: 'needle' }, 'Des pieux miniaturisés reprennent leur taille en vol.');
+  J('jg_sukuna_barrage', 'Sukunahikona : Barrage', 'neutre', 'proj', 30, 9, 58, { cnt: 7, spr: 0.9, r: 9, spd: 760, life: 0.9, grow: 1, look: 'needle' }, 'Sept pieux minuscules qui deviennent géants.');
+  J('jg_absorb', 'Kāma : Absorption', 'neutre', 'buff', 14, 12, 0, { dur: 2.5, buff: 'deflect' }, 'Kāma absorbe tout ninjutsu.');
+  J('jg_teleport', 'Kāma : Téléportation', 'neutre', 'teleport', 12, 5, 50, { rng: 560 }, 'Jigen réapparaît derrière la cible.');
+  J('jg_taijutsu', 'Taijutsu Ōtsutsuki', 'neutre', 'dash', 12, 4, 70, { rng: 300, w: 46 }, 'Un enchaînement trop rapide pour l’œil.');
+  J('jg_onde', 'Onde de Kāma', 'neutre', 'nova', 18, 7, 60, { r: 170, kb: 800 }, 'Une onde repousse tout.');
+  J('jg_ult', 'Isshiki : Jugement Ōtsutsuki', 'neutre', 'beam', 50, 20, 220, { rng: 800, w: 90, delay: 0.8 }, 'Un rayon de chakra divin.');
+  const L = { hair: '#1a1a1a', outfit: '#e2d8c4', scarf: '#8a6a3a', band: '#8a6a3a' };
+  BOSSES.jigen = { n: 'Jigen', ai: 'boss', hp: 9000, spd: 185, dmg: 28, xp: 1200, ryo: 600, mind: 0.95, skill: 0.95, size: 1.3, el: 'neutre', melee: 1, moves: ['jg_pieux', 'jg_sukuna', 'jg_taijutsu', 'jg_teleport'], look: L, ng: 1 };
+  const PH = [
+    { at: 1, n: 'Jigen', moves: ['jg_pieux', 'jg_sukuna', 'jg_taijutsu', 'jg_teleport', 'jg_onde'], cd: 1 },
+    { at: 0.66, n: 'Jigen — Kāma déployé', moves: ['jg_cube', 'jg_pieux_pluie', 'jg_sukuna', 'jg_absorb', 'jg_teleport', 'jg_taijutsu'], cd: 0.8, line: 'Ce corps suffira encore un peu.' },
+    { at: 0.33, n: 'Isshiki Ōtsutsuki', moves: ['jg_megacube', 'jg_sukuna_barrage', 'jg_pieux_pluie', 'jg_cube', 'jg_absorb', 'jg_ult', 'jg_teleport'], cd: 0.65, line: 'Je suis Isshiki Ōtsutsuki. Prosterne-toi.' },
+  ];
+  // ---------- cubes du Daikokuten (joueur et Jigen) ----------
+  SNG.cubes = [];
+  const bex = execTech; execTech = function (u, T, ang, tgt) {
+    if (T && T.cube) { const d = Math.min(T.rng || 420, tgt && alive(tgt) ? dist(u.x, u.y, tgt.x, tgt.y) : 260); const x = clamp(tgt && alive(tgt) ? tgt.x : u.x + Math.cos(ang) * d, 60, G.map.w - 60), y = clamp(tgt && alive(tgt) ? tgt.y : u.y + Math.sin(ang) * d, 60, G.map.h - 60);
+      const s = T.cs || 150; SNG.cubes.push({ x, y, s, t: 0, fall: T.delay || 0.8, owner: u, dmg: T.dmg * (u.atk || 1) * (u.mode ? u.mode.def.mul || 1 : 1), hit: 0, life: 3.2 });
+      G.warns.push({ x, y, r: s * 0.62, t: T.delay || 0.8, max: T.delay || 0.8, c: '#ffd27a' }); ev('cube'); u.cds[T.id] = T.cd; return true; }
+    return bex.apply(this, arguments); };
+  const bup = updateProjs; updateProjs = function (dt) { const r = bup.apply(this, arguments);
+    for (const c of SNG.cubes) { c.t += dt; if (!c.hit && c.t >= c.fall) { c.hit = 1; Cam.add(c.s > 200 ? 0.9 : 0.5); FX.ring(c.x, c.y, '#ffd27a', 10, c.s * 1.1, 0.5, 10); Audio.play('boom');
+        for (const v of G.units) if (alive(v) && v.team !== c.owner.team && Math.abs(v.x - c.x) < c.s * 0.62 && Math.abs(v.y - c.y) < c.s * 0.5) { dealDamage(c.owner, v, c.dmg, { el: 'terre', kb: 500, src: 'cube' }); ev('cubeHit'); } } }
+    SNG.cubes = SNG.cubes.filter((c) => c.t < c.fall + c.life); return r; };
+  const bo = drawOverheads; drawOverheads = function (ctx, gl) {
+    for (const c of SNG.cubes) { const k = Math.min(1, c.t / c.fall), h = c.s, w = c.s; const lift = (1 - k * k) * 600; const fade = c.t > c.fall + c.life - 0.5 ? (c.fall + c.life - c.t) / 0.5 : 1; const x = c.x - w / 2, y = c.y - h * 0.75 - lift;
+      ctx.save(); ctx.globalAlpha = 0.95 * fade; ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(c.x, c.y, w * 0.6 * (0.4 + 0.6 * k), w * 0.22 * (0.4 + 0.6 * k), 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#16141c'; ctx.fillRect(x, y, w, h * 0.72); ctx.fillStyle = '#2a2632'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w * 0.18, y - h * 0.16); ctx.lineTo(x + w * 1.18, y - h * 0.16); ctx.lineTo(x + w, y); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#0c0b10'; ctx.beginPath(); ctx.moveTo(x + w, y); ctx.lineTo(x + w * 1.18, y - h * 0.16); ctx.lineTo(x + w * 1.18, y + h * 0.56); ctx.lineTo(x + w, y + h * 0.72); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,210,122,0.55)'; ctx.lineWidth = 1.5; ctx.strokeRect(x, y, w, h * 0.72); ctx.restore(); }
+    return bo.apply(this, arguments); };
+  // ---------- phases de Jigen ----------
+  const bai = aiUpdate; aiUpdate = function (u, dt) {
+    if (u && u.bossId === 'jigen' && alive(u)) { const f = u.hp / u.maxHp; const ph = u._jph || 0; const want = f < PH[2].at ? 2 : f < PH[1].at ? 1 : 0;
+      if (want > ph) { u._jph = want; const P2 = PH[want]; u.ai.moves = P2.moves; u.name = P2.n; u.iframe = Math.max(u.iframe || 0, 1.2); u.cds = {}; u.ch = u.maxCh;
+        FX.ring(u.x, u.y, '#ffd27a', 10, 320, 0.7, 14); Cam.add(0.8); Audio.play('roar'); banner(P2.n, 'PHASE ' + (want + 1), '#ffd27a'); if (P2.line) bark(u, P2.line, 1);
+        for (const v of G.units) if (alive(v) && v.team !== u.team && dist(u.x, u.y, v.x, v.y) < 260) { const a = Math.atan2(v.y - u.y, v.x - u.x); v.vx += Math.cos(a) * 600; v.vy += Math.sin(a) * 600; }
+        if (want === 2) { u.size = 1.5; u.r = 15 * u.size; u.look = Object.assign({}, u.look, { hair: '#f2f2f2', outfit: '#f0ebe0', scarf: '#c9a24a' }); u.spd *= 1.15; u.armor = (u.armor || 0) + 0.1; }
+        ev('phase' + (want + 1)); }
+      // rythme de lancer accéléré selon la phase (toujours soumis aux recharges et au chakra)
+      if (u.ai.castCd && u.ai.castCd > G.t + 3 * PH[u._jph || 0].cd) u.ai.castCd = G.t + 3 * PH[u._jph || 0].cd; }
+    return bai.apply(this, arguments); };
+  SNG.jigenFight = function (opts) { startGame('creative', { biome: 'otsutsuki' }); G.cheats.god = false; const u = G.players[0]; const b = spawnBoss('jigen', u.x + 520, u.y, (opts && opts.tier) || 1); b.maxCh = 400; b.ch = 400; b._jph = 0; G.ngJigen = { b, t0: G.t };
+    banner('Jigen', 'RÉCEPTACLE D’ISSHIKI', '#ffd27a'); ev('jigenStart'); return b; };
+  const bk = killUnit; killUnit = function (u) { const r = bk.apply(this, arguments); try { if (u && u.bossId === 'jigen') { const p = P(); if (p) { p.ng = p.ng || { modes: {}, masters: {} }; p.ng.jigen = (p.ng.jigen || 0) + 1; p.ng.modes.karma_k = 1; Profile.save(); } banner('Isshiki Ōtsutsuki', 'VAINCU', '#ffd27a'); ev('jigenDown'); } } catch (e) {} return r; };
+  SNG.release(10, 'Next Generation 3 — Jigen', [
+    ['大', '#ffd27a', 'Boss : Jigen (Isshiki Ōtsutsuki)', 'Trois phases : Jigen, Kāma déployé, puis Isshiki en personne. Pieux et cubes du Daikokuten, Sukunahikona (pieux qui grandissent en vol), absorption de Kāma, téléportation, onde et rayon final. Il respecte les mêmes recharges et le même coût en chakra que toi.'],
+    ['方', '#9aa7ff', 'Cubes du Daikokuten', 'Les cubes tombent du ciel après un avertissement au sol. Le Mode Kāma de Kawaki peut aussi en invoquer.'],
+  ]);
+})();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */
 (function(){
   const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
