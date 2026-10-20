@@ -12696,6 +12696,233 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     ['彩', '#ffc83d', 'Interface ère Boruto', 'Nouvelle palette (bleu nuit, cyan, orange), typographie moderne, panneaux plus nets.'],
   ]);
 })();
+/* Shinobi Next Generation — NG 2 : l'ère Boruto (techniques, modes, maîtres, cartes, Kara). Noms canon. */
+(function () {
+  const ev = SNG.evc;
+  // ---------- techniques (ng = groupe, pour le comptage) ----------
+  const B = (g) => (id, n, cat, el, kind, cost, cd, dmg, rar, p, desc) => T(id, n, cat, el, kind, cost, cd, dmg, rar, Object.assign({ ng: g }, p || {}), desc);
+  let t = B('Boruto & équipe 7');
+  t('ng_rasen_fantome', 'Rasengan Fantôme', 'ninjutsu', 'vent', 'proj', 22, 6, 70, 4, { r: 16, spd: 620, life: 0.9, look: 'sphere', vanish: 1, seals: 1, k: '消', st: { shock: 0.3 } }, 'Le Rasengan de Boruto : il disparaît en vol puis réapparaît sur la cible.');
+  t('ng_rasen_uzuhiko', 'Rasengan Uzuhiko', 'ninjutsu', 'vent', 'vortex', 40, 18, 34, 5, { r: 30, spd: 420, life: 1.1, vr: 200, vdur: 1.8, seals: 2, k: '渦', st: { bleed: 3 } }, 'Rasengan invisible à cœur de vent, assez grand pour aspirer une armée.');
+  t('ng_kage_bunshin_b', 'Multi-clonage de Boruto', 'ninjutsu', 'neutre', 'summon', 26, 16, 0, 3, { cnt: 3, dur: 9, what: 'clone', seals: 1 }, 'Trois clones qui harcèlent la cible.');
+  t('ng_raiton_bunshin', 'Clone de Foudre', 'ninjutsu', 'foudre', 'summon', 22, 14, 0, 3, { cnt: 1, dur: 8, what: 'decoy', seals: 2, st: { shock: 0.6 } }, 'Un clone qui électrocute quand on le frappe.');
+  t('ng_shuriken_chakra', 'Shuriken de chakra', 'outil', 'neutre', 'proj', 4, 1.2, 14, 1, { cnt: 3, spr: 0.18, spd: 980, r: 6, life: 0.6, shape: 'shuriken', curve: 1 }, 'Shurikens guidés par le chakra.');
+  t('ng_kote_lame', 'Kote : Lame de vent', 'outil', 'vent', 'proj', 8, 3, 30, 2, { spd: 800, r: 10, life: 0.6, shape: 'slash' }, 'Un parchemin scientifique libère une lame de vent.');
+  t('ng_kote_foudre', 'Kote : Décharge', 'outil', 'foudre', 'cone', 8, 4, 28, 2, { rng: 200, arc: 0.5, st: { shock: 0.5 } }, 'Un parchemin scellé décharge la foudre.');
+  t('ng_kote_feu', 'Kote : Boule de feu', 'outil', 'feu', 'proj', 8, 4, 34, 2, { r: 18, spd: 520, life: 0.9, ex: 80, look: 'fireball', st: { heat: 30 } }, 'Le feu d’un parchemin, sans signes.');
+  t('ng_gentle_step', 'Gentle Step : Lions jumeaux', 'taijutsu', 'neutre', 'dash', 18, 7, 64, 4, { rng: 260, w: 40, look: 'lion' }, 'Les poings de Hinata en têtes de lion.');
+  t('ng_chidori_sarada', 'Chidori de Sarada', 'ninjutsu', 'foudre', 'lunge', 20, 6, 74, 3, { rng: 300, r: 16, kb: 520, look: 'sphere', seals: 2, k: '千', st: { shock: 0.7 } }, 'Le Chidori qui chante, version Sarada.');
+  t('ng_poing_sarada', 'Poing Shannarō', 'taijutsu', 'terre', 'nova', 16, 6, 52, 3, { r: 120, kb: 620, st: { knockup: 1 } }, 'Le sol éclate sous le poing de Sarada.');
+  t('ng_sarada_shuriken', 'Shuriken de foudre', 'outil', 'foudre', 'proj', 6, 2.2, 18, 2, { cnt: 2, spr: 0.2, spd: 900, r: 7, life: 0.6, shape: 'shuriken', st: { shock: 0.3 } }, 'Deux shurikens chargés de foudre.');
+  t('ng_sarada_genjutsu', 'Genjutsu du Sharingan', 'genjutsu', 'illusion', 'gen', 16, 9, 0, 3, { rng: 280, single: 1, eff: 'trance', dur: 2.2, seals: 1 }, 'Un regard rouge fige la cible.');
+  t('ng_mitsuki_bras', 'Bras de Serpent', 'ninjutsu', 'neutre', 'pull', 14, 5, 22, 2, { rng: 420 }, 'Les bras de Mitsuki s’étirent et ramènent la cible.');
+  t('ng_mitsuki_serpents', 'Serpents Spectraux', 'ninjutsu', 'neutre', 'bind', 18, 9, 18, 3, { rng: 380, dur: 2, seals: 2 }, 'Des serpents enserrent la cible.');
+  t('ng_mitsuki_vent', 'Grande Percée de Vent', 'ninjutsu', 'vent', 'wave', 20, 8, 34, 3, { w: 220, spd: 600, life: 0.8, kb: 600, seals: 2 }, 'Un mur d’air qui balaie tout.');
+  t('ng_mitsuki_foudre', 'Lame de Foudre Serpent', 'ninjutsu', 'foudre', 'line', 18, 6, 36, 3, { rng: 420, cnt: 7, st: { shock: 0.4 }, seals: 2 }, 'Des serpents de foudre jaillissent en ligne.');
+  t = B('Nouvelle génération');
+  t('ng_shikadai_ombre', 'Ombre Liante', 'secret', 'ombre', 'bind', 16, 8, 0, 3, { rng: 460, dur: 2.6, seals: 2 }, 'L’ombre de Shikadai paralyse la cible.');
+  t('ng_shikadai_aiguilles', 'Aiguilles d’Ombre', 'secret', 'ombre', 'line', 18, 7, 40, 3, { rng: 420, cnt: 8, seals: 3 }, 'Des aiguilles d’ombre transpercent en ligne.');
+  t('ng_inojin_loup', 'Ninga : Loup d’Encre', 'ninjutsu', 'neutre', 'summon', 20, 14, 0, 3, { cnt: 2, dur: 10, what: 'encreloup' }, 'Deux loups d’encre chassent la cible.');
+  t('ng_inojin_aigle', 'Ninga : Aigle d’Encre', 'ninjutsu', 'neutre', 'proj', 14, 5, 30, 2, { cnt: 3, spr: 0.3, spd: 560, r: 10, life: 1, look: 'inkbird' }, 'Trois oiseaux d’encre en piqué.');
+  t('ng_chocho_papillon', 'Poing Papillon', 'secret', 'neutre', 'dash', 22, 8, 80, 4, { rng: 240, w: 60 }, 'ChōChō s’agrandit et frappe avec des ailes de chakra.');
+  t('ng_chocho_charge', 'Boulet Humain', 'secret', 'neutre', 'dash', 14, 6, 40, 2, { rng: 320, w: 54 }, 'ChōChō roule sur ses ennemis.');
+  t('ng_metal_lee', 'Huitième Porte de Metal Lee', 'taijutsu', 'neutre', 'buff', 20, 22, 0, 4, { dur: 6, buff: 'gates' }, 'Metal Lee ouvre les Portes : vitesse et puissance.');
+  t('ng_metal_tourbillon', 'Tourbillon de Metal', 'taijutsu', 'neutre', 'barrage', 10, 6, 9, 2, { rng: 90, hits: 10, dur: 0.8 }, 'Une rafale de coups de pied.');
+  t('ng_denki_drone', 'Drone de Denki', 'outil', 'foudre', 'summon', 18, 16, 0, 3, { cnt: 1, dur: 12, what: 'faucon' }, 'Un drone de combat qui attaque à distance.');
+  t('ng_iwabee_mur', 'Mur Rocheux d’Iwabee', 'ninjutsu', 'terre', 'wall', 12, 4, 0, 1, { w: 6, hp: 220, seals: 2 }, 'Un mur de pierre solide.');
+  t('ng_iwabee_lances', 'Éboulement d’Iwabee', 'ninjutsu', 'terre', 'meteor', 22, 9, 42, 2, { r: 100, cnt: 5, delay: 0.7, st: { knockup: 1 }, seals: 3 }, 'Des rochers tombent sur la zone.');
+  t('ng_sumire_nue', 'Invocation : Nue', 'ninjutsu', 'neutre', 'summon', 28, 22, 0, 4, { cnt: 1, dur: 14, what: 'salamandre', seals: 4 }, 'Sumire appelle Nue, la créature d’ombre.');
+  t('ng_sumire_brume', 'Brume de Chakra Absorbante', 'ninjutsu', 'eau', 'zone', 22, 12, 6, 3, { r: 140, dur: 5, t: 'mist', at: 'self', seals: 3 }, 'Une brume qui draine le chakra des ennemis.');
+  t('ng_kagura_hirame', 'Hiramekarei : Lame Géante', 'kenjutsu', 'neutre', 'beam', 24, 9, 96, 4, { rng: 380, w: 60, delay: 0.3 }, 'L’épée de Kagura libère une lame de chakra.');
+  t('ng_shinki_sable', 'Sable de Fer : Lances', 'ninjutsu', 'terre', 'rain', 24, 10, 36, 3, { cnt: 8, r: 50, rng: 480, seals: 3 }, 'Les pointes de sable de fer de Shinki.');
+  t('ng_shinki_ours', 'Sable de Fer : Garde', 'ninjutsu', 'terre', 'buff', 18, 14, 0, 3, { dur: 4, buff: 'sandshield' }, 'Une carapace de sable de fer.');
+  t('ng_himawari_poing', 'Poing de Himawari', 'taijutsu', 'neutre', 'lunge', 14, 6, 70, 3, { rng: 220, r: 18, kb: 900, look: 'palm' }, 'Un seul coup, un point de chakra fermé.');
+  t('ng_hanabi_paume', 'Paume du Vide de Hanabi', 'taijutsu', 'neutre', 'proj', 12, 4, 40, 2, { r: 18, spd: 700, life: 0.5, look: 'palm', kb: 600 }, 'Une paume d’air à distance.');
+  t = B('Adultes de Konoha');
+  t('ng_naruto_rasenshuriken', 'Rasen-Shuriken du Hokage', 'ninjutsu', 'vent', 'vortex', 44, 18, 30, 5, { r: 30, spd: 520, life: 1, vr: 220, vdur: 2, k: '螺', st: { bleed: 4 } }, 'Le Rasen-Shuriken de Naruto adulte.');
+  t('ng_naruto_bijudama', 'Bijūdama du Septième', 'ninjutsu', 'neutre', 'beam', 50, 24, 160, 5, { rng: 700, w: 80, delay: 0.6 }, 'La bombe à queues de Kurama.');
+  t('ng_naruto_clones', 'Mille clones du Hokage', 'ninjutsu', 'neutre', 'summon', 36, 22, 0, 4, { cnt: 4, dur: 10, what: 'clone', seals: 1 }, 'Quatre clones qui frappent en même temps.');
+  t('ng_sasuke_chidori_nagashi', 'Chidori Nagashi', 'ninjutsu', 'foudre', 'nova', 18, 7, 40, 3, { r: 150, kb: 420, st: { shock: 0.8 } }, 'La foudre court sur tout le corps de Sasuke.');
+  t('ng_sasuke_amenotejikara', 'Amenotejikara', 'ninjutsu', 'neutre', 'teleport', 16, 5, 44, 4, { rng: 480 }, 'Sasuke échange sa place avec sa cible.');
+  t('ng_sasuke_indra', 'Flèche d’Indra', 'ninjutsu', 'foudre', 'beam', 54, 26, 180, 5, { rng: 760, w: 70, delay: 0.7, st: { shock: 1 } }, 'La flèche de foudre du Susanoo.');
+  t('ng_sakura_byakugo', 'Sceau Byakugō', 'iryo', 'neutre', 'heal', 30, 22, 140, 4, { r: 200 }, 'Cent sceaux libérés : régénération complète.');
+  t('ng_sakura_poing', 'Coup de Poing Céleste', 'taijutsu', 'terre', 'nova', 20, 7, 66, 3, { r: 150, kb: 700, st: { knockup: 1 } }, 'Le sol éclate dans un grand cercle.');
+  t('ng_shikamaru_etranglement', 'Étranglement de l’Ombre', 'secret', 'ombre', 'bind', 22, 12, 28, 4, { rng: 520, dur: 3, seals: 3 }, 'Shikamaru étouffe la cible avec son ombre.');
+  t('ng_konohamaru_rasengan', 'Grand Rasengan de Konohamaru', 'ninjutsu', 'neutre', 'orb', 26, 7, 90, 4, { r: 28, spd: 300, life: 0.6, kb: 640 }, 'Le Rasengan géant de Konohamaru.');
+  t('ng_konohamaru_feu', 'Dragon de Feu de Konohamaru', 'ninjutsu', 'feu', 'proj', 22, 8, 60, 3, { r: 20, spd: 520, life: 1, shape: 'dragon', st: { heat: 40 }, seals: 4 }, 'Un dragon de feu.');
+  t('ng_shino_insectes', 'Nuée d’Insectes', 'secret', 'neutre', 'zone', 18, 9, 10, 3, { r: 120, dur: 4, t: 'poison', at: 'front', seals: 2 }, 'Des insectes qui dévorent le chakra.');
+  t('ng_kakashi_purple', 'Foudre Violette', 'ninjutsu', 'foudre', 'lunge', 22, 7, 80, 4, { rng: 320, r: 16, kb: 500, look: 'sphere', seals: 2, st: { shock: 0.8 } }, 'Kakashi sans Sharingan : la Foudre Violette.');
+  t('ng_gaara_sable', 'Tsunami de Sable', 'ninjutsu', 'terre', 'wave', 28, 10, 40, 4, { w: 300, spd: 480, life: 1, kb: 560 }, 'Le Kazekage noie l’ennemi sous le sable.');
+  t('ng_darui_noir', 'Panthère Noire', 'ninjutsu', 'foudre', 'proj', 24, 8, 66, 4, { r: 18, spd: 640, life: 0.8, shape: 'wolf', st: { shock: 0.8 } }, 'La foudre noire de Darui.');
+  t('ng_chojuro_hiramekarei', 'Hiramekarei Déployée', 'kenjutsu', 'eau', 'cone', 22, 7, 60, 4, { rng: 240, arc: 0.7 }, 'Le Mizukage frappe large.');
+  t = B('Kara & Ōtsutsuki');
+  t('ng_kashin_kibaku', 'Kashin Kōji : Grand Crapaud de Feu', 'ninjutsu', 'feu', 'meteor', 30, 12, 58, 4, { r: 140, cnt: 3, delay: 0.9, st: { heat: 40 }, seals: 3 }, 'Des flammes s’abattent en colonnes.');
+  t('ng_kashin_hiraishin', 'Kashin Kōji : Pas Volant', 'ninjutsu', 'neutre', 'teleport', 14, 5, 36, 3, { rng: 460 }, 'Kashin réapparaît derrière la cible.');
+  t('ng_delta_laser', 'Delta : Yeux Laser', 'ninjutsu', 'feu', 'beam', 24, 8, 80, 4, { rng: 520, w: 24, delay: 0.25, st: { heat: 30 } }, 'Les yeux scientifiques de Delta tirent un rayon.');
+  t('ng_delta_coup', 'Delta : Coup de Pied Fléau', 'taijutsu', 'neutre', 'launcher', 12, 6, 60, 3, { rng: 260 }, 'Delta projette sa cible en l’air.');
+  t('ng_boro_poison', 'Boro : Poison Vivant', 'ninjutsu', 'eau', 'zone', 22, 10, 14, 3, { r: 130, dur: 5, t: 'poison', at: 'front' }, 'Le corps de Boro libère un poison corrosif.');
+  t('ng_boro_poing', 'Boro : Poing Colossal', 'taijutsu', 'neutre', 'nova', 18, 7, 60, 3, { r: 130, kb: 700 }, 'Un poing énorme qui écrase tout.');
+  t('ng_deepa_armes', 'Deepa : Bras-Armes', 'kenjutsu', 'neutre', 'barrage', 14, 7, 12, 3, { rng: 110, hits: 9, dur: 0.9 }, 'Les bras de Deepa deviennent des lames.');
+  t('ng_ao_kote', 'Ao : Kote d’Absorption', 'outil', 'neutre', 'buff', 18, 16, 0, 4, { dur: 3, buff: 'deflect' }, 'L’œil scientifique d’Ao absorbe les techniques.');
+  t('ng_ao_pistolet', 'Ao : Canon à Chakra', 'outil', 'neutre', 'proj', 12, 4, 46, 3, { r: 12, spd: 900, life: 0.7, look: 'airbullet' }, 'Un tir de chakra comprimé.');
+  t('ng_kawaki_lame', 'Kawaki : Bras-Lame', 'kenjutsu', 'neutre', 'dash', 16, 5, 58, 3, { rng: 280, w: 40 }, 'Le bras de Kawaki devient une lame.');
+  t('ng_kawaki_marteau', 'Kawaki : Marteau Noir', 'taijutsu', 'neutre', 'nova', 18, 7, 64, 3, { r: 120, kb: 760, st: { knockup: 1 } }, 'Un marteau de métal noir.');
+  t('ng_victor_robot', 'Victor : Ninja Mécanique', 'outil', 'neutre', 'summon', 26, 20, 0, 4, { cnt: 1, dur: 14, what: 'golem' }, 'Un robot de combat de Kara.');
+  t('ng_amado_scalpel', 'Amado : Scalpel Scientifique', 'outil', 'neutre', 'buff', 12, 14, 0, 3, { dur: 5, buff: 'scalpel' }, 'Chaque coup coupe le chakra.');
+  t('ng_eida_charme', 'Eida : Charme Absolu', 'genjutsu', 'illusion', 'gen', 26, 20, 0, 5, { rng: 360, eff: 'charm', dur: 3 }, 'Tous ceux qui la voient tombent sous son charme.');
+  t('ng_daemon_reflet', 'Daemon : Renvoi', 'genjutsu', 'illusion', 'buff', 20, 18, 0, 5, { dur: 3, buff: 'mirror' }, 'Toute intention de blesser se retourne contre son auteur.');
+  t('ng_urashiki_canne', 'Urashiki : Canne-Ligne', 'ninjutsu', 'neutre', 'pull', 16, 6, 30, 4, { rng: 520 }, 'Urashiki harponne le chakra de sa cible.');
+  t('ng_kinshiki_hache', 'Kinshiki : Hache de Chakra', 'kenjutsu', 'neutre', 'beam', 26, 10, 110, 4, { rng: 300, w: 70, delay: 0.4 }, 'Une hache de chakra géante.');
+  t('ng_zetsu_lien', 'Zetsu : Racines', 'ninjutsu', 'bois', 'bind', 16, 9, 12, 2, { rng: 380, dur: 2 }, 'Des racines blanches enlacent la cible.');
+  // ---------- techniques de mode ----------
+  const MM = (mode, g) => (id, n, el, kind, cost, cd, dmg, p, desc) => M(id, n, mode, el, kind, cost, cd, dmg, Object.assign({ ng: g }, p || {}), desc);
+  let m = MM('karma_b', 'Mode Kāma (Boruto)');
+  m('kb_absorb', 'Kāma : Absorption', 'neutre', 'buff', 14, 12, 0, { dur: 3, buff: 'deflect' }, 'La paume de Kāma absorbe les techniques de chakra.');
+  m('kb_rasengan', 'Rasengan Kāma', 'vent', 'orb', 22, 6, 96, { r: 26, spd: 320, life: 0.6, kb: 700 }, 'Le Rasengan amplifié par la marque.');
+  m('kb_sukuna', 'Sukunahikona (Boruto)', 'neutre', 'proj', 20, 7, 70, { r: 8, spd: 700, life: 0.8, grow: 1, look: 'orbmini' }, 'Rétrécit un projectile puis le rend à sa taille en vol.');
+  m('kb_dash', 'Pas Ōtsutsuki', 'neutre', 'teleport', 10, 4, 30, {}, 'Un pas impossible à suivre.');
+  m('kb_paume', 'Paume de Kāma', 'neutre', 'nova', 16, 6, 54, { r: 140, kb: 620 }, 'Une onde repousse tout.');
+  m('kb_ult', 'Rasengan Uzuhiko · Kāma', 'vent', 'vortex', 40, 18, 44, { r: 34, spd: 440, life: 1.1, vr: 240, vdur: 2, st: { bleed: 4 } }, 'Ultime : un Uzuhiko gonflé par Kāma.');
+  m = MM('momoshiki', 'Mode Momoshiki');
+  m('mo_rasengan', 'Rasengan Géant Ōtsutsuki', 'neutre', 'orb', 30, 8, 120, { r: 40, spd: 260, life: 0.8, kb: 900 }, 'Un Rasengan colossal.');
+  m('mo_dragon_feu', 'Dragon de Feu Absorbé', 'feu', 'proj', 22, 6, 74, { r: 22, spd: 520, life: 1, shape: 'dragon', st: { heat: 45 } }, 'Momoshiki recrache un dragon de feu absorbé.');
+  m('mo_dragon_foudre', 'Dragon de Foudre Absorbé', 'foudre', 'proj', 22, 6, 74, { r: 22, spd: 640, life: 0.9, shape: 'dragon', st: { shock: 0.8 } }, 'Un dragon de foudre renvoyé.');
+  m('mo_meteores', 'Pluie de Météores', 'terre', 'meteor', 36, 14, 70, { r: 120, cnt: 6, delay: 0.8, st: { knockup: 1 } }, 'Des rochers géants tombent du ciel.');
+  m('mo_absorb', 'Paume Rinnegan', 'neutre', 'buff', 16, 12, 0, { dur: 3, buff: 'deflect' }, 'Absorbe tout ninjutsu.');
+  m('mo_ult', 'Vérité Ōtsutsuki', 'neutre', 'beam', 60, 26, 200, { rng: 760, w: 90, delay: 0.7 }, 'Ultime : un rayon de chakra divin.');
+  m = MM('karma_k', 'Mode Kāma (Kawaki)');
+  m('kk_lames', 'Corps Modifié : Lames', 'neutre', 'barrage', 12, 5, 14, { rng: 110, hits: 10, dur: 0.9 }, 'Le corps de Kawaki se couvre de lames.');
+  m('kk_marteau', 'Corps Modifié : Marteau', 'neutre', 'nova', 18, 6, 72, { r: 130, kb: 780, st: { knockup: 1 } }, 'Un bras devient marteau.');
+  m('kk_pieu', 'Pieux Noirs', 'neutre', 'line', 20, 6, 48, { rng: 460, cnt: 8 }, 'Des pieux noirs jaillissent en ligne.');
+  m('kk_cube', 'Daikokuten : Cube', 'terre', 'meteor', 28, 10, 90, { r: 120, cnt: 1, delay: 0.7, st: { knockup: 1 }, cube: 1 }, 'Un cube géant sorti de l’espace-temps.');
+  m('kk_sukuna', 'Sukunahikona (Kawaki)', 'neutre', 'proj', 20, 7, 72, { r: 8, spd: 700, life: 0.8, grow: 1, look: 'orbmini' }, 'Des objets miniaturisés retrouvent leur taille.');
+  m('kk_ult', 'Daikokuten : Prison de Pieux', 'neutre', 'rain', 46, 20, 70, { cnt: 10, r: 60, rng: 560 }, 'Ultime : une forêt de pieux tombe du ciel.');
+  m = MM('baryon', 'Mode Baryon');
+  m('ba_poing', 'Poing Baryon', 'feu', 'dash', 16, 4, 110, { rng: 300, w: 52 }, 'Chaque coup consume la vie de l’ennemi.');
+  m('ba_rafale', 'Rafale Baryon', 'feu', 'barrage', 14, 5, 20, { rng: 110, hits: 12, dur: 0.9 }, 'Une rafale de coups lumineux.');
+  m('ba_vol', 'Bond Nucléaire', 'feu', 'teleport', 10, 3, 40, {}, 'Un bond plus rapide que l’œil.');
+  m('ba_fusion', 'Fusion Nucléaire', 'feu', 'nova', 24, 9, 90, { r: 170, kb: 800, st: { heat: 60 } }, 'L’énergie de fusion explose autour de Naruto.');
+  m('ba_ult', 'Coup Final Baryon', 'feu', 'lunge', 50, 24, 260, { rng: 360, r: 24, kb: 1100, look: 'redfist' }, 'Ultime : le coup qui a vaincu Isshiki.');
+  m = MM('jougan', 'Jōgan');
+  m('jo_flux', 'Jōgan : Vision des Flux', 'neutre', 'buff', 10, 14, 0, { dur: 5, buff: 'vision' }, 'Voit le chakra et les points faibles.');
+  m('jo_points', 'Jōgan : Point Faible', 'neutre', 'proj', 12, 4, 56, { r: 10, spd: 900, life: 0.6, look: 'palm' }, 'Frappe là où le chakra se noue.');
+  m('jo_passage', 'Jōgan : Passage Dimensionnel', 'neutre', 'teleport', 14, 5, 40, { rng: 520 }, 'Ouvre un passage et réapparaît derrière la cible.');
+  m('jo_sceau', 'Jōgan : Rupture de Sceau', 'neutre', 'nova', 18, 9, 40, { r: 150, kb: 300 }, 'Brise les barrières et les sceaux autour.');
+  m('jo_ult', 'Jōgan : Œil Pur', 'neutre', 'beam', 44, 22, 150, { rng: 680, w: 50, delay: 0.5 }, 'Ultime : un trait de chakra pur.');
+  m = MM('code', 'Code');
+  m('co_griffes', 'Marques de Griffes', 'neutre', 'line', 16, 5, 50, { rng: 520, cnt: 8 }, 'Des marques blanches qui découpent tout.');
+  m('co_teleport', 'Saut par les Griffes', 'neutre', 'teleport', 10, 3, 44, { rng: 560 }, 'Code se téléporte par ses marques.');
+  m('co_lames', 'Lames de Kāma Libéré', 'neutre', 'cone', 18, 6, 70, { rng: 260, arc: 0.8 }, 'Un éventail de lames blanches.');
+  m('co_grimoire', 'Grimoire (Juubi)', 'bois', 'summon', 30, 22, 0, { cnt: 2, dur: 12, what: 'titan' }, 'Les créatures de l’Arbre Divin obéissent.');
+  m('co_ult', 'Kāma Libéré', 'neutre', 'rain', 50, 22, 80, { cnt: 12, r: 60, rng: 600 }, 'Ultime : sans limiteurs, une tempête de griffes.');
+  m = MM('mitsuki_sage', 'Mode Ermite de Mitsuki');
+  m('ms_serpent', 'Serpent Blanc Ermite', 'neutre', 'proj', 16, 5, 64, { r: 18, spd: 560, life: 1, shape: 'wolf' }, 'Un serpent de chakra naturel.');
+  m('ms_vent', 'Percée de Vent Ermite', 'vent', 'wave', 20, 7, 56, { w: 260, spd: 620, life: 0.9, kb: 700 }, 'Le vent amplifié par l’énergie naturelle.');
+  m('ms_foudre', 'Foudre Ermite', 'foudre', 'rain', 24, 9, 46, { cnt: 7, r: 60, rng: 520, st: { shock: 0.6 } }, 'Des éclairs ermites.');
+  m('ms_ult', 'Grand Serpent Blanc', 'neutre', 'summon', 40, 24, 0, { cnt: 1, dur: 14, what: 'colosse' }, 'Ultime : l’apparence du Serpent Blanc.');
+  // ---------- modes (format Shinobi 2 ; noyau « pupille », couleur propre) ----------
+  const S = (n, skills, ult, req, drain, mul) => ({ n, skills, ult, req, drain, mul });
+  const add = (id, n, k, c, ngc, stages, d, act) => { MODES[id] = { n, k, c, kind: 'eye', ng: 1, ngc, stages }; EYES[id] = { n, k, c: ngc, d, act: act || stages[0].skills[0], ng: 1 }; };
+  add('karma_b', 'Kāma — Boruto', '殻', '#4fd6ff', '#4fd6ff', [S('Marque scellée', ['kb_absorb', 'kb_rasengan', 'ng_rasen_fantome', 'kb_dash'], 'kb_rasengan', 20, 2.2, 1.2), S('Kāma déployé', ['kb_absorb', 'kb_rasengan', 'kb_sukuna', 'kb_dash', 'kb_paume', 'ng_rasen_fantome'], 'kb_ult', 32, 3, 1.4), S('Kāma total', ['kb_rasengan', 'kb_sukuna', 'kb_paume', 'kb_absorb', 'kb_dash', 'ng_rasen_uzuhiko', 'ng_rasen_fantome', 'ng_kage_bunshin_b'], 'kb_ult', 45, 4, 1.6)], 'Marque de Kāma : absorbe les techniques, Sukunahikona.');
+  add('momoshiki', 'Mode Momoshiki', '桃', '#e8e0ff', '#e8e0ff', [S('Possession', ['mo_absorb', 'mo_dragon_feu', 'mo_dragon_foudre', 'kb_dash'], 'mo_rasengan', 40, 3.4, 1.5), S('Momoshiki éveillé', ['mo_absorb', 'mo_dragon_feu', 'mo_dragon_foudre', 'mo_rasengan', 'mo_meteores', 'kb_dash'], 'mo_ult', 50, 4.4, 1.8)], 'Momoshiki prend le contrôle : absorbe et renvoie.');
+  add('karma_k', 'Kāma — Kawaki', '鬼', '#9aa7ff', '#9aa7ff', [S('Corps modifié', ['kk_lames', 'kk_marteau', 'ng_kawaki_lame', 'kk_pieu'], 'kk_marteau', 20, 2.2, 1.2), S('Kāma de Kawaki', ['kk_lames', 'kk_marteau', 'kk_pieu', 'kk_sukuna', 'kb_absorb', 'ng_kawaki_marteau'], 'kk_cube', 32, 3, 1.4), S('Isshiki partiel', ['kk_cube', 'kk_pieu', 'kk_sukuna', 'kk_marteau', 'kk_lames', 'kb_absorb', 'kb_dash', 'ng_kawaki_lame'], 'kk_ult', 45, 4, 1.6)], 'Le corps modifié de Kawaki et les pouvoirs d’Isshiki.');
+  add('baryon', 'Mode Baryon', '核', '#ff9a3c', '#ff9a3c', [S('Baryon', ['ba_poing', 'ba_rafale', 'ba_vol', 'ba_fusion'], 'ba_ult', 45, 6, 2), S('Baryon (dernière flamme)', ['ba_poing', 'ba_rafale', 'ba_vol', 'ba_fusion', 'ng_naruto_rasenshuriken', 'ng_naruto_bijudama'], 'ba_ult', 55, 7.5, 2.4)], 'Naruto et Kurama fusionnent : puissance absolue, durée courte.');
+  add('jougan', 'Jōgan', '浄', '#b47cff', '#b47cff', [S('Éveil', ['jo_flux', 'jo_points', 'ng_rasen_fantome', 'jo_passage'], 'jo_points', 22, 2, 1.15), S('Œil accompli', ['jo_flux', 'jo_points', 'jo_passage', 'jo_sceau', 'ng_rasen_fantome', 'ng_shuriken_chakra'], 'jo_ult', 34, 2.8, 1.3), S('Œil pur', ['jo_ult', 'jo_points', 'jo_passage', 'jo_sceau', 'jo_flux', 'ng_rasen_uzuhiko', 'ng_rasen_fantome', 'kb_dash'], 'jo_ult', 48, 3.6, 1.5)], 'L’œil de Boruto : voit le chakra et les passages entre les dimensions.');
+  add('code', 'Code — Kāma libéré', '爪', '#f2f2f2', '#d9f6ff', [S('Limiteurs', ['co_griffes', 'co_teleport', 'co_lames', 'kb_absorb'], 'co_lames', 35, 3, 1.4), S('Limiteurs levés', ['co_griffes', 'co_teleport', 'co_lames', 'kb_absorb', 'co_grimoire', 'kk_pieu'], 'co_ult', 45, 4, 1.7), S('Grimoire', ['co_ult', 'co_griffes', 'co_teleport', 'co_lames', 'co_grimoire', 'kk_pieu', 'kb_absorb', 'kb_dash'], 'co_ult', 55, 5, 1.9)], 'Code, Kāma sans limiteurs : griffes blanches et téléportation.');
+  add('mitsuki_sage', 'Ermite — Mitsuki', '蛇', '#7ad8a0', '#7ad8a0', [S('Énergie naturelle', ['ms_serpent', 'ms_vent', 'ng_mitsuki_bras', 'ng_mitsuki_serpents'], 'ms_vent', 25, 2.4, 1.25), S('Mode Ermite complet', ['ms_serpent', 'ms_vent', 'ms_foudre', 'ng_mitsuki_bras', 'ng_mitsuki_serpents', 'ng_mitsuki_foudre'], 'ms_ult', 38, 3.2, 1.5)], 'Le Mode Ermite de la caverne Ryūchi.');
+  SNG.NG_MODES = ['karma_b', 'momoshiki', 'karma_k', 'baryon', 'jougan', 'code', 'mitsuki_sage'];
+  // ---------- cartes ----------
+  Object.assign(BIOMES, {
+    konoha_ng: { n: 'Konoha — Nouvelle Ère', g1: '#2a3a2e', g2: '#3a4d3a', g3: '#5a7a52', ob: 'pillar', amb: 0, tint: '#0b141a', zones: [], mobs: ['kara_ninja', 'bandit', 'lanceur'] },
+    kara_repaire: { n: 'Repaire de Kara', g1: '#1c1a2a', g2: '#2a2640', g3: '#3e3860', ob: 'pillar', amb: 4, tint: '#0d0a1a', zones: ['mist'], mobs: ['kara_ninja', 'kara_scientifique', 'kara_soldat'] },
+    ryuchi: { n: 'Caverne Ryūchi', g1: '#1e2a26', g2: '#2a3e36', g3: '#3e5a4e', ob: 'rock', amb: 2, tint: '#081410', zones: ['poison'], mobs: ['serpent35', 'kara_soldat'] },
+    otsutsuki: { n: 'Ruines Ōtsutsuki', g1: '#2a2836', g2: '#3a3850', g3: '#5a5478', ob: 'pillar', amb: 6, tint: '#120f20', zones: [], mobs: ['zetsu_ng', 'kara_ninja'] },
+    boro_labo: { n: 'Laboratoire de Boro', g1: '#1a2a24', g2: '#24382e', g3: '#3a5a46', ob: 'basalt', amb: 3, tint: '#06140e', zones: ['poison', 'puddle'], mobs: ['kara_scientifique', 'kara_soldat', 'kamikaze'] },
+    ame_ruines: { n: 'Ruines d’Ame', g1: '#262a34', g2: '#323848', g3: '#4a5468', ob: 'pillar', amb: 0, tint: '#0a0d14', zones: ['puddle', 'puddle'], mobs: ['deserteur', 'kara_ninja'] },
+  });
+  for (const k of ['konoha_ng', 'kara_repaire', 'ryuchi', 'otsutsuki', 'boro_labo', 'ame_ruines']) if (!BIOME_ORDER.includes(k)) BIOME_ORDER.push(k);
+  // ---------- ennemis et boss de Kara ----------
+  const L = (hair, outfit, scarf, x) => Object.assign({ hair, outfit, scarf }, x || {});
+  Object.assign(MOBS, {
+    kara_ninja: { n: 'Ninja de Kara', ai: 'assassin', hp: 90, spd: 175, dmg: 11, xp: 12, ryo: 9, mind: 0.3, skill: 0.45, look: L('#1a1a22', '#24203a', '#6a5acd') },
+    kara_scientifique: { n: 'Scientifique de Kara', ai: 'caster', hp: 70, spd: 150, dmg: 10, xp: 12, ryo: 10, mind: 0.4, skill: 0.4, look: L('#d8d8d8', '#e8e8f0', '#4a9a6a') },
+    kara_soldat: { n: 'Soldat modifié', ai: 'brute', hp: 140, spd: 150, dmg: 14, xp: 14, ryo: 10, mind: 0.2, skill: 0.3, armor: 0.1, look: L('#3a2a2a', '#3a3a44', '#a33') },
+    zetsu_ng: { n: 'Zetsu Blanc', ai: 'brute', hp: 80, spd: 140, dmg: 9, xp: 9, ryo: 5, mind: 0.1, skill: 0.2, look: L('#f0f0f0', '#e8e8e8', '#cfcfcf') },
+  });
+  Object.assign(BOSSES, {
+    kashin_koji: { n: 'Kashin Kōji', ai: 'boss', hp: 1700, spd: 190, dmg: 22, xp: 300, ryo: 200, mind: 0.8, skill: 0.8, size: 1.25, el: 'feu', moves: ['ng_kashin_kibaku', 'ng_kashin_hiraishin', 'ng_kote_feu'], look: L('#e8e8e8', '#2a2a34', '#c02a2a', { mask: 1 }), ng: 1 },
+    delta: { n: 'Delta', ai: 'boss', hp: 1500, spd: 200, dmg: 20, xp: 280, ryo: 190, mind: 0.7, skill: 0.8, size: 1.15, el: 'feu', melee: 1, moves: ['ng_delta_laser', 'ng_delta_coup'], look: L('#f0e0ff', '#1a1a2a', '#ff5ac8'), ng: 1 },
+    boro: { n: 'Boro', ai: 'boss', hp: 2200, spd: 150, dmg: 26, xp: 300, ryo: 200, mind: 0.5, skill: 0.6, size: 1.5, el: 'eau', melee: 1, moves: ['ng_boro_poison', 'ng_boro_poing'], look: L('#2a2a2a', '#3a4a3a', '#4a9a6a'), ng: 1 },
+    deepa: { n: 'Deepa', ai: 'boss', hp: 1800, spd: 170, dmg: 24, xp: 280, ryo: 190, mind: 0.6, skill: 0.6, size: 1.35, el: 'neutre', sword: 1, moves: ['ng_deepa_armes', 'ng_kawaki_lame'], look: L('#5a3a2a', '#2a2a2a', '#c08a3a'), ng: 1 },
+    ao: { n: 'Ao', ai: 'boss', hp: 1500, spd: 180, dmg: 20, xp: 260, ryo: 180, mind: 0.8, skill: 0.8, size: 1.15, el: 'neutre', moves: ['ng_ao_kote', 'ng_ao_pistolet', 'ng_kote_foudre'], look: L('#2a3a6a', '#2a2a3a', '#4a6aa8', { mask: 1 }), ng: 1 },
+    kawaki_rival: { n: 'Kawaki', ai: 'boss', hp: 1900, spd: 200, dmg: 24, xp: 320, ryo: 200, mind: 0.8, skill: 0.85, size: 1.1, el: 'neutre', melee: 1, moves: ['ng_kawaki_lame', 'ng_kawaki_marteau', 'kk_pieu', 'kk_cube'], look: L('#1a1a22', '#1a1a1a', '#6a6a7a'), ng: 1 },
+    momoshiki_boss: { n: 'Momoshiki Ōtsutsuki', ai: 'boss', hp: 2600, spd: 170, dmg: 26, xp: 380, ryo: 240, mind: 0.9, skill: 0.85, size: 1.25, el: 'neutre', moves: ['mo_dragon_feu', 'mo_dragon_foudre', 'mo_rasengan', 'mo_meteores', 'mo_absorb'], look: L('#f4f4f4', '#ece6f6', '#b8a8e8'), ng: 1 },
+    kinshiki: { n: 'Kinshiki Ōtsutsuki', ai: 'boss', hp: 3000, spd: 150, dmg: 30, xp: 360, ryo: 220, mind: 0.6, skill: 0.6, size: 1.6, el: 'neutre', melee: 1, moves: ['ng_kinshiki_hache', 'ng_boro_poing'], look: L('#f0f0f0', '#e8e4f0', '#c8b8e8'), ng: 1 },
+    urashiki: { n: 'Urashiki Ōtsutsuki', ai: 'boss', hp: 2200, spd: 200, dmg: 22, xp: 340, ryo: 220, mind: 0.9, skill: 0.85, size: 1.15, el: 'neutre', moves: ['ng_urashiki_canne', 'mo_absorb', 'mo_dragon_foudre'], look: L('#e8e8f0', '#d8d0ea', '#8a6ad8'), ng: 1 },
+    code_boss: { n: 'Code', ai: 'boss', hp: 3200, spd: 220, dmg: 30, xp: 450, ryo: 260, mind: 0.9, skill: 0.9, size: 1.2, el: 'neutre', melee: 1, moves: ['co_griffes', 'co_teleport', 'co_lames', 'co_ult'], look: L('#f2f2f2', '#1a1a1a', '#e8e8e8'), ng: 1 },
+  });
+  // ---------- effets propres : Sukunahikona (le projectile grandit en vol), Rasengan Fantôme (disparaît puis réapparaît) ----------
+  const bsp = spawnProj; spawnProj = function (u, T) { const p = bsp.apply(this, arguments); try { if (p && T) { if (T.grow) { p._r0 = p.r; p.r *= 0.3; p._grow = 1; } if (T.vanish) p._van = 1; } } catch (e) {} return p; };
+  const bup = updateProjs; updateProjs = function (dt) { const r = bup.apply(this, arguments); for (const p of G.projs) if (p._grow) { const k = Math.min(1, p.t / 0.32); p.r = p._r0 * (0.3 + 0.7 * k * k); if (k >= 1) p._grow = 0; } return r; };
+  const bdp = drawProj; drawProj = function (ctx, gl, p) { if (p._van && p.t > 0.1 && p.t < 0.42) { ev('vanish'); ctx.save(); ctx.globalAlpha = 0.15; const r = bdp.apply(this, arguments); ctx.restore(); return r; } return bdp.apply(this, arguments); };
+  // ---------- maîtres de la nouvelle ère : un duel, puis un mode ou des techniques ----------
+  const MASTERS = SNG.MASTERS = [
+    { id: 'naruto7', n: 'Naruto Uzumaki (Septième Hokage)', k: '七', c: '#ff9a3c', boss: 'kinshiki', give: { mode: 'baryon', techs: ['ng_naruto_rasenshuriken', 'ng_naruto_bijudama', 'ng_naruto_clones'] }, line: 'Tu veux le Mode Baryon ? Montre-moi que tu peux tenir face à un Ōtsutsuki.' },
+    { id: 'sasuke_adulte', n: 'Sasuke Uchiha', k: '影', c: '#b47cff', boss: 'urashiki', give: { mode: 'jougan', techs: ['ng_sasuke_chidori_nagashi', 'ng_sasuke_amenotejikara', 'ng_sasuke_indra'] }, line: 'Ton œil voit plus loin que le mien. Prouve-le.' },
+    { id: 'konohamaru', n: 'Konohamaru Sarutobi', k: '猿', c: '#ffb13d', boss: 'kashin_koji', give: { techs: ['ng_konohamaru_rasengan', 'ng_konohamaru_feu', 'ng_rasen_fantome'] }, line: 'Un Rasengan, c’est de la volonté, pas de la taille.' },
+    { id: 'orochimaru_ryuchi', n: 'Orochimaru (Caverne Ryūchi)', k: '蛇', c: '#7ad8a0', boss: 'boro', give: { mode: 'mitsuki_sage', techs: ['ng_mitsuki_bras', 'ng_mitsuki_serpents', 'ng_mitsuki_vent', 'ng_mitsuki_foudre'] }, line: 'L’énergie naturelle de Ryūchi… survivras-tu au poison ?' },
+    { id: 'shino', n: 'Shino Aburame', k: '蟲', c: '#6a9a6a', boss: 'deepa', give: { techs: ['ng_shino_insectes', 'ng_shikadai_ombre', 'ng_inojin_loup', 'ng_chocho_papillon'] }, line: 'Votre équipe sera évaluée. Pourquoi ? Parce que c’est mon rôle.' },
+    { id: 'isshiki_trace', n: 'La marque d’Isshiki', k: '殻', c: '#4fd6ff', boss: 'momoshiki_boss', give: { mode: 'karma_b', techs: ['kb_rasengan', 'ng_rasen_uzuhiko'] }, line: 'Vaincs Momoshiki : la marque de Kāma s’éveillera.' },
+    { id: 'kawaki_duel', n: 'Kawaki', k: '鬼', c: '#9aa7ff', boss: 'kawaki_rival', give: { mode: 'karma_k', techs: ['ng_kawaki_lame', 'ng_kawaki_marteau'] }, line: 'Je protégerai le Septième. Même contre toi.' },
+    { id: 'code_ombre', n: 'L’ombre de Code', k: '爪', c: '#d9f6ff', boss: 'code_boss', give: { mode: 'code' }, line: 'Les limiteurs sont levés. Viens.' },
+    { id: 'ao_duel', n: 'Ao', k: '青', c: '#4a6aa8', boss: 'ao', give: { techs: ['ng_ao_kote', 'ng_ao_pistolet', 'ng_kote_lame', 'ng_kote_foudre', 'ng_kote_feu'] }, line: 'Les outils scientifiques ne mentent pas.' },
+    { id: 'delta_duel', n: 'Delta', k: '德', c: '#ff5ac8', boss: 'delta', give: { mode: 'momoshiki' }, line: 'Tu veux le pouvoir de Momoshiki ? Passe d’abord par moi.' },
+  ];
+  const ngp = () => { const p = P(); if (!p) return null; p.ng = p.ng || { modes: {}, masters: {}, mode: null }; return p.ng; };
+  SNG.ngp = ngp;
+  const unlocked = (id) => G.mode === 'creative' || !!(ngp() && ngp().modes[id]);
+  SNG.unlocked = unlocked;
+  function reward(Mst) { const o = ngp(); const p = P(); o.masters[Mst.id] = 1; const g = Mst.give;
+    if (g.mode) { o.modes[g.mode] = 1; if (!o.mode) o.mode = g.mode; if (p.eyes && !p.eyes.includes(g.mode)) p.eyes.push(g.mode); }
+    for (const id of g.techs || []) if (TECH[id] && !p.techs.includes(id)) { try { grantTech(p, TECH[id]); } catch (e) { p.techs.push(id); } }
+    Profile.save(); banner(Mst.n, g.mode ? MODES[g.mode].n : 'Techniques apprises', Mst.c); ev('master'); }
+  SNG.reward = reward;
+  // duel : une arène, le boss du maître ; victoire = récompense
+  SNG.duel = function (i) { const Mst = MASTERS[i]; if (!Mst) return; startGame('creative', { biome: pick(['konoha_ng', 'otsutsuki', 'kara_repaire']) }); G.ngDuel = { i, t: 0 };
+    G.cheats.god = false; const u = G.players[0]; const b = spawnBoss(Mst.boss, u.x + 420, u.y, 1); b._ngDuel = 1; banner(Mst.n, 'DUEL', Mst.c); ev('duel'); return b; };
+  const bk = killUnit; killUnit = function (u) { const r = bk.apply(this, arguments); try { if (u && u._ngDuel && G.ngDuel) { const Mst = MASTERS[G.ngDuel.i]; G.ngDuel = null; reward(Mst); } } catch (e) { console.warn(e); } return r; };
+  // touche B : entre / sort du mode de l'ère Boruto équipé
+  addEventListener('keydown', (e) => { if (e.code !== 'KeyB' || e.repeat || !G.players || !G.players[0] || G.paused || G.over) return; const tag = (e.target && e.target.tagName) || ''; if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    const u = G.players[0]; if (!u.isPlayer || u.dead) return; const o = ngp(); const id = (o && o.mode) || (G.mode === 'creative' ? 'karma_b' : null);
+    if (!id || !unlocked(id)) { denyCast(u, 'Aucun mode de l’ère Boruto : affronte un maître (menu Ère Boruto)', 'eye'); return; }
+    if (u.mode && MODES[u.mode.id] && MODES[u.mode.id].ng) { exitMode(u); return; } const prev = u.eye; u.eye = id; eyeKey(u); if (!u.mode) u.eye = prev; ev('ngKey'); });
+  // ---------- panneau « Ère Boruto » ----------
+  const st = document.createElement('style'); st.textContent = `#ngpanel{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(5,8,14,.72);backdrop-filter:blur(3px)}
+  #ngpanel .w{width:min(980px,94vw);max-height:88vh;overflow:auto;background:#0e131e;border:1px solid #263247;border-radius:12px;padding:18px 20px;color:#eef3fa;font-family:"Exo 2",sans-serif}
+  #ngpanel h2{margin:0 0 4px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}#ngpanel h3{margin:14px 0 8px;font-size:13px;letter-spacing:.12em;color:#93a1b8;text-transform:uppercase}
+  #ngpanel .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}#ngpanel .c{border:1px solid #263247;border-left:3px solid var(--c);border-radius:8px;padding:9px 10px;background:#121a28}
+  #ngpanel .c b{display:block;font-weight:800}#ngpanel .c small{color:#93a1b8}#ngpanel .c.on{box-shadow:0 0 0 1px var(--c) inset}#ngpanel button{margin-top:6px;padding:4px 10px;font-size:12px}#ngpanel .x{float:right}`;
+  document.head.appendChild(st);
+  SNG.panel = function () { const o = ngp() || { modes: {}, masters: {} }; let el = document.getElementById('ngpanel'); if (!el) { el = document.createElement('div'); el.id = 'ngpanel'; document.body.appendChild(el); }
+    const mode = (id) => { const Md = MODES[id], on = o.modes[id]; return `<div class="c${o.mode === id ? ' on' : ''}" style="--c:${Md.ngc}"><b>${Md.k} ${esc(Md.n)}</b><small>${esc(EYES[id].d)}</small><br>${on ? `<button data-eq="${id}">${o.mode === id ? 'Équipé (B)' : 'Équiper'}</button>` : '<small>🔒 maître à vaincre</small>'}</div>`; };
+    const mst = (M, i) => `<div class="c" style="--c:${M.c}"><b>${M.k} ${esc(M.n)}</b><small>« ${esc(M.line)} »</small><br><small>Duel : ${esc(BOSSES[M.boss].n)} → ${esc([M.give.mode ? MODES[M.give.mode].n : '', (M.give.techs || []).length ? (M.give.techs.length + ' techniques') : ''].filter(Boolean).join(' + '))}</small><br><button data-duel="${i}">${o.masters[M.id] ? 'Revoir' : 'Défier'}</button></div>`;
+    el.innerHTML = `<div class="w"><button class="ghost x" id="ngx">Fermer</button><h2>Ère Boruto</h2><small style="color:#93a1b8">Modes (touche B en combat), maîtres et Kara.</small>
+      <h3>Modes</h3><div class="g">${SNG.NG_MODES.map(mode).join('')}</div><h3>Maîtres de la nouvelle ère</h3><div class="g">${MASTERS.map(mst).join('')}</div>
+      <h3>Boss</h3><div class="g"><div class="c" style="--c:#ffd27a"><b>大 Jigen — Isshiki Ōtsutsuki</b><small>Trois phases. Sukunahikona, Daikokuten, Kāma.</small><br><button id="ngjigen">Affronter</button></div></div></div>`;
+    el.querySelector('#ngx').onclick = () => el.remove();
+    el.querySelectorAll('[data-eq]').forEach((b) => (b.onclick = () => { ngp().mode = b.dataset.eq; Profile.save(); SNG.panel(); }));
+    el.querySelectorAll('[data-duel]').forEach((b) => (b.onclick = () => { el.remove(); if (typeof UI !== 'undefined' && UI.show) try { UI.show('scr-none'); } catch (e) {} SNG.duel(+b.dataset.duel); }));
+    const jb = el.querySelector('#ngjigen'); if (jb) jb.onclick = () => { el.remove(); if (SNG.jigenFight) SNG.jigenFight(); else toast('Jigen', 'Bientôt', 'Le combat contre Jigen arrive au jalon NG 3.', '#ffd27a', '大'); }; };
+  // bouton au menu principal
+  const bt = UI.title; UI.title = function () { const r = bt.apply(this, arguments); try { const nav = document.querySelector('#scr-title .mainnav'); if (nav && !nav.querySelector('[data-ng]')) { nav.insertAdjacentHTML('beforeend', `<button data-ng="1">${seal('殻', '#4fd6ff')}<span><b>Ère Boruto</b><small>Modes, maîtres, Kara, Jigen</small></span></button>`); nav.querySelector('[data-ng]').onclick = () => { if (!P()) return this.create('hub'); SNG.panel(); }; } } catch (e) { console.warn(e); } return r; };
+  SNG.release(9, 'Next Generation 2 — L’ère Boruto', [
+    ['殻', '#4fd6ff', 'Sept modes de l’ère Boruto', 'Kāma (Boruto), Mode Momoshiki, Kāma (Kawaki), Mode Baryon, Jōgan, Code (Kāma libéré) et Ermite de Mitsuki, avec stades, ultime et roue. Touche B pour entrer ou sortir du mode équipé.'],
+    ['術', '#ff9a3c', 'Plus de 100 techniques', 'Équipe 7 de Boruto, nouvelle génération (Shikadai, Inojin, ChōChō, Metal Lee, Denki, Iwabee, Sumire, Kagura, Shinki, Himawari…), adultes de Konoha (Septième Hokage, Sasuke, Sakura, Shikamaru, Konohamaru, Shino, Kakashi, Gaara…) et Kara.'],
+    ['師', '#ffc83d', 'Maîtres et duels', 'Dix maîtres à défier (Naruto, Sasuke, Konohamaru, Orochimaru à Ryūchi, Shino, Kawaki…) pour obtenir un mode ou des techniques.'],
+    ['地', '#7ad8a0', 'Nouvelles cartes', 'Konoha Nouvelle Ère, repaire de Kara, caverne Ryūchi, ruines Ōtsutsuki, labo de Boro, ruines d’Ame. Nouveaux ennemis : ninjas, scientifiques et soldats modifiés de Kara, Zetsu blancs.'],
+    ['敵', '#ff5a5a', 'Kara et les Ōtsutsuki', 'Kashin Kōji, Delta, Boro, Deepa, Ao, Kawaki, Momoshiki, Kinshiki, Urashiki et Code.'],
+  ]);
+})();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */
 (function(){
   const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };

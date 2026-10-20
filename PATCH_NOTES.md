@@ -7,3 +7,30 @@
 - Fluidité : sol streamé par tuiles autour de la caméra, ennemis lointains mis en veille.
 - Interface ère Boruto : palette bleu nuit, cyan et orange, typographie Exo 2.
 - Sauvegarde séparée de Shinobi 1 et 2.
+
+## NG 2 — L’ère Boruto
+- 7 modes, avec stades, ultime et roue. Touche **B** pour entrer ou sortir du mode équipé :
+  - Kāma (Boruto) ;
+  - Mode Momoshiki ;
+  - Kāma (Kawaki) ;
+  - Mode Baryon (orange) ;
+  - Jōgan (violet) ;
+  - Code (Kāma libéré) ;
+  - Ermite de Mitsuki.
+- 106 nouvelles techniques :
+  - Équipe 7 de Boruto ;
+  - nouvelle génération (Shikadai, Inojin, ChōChō, Metal Lee, Denki, Iwabee, Sumire, Kagura, Shinki, Himawari, Hanabi) ;
+  - adultes (Septième Hokage, Sasuke, Sakura, Shikamaru, Konohamaru, Shino, Kakashi, Gaara, Darui, Chōjūrō) ;
+  - Kara et Ōtsutsuki.
+  - Sukunahikona : le projectile grandit en vol. Le Rasengan Fantôme disparaît puis réapparaît.
+- 10 maîtres à défier en duel pour gagner un mode ou des techniques (menu **Ère Boruto**).
+- 6 cartes :
+  - Konoha Nouvelle Ère ;
+  - repaire de Kara ;
+  - caverne Ryūchi ;
+  - ruines Ōtsutsuki ;
+  - labo de Boro ;
+  - ruines d’Ame.
+- Nouveaux ennemis : ninjas, scientifiques et soldats modifiés de Kara, Zetsu blancs.
+- 10 boss : Kashin Kōji, Delta, Boro, Deepa, Ao, Kawaki, Momoshiki, Kinshiki, Urashiki, Code.
+- **673 techniques** au total, vérifiées par `tools/count_moves.js`. Aucune référence cassée dans les modes.
