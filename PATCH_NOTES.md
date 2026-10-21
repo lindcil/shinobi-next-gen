@@ -1,3 +1,5 @@
+NG 12 — Objectif de Carrière : en monde ouvert, une pastille en haut de l’écran montre ton rang, le prochain rang (kanji) et ta progression jusqu’au niveau requis.
+
 NG 11 — Tactique & tactile : Ennemis plus malins : un ennemi qui te repère alerte jusqu’à 4 alliés proches, et un sbire à moins de 25 % de PV recule un instant pour se regrouper (une fois). Les boss et les bêtes ne reculent pas. Tactile : boutons et joystick agrandis sur écran tactile.
 
 NG 10 — Cut-ins Storm : un ultime, une technique secrète ou une technique de rareté 5 lancée par toi déclenche un cut-in façon Storm. Bandes noires, panneau incliné à la couleur de l'élément, ton personnage en buste, nom de la technique, lignes de vitesse, coup de pinceau. 1,3 s, une fois par technique et par combat, sans flash blanc ; clic, toucher ou Échap pour passer. Audit : tous les modes lancés et joués sans erreur console.

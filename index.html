@@ -14102,6 +14102,16 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   setInterval(() => { if (!G.ngSaga) return; const pk = document.getElementById('pick14'); if (pk && !pk.hidden && pk.style.display !== 'none') { pk.remove(); K.ev.locked = (K.ev.locked || 0) + 1; } const u = hero(), k = K.kit(); if (u && k && u.slots && u.slots.slice(0, 4).join() !== k.sk.map((id) => (id && TECH[id] ? id : null)).join()) K.apply(); }, 400);
   if (window.SNG && SNG.release) try { SNG.release(13, 'Saga canon', ['Chaque arc donne au héros ses pouvoirs canon : Naruto commence avec les clones, le Rasengan arrive à la Vallée de la Fin, l’Ermite et le Rasenshuriken contre Pain, le Mode Kurama et la Bijūdama pendant la Guerre', 'Manteau de Kyūbi limité au stade 1 dans les premiers arcs, pas de Bijūdama avant la Guerre', 'Boruto : clones puis Rasengan Fantôme, Jōgan et Kāma selon l’arc', 'Kit verrouillé en Saga, sauvegarde normale intacte']); } catch (e) {}
 })();
+/* NG 12 — Objectif de Carrière dans le HUD : en monde ouvert, une petite pastille montre ton rang, le prochain rang et
+   ta progression (niveau requis). Peu de texte : kanji du rang, barre, niveau visé. */
+(function () {
+  const el = document.createElement('div'); el.id = 'rk82'; el.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:30;pointer-events:none;display:none;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;background:rgba(11,16,32,.72);border:1px solid rgba(255,209,102,.5);font:700 13px "Exo 2",sans-serif;color:#eef3ff';
+  const add = () => document.body && !el.parentNode && document.body.appendChild(el); add(); addEventListener('load', add);
+  setInterval(() => { try { const C = SNG.career; const on = C && C.on() && typeof G !== 'undefined' && G.mode === 'monde'; el.style.display = on ? 'flex' : 'none'; if (!on) return;
+    const p = P(), i = C.rankIdx(p), R = C.RANKS[i], N = C.RANKS[i + 1]; const lv = p.lv || 1;
+    if (!N) { el.innerHTML = `<b style="color:#ffd166;font-size:16px">${R.k}</b>${R.n}`; return; }
+    const f = Math.max(0, Math.min(1, (lv - R.lv) / (N.lv - R.lv))); el.innerHTML = `<b style="color:#ffd166;font-size:16px">${R.k}</b><span style="display:inline-block;width:90px;height:6px;border-radius:3px;background:#1d2747;overflow:hidden"><i style="display:block;height:100%;width:${(f * 100).toFixed(0)}%;background:linear-gradient(90deg,#ffd166,#ff9a2e)"></i></span><b style="color:#ff9a2e;font-size:16px">${N.k}</b><span style="opacity:.8">niv. ${N.lv}</span>`; } catch (e) { } }, 400);
+})();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */
 (function(){
   const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
