@@ -11144,6 +11144,37 @@ function techCard2(id, p, opts = {}) {
   const b = document.createElement('button'); b.id = 'njbbtn'; b.textContent = '忍 Ninjutsu'; b.onclick = () => N.open();
   setInterval(() => { if (document.body && !document.getElementById('njbbtn')) document.body.appendChild(b); let menu = true; try { menu = !G.mode || G.mode === 'demo'; } catch (e) {} b.style.display = menu ? 'block' : 'none'; }, 300);
 })();
+/* Cut-ins façon Storm (STC) — commun à Shinobi 1, Shinobi 2 et Next Gen.
+   Sur un ultime, une technique secrète ou une technique de rareté 5 lancée par le joueur : bandes noires, panneau incliné
+   à la couleur de l'élément, portrait en buste du personnage (son vrai rig), nom de la technique, lignes de vitesse et
+   coup de pinceau. Environ 1,3 s, sans flash blanc (compatible « Réduire les flashs »). Une fois par technique et par
+   combat, jamais en boucle ; clic, toucher ou Échap pour passer. */
+(function () {
+  if (window.__STC) return; window.__STC = 1;
+  const oc = document.createElement('canvas'); oc.id = 'stcCut'; oc.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60;display:none';
+  const add = () => document.body && !oc.parentNode && document.body.appendChild(oc); add(); addEventListener('load', add);
+  const g = oc.getContext('2d'); let C = null; const seen = new Set();
+  const isUlt = (T) => !!T && !T.mode && (T.ult || T.cat === 'secret' || (T.rar || 0) >= 5);
+  const elCol = (T) => { try { return (EL[T.el] || {}).c || (EL[T.el] || {}).col || '#ff9a2e'; } catch (e) { return '#ff9a2e'; } };
+  function start(u, T) { const key = (u.name || '') + T.id + (window.G && G.t0 || ''); if (seen.has(key)) return; seen.add(key); if (seen.size > 400) seen.clear();
+    C = { u, T, t0: performance.now(), dur: 1300, c: elCol(T), name: T.name || T.n || T.id }; oc.style.display = 'block'; requestAnimationFrame(draw); }
+  const skip = () => { if (C && performance.now() - C.t0 > 250) C.dur = 0; };
+  addEventListener('keydown', (e) => { if (C && (e.code === 'Escape')) skip(); }); addEventListener('pointerdown', skip, { passive: true });
+  function draw() { if (!C) return; const W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1); if (oc.width !== (W * dpr | 0)) { oc.width = W * dpr | 0; oc.height = H * dpr | 0; }
+    const T = performance.now() - C.t0; if (T > C.dur) { C = null; g.clearRect(0, 0, oc.width, oc.height); oc.style.display = 'none'; return; }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); const k = Math.min(1, T / 140), out = Math.max(0, (T - C.dur + 180) / 180), bar = H * 0.1 * (1 - out);
+    g.fillStyle = '#05070f'; g.fillRect(0, 0, W, bar); g.fillRect(0, H - bar, W, bar);
+    const sx = (1 - k) * W - out * W; g.save(); g.translate(sx, 0); g.beginPath(); g.moveTo(0, H * 0.3); g.lineTo(W, H * 0.2); g.lineTo(W, H * 0.66); g.lineTo(0, H * 0.78); g.closePath(); g.fillStyle = C.c; g.globalAlpha = 0.92; g.fill(); g.globalAlpha = 1; g.save(); g.clip();
+    g.fillStyle = 'rgba(5,7,15,.5)'; g.fillRect(0, 0, W, H); g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 3; for (let i = 0; i < 24; i++) { const y = ((i * 97 + T * 2.4) % (H * 0.6)) + H * 0.18, x = (i * 211) % W; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 160 + (i % 3) * 70, y - 26); g.stroke(); }
+    // portrait : le vrai rig du personnage, agrandi en buste
+    try { const u = C.u, s = H / 110, px = W * 0.27, py = H * 1.05; const sv = { x: u.x, y: u.y, f: u.facing, fx: u.fx, al: u.alpha }; g.save(); g.translate(px, py); g.scale(s, s); u.x = 0; u.y = 0; if ('alpha' in u) u.alpha = 1; drawUnit(g, g, u); g.restore(); u.x = sv.x; u.y = sv.y; if ('alpha' in u) u.alpha = sv.al; } catch (e) { }
+    // coup de pinceau
+    g.fillStyle = 'rgba(11,16,32,.85)'; const L = W * 0.55 * Math.min(1, T / 260); g.beginPath(); g.moveTo(W * 0.4, H * 0.56); g.quadraticCurveTo(W * 0.4 + L / 2, H * 0.53, W * 0.4 + L, H * 0.55); g.quadraticCurveTo(W * 0.4 + L / 2, H * 0.58, W * 0.4, H * 0.575); g.fill(); g.restore();
+    g.strokeStyle = '#0b1020'; g.lineWidth = 6; g.stroke(); const fs = Math.round(H * 0.07); g.font = `900 ${fs}px 'Dela Gothic One','Exo 2',sans-serif`; g.textAlign = 'right'; g.lineWidth = 9; g.strokeStyle = '#0b1020'; g.strokeText(C.name, W * 0.95, H * 0.52); g.fillStyle = '#fff'; g.fillText(C.name, W * 0.95, H * 0.52); g.restore();
+    requestAnimationFrame(draw); }
+  const hook = () => { if (typeof execTech !== 'function' || execTech.__stc) return; const ex = execTech; execTech = function (u, T) { try { if (u && u.isPlayer && isUlt(T)) start(u, T); } catch (e) { } return ex.apply(this, arguments); }; execTech.__stc = 1; };
+  hook(); addEventListener('load', hook); window.STC = { start, isUlt };
+})();
 /* Rig v4.6 d'Éternel II : squelette hiérarchique FK + IK 2 os, UNE seule orientation pour tout le corps.
    Les poses (12 principes / ZZZ) de Shinobi 2 sont conservées : le nouveau rig lit les cibles de ninjaPose et le ressort stx/sty. */
 (function () {
