@@ -1,3 +1,5 @@
+NG 14.1 — Menu Pause : bouton « Retour à la sélection des jeux » (sauvegarde, confirmation en plein combat).
+
 NG 14 — Choc Kāma : nouveau jeu Créatif. Tu passes en Kāma complet face à Isshiki, vos chakras se percutent (particules or contre violet) et tu martèles pour gagner. L'écran de fin propose Revanche · Changer de jeu · Réglages · Quitter. Aucune erreur console.
 
 NG 13 — Kāma complet & Code : Kawaki/Karma obtient un 4e stade « Kāma complet » (piliers, pluie de cubes, échelle, ultime). Code, Kawaki et Isshiki rejoignent le roster avec des kits canon fixes. Nouvel arc Saga « Code et les Claw Grimes » (nouveaux ennemis Claw Grime). Rencontres : Isshiki Ōtsutsuki, Momoshiki & Kinshiki, défi Edo Naruto & Sasuke. Traînées de M1 variées (lame plus longue, poings plus courts, échos sur les finishers). Paliers de rang : niv. 1/5/12/24/36/48/60. Audit : tous les modes sans erreur console.

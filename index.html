@@ -11076,6 +11076,15 @@ function techCard2(id, p, opts = {}) {
   const add = () => document.body && !document.getElementById('hubback') && document.body.appendChild(a);
   setInterval(() => { add(); let menu = true; try { menu = !G.mode || G.mode === 'demo'; } catch (e) {} a.style.display = menu ? 'block' : 'none'; }, 300);
 })();
+/* Bouton « Retour à la sélection des jeux » dans le menu Pause : sauvegarde puis retour au hub (confirmation en plein combat). */
+(function () {
+  if (window.__hubPause) return; window.__hubPause = 1;
+  const fight = () => { try { return G.mode && !G.over && (G.units || []).some((u) => u.team !== 0 && u.hp > 0 && !u.dead && !u.down); } catch (e) { return false; } };
+  const go = () => { if (fight() && !confirm('Un combat est en cours. Ta progression est sauvegardée, mais ce combat sera perdu. Retourner à la sélection des jeux ?')) return;
+    try { if (window.Profile && Profile.save) Profile.save(); } catch (e) {} location.href = 'https://lindcil.github.io/'; };
+  window.hubPauseGo = go;
+  setInterval(() => { const p = document.getElementById('scr-pause'); if (!p || p.hidden || p.querySelector('#phubsel')) return; const col = p.querySelector('.col') || p.querySelector('.panel') || p; const b = document.createElement('button'); b.id = 'phubsel'; b.textContent = '⟵ Retour à la sélection des jeux'; b.onclick = go; col.appendChild(b); }, 200);
+})();
 /* ===== Navigateur de Ninjutsu (commun aux 3 jeux) : mêmes filtres que Préparation ===== */
 (function () {
   if (window.NJB) return; const N = (window.NJB = { q: '', sub: 'tous', el: 'tous', rar: 0, mode: 'tous', cat: 'tous', sort: 'rar', sel: null, ev: {} });
