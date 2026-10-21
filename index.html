@@ -11175,6 +11175,23 @@ function techCard2(id, p, opts = {}) {
   const hook = () => { if (typeof execTech !== 'function' || execTech.__stc) return; const ex = execTech; execTech = function (u, T) { try { if (u && u.isPlayer && isUlt(T)) start(u, T); } catch (e) { } return ex.apply(this, arguments); }; execTech.__stc = 1; };
   hook(); addEventListener('load', hook); window.STC = { start, isUlt };
 })();
+/* Tactique & tactile (TAC) — commun à Shinobi 1, Shinobi 2 et Next Gen.
+   Ennemis plus malins : un ennemi qui te repère alerte ses alliés proches, et un sbire à moins de 25 % de PV recule
+   un instant pour se regrouper (une fois), puis revient. Les boss et les bêtes ne reculent pas.
+   Tactile : boutons et joystick agrandis sur écran tactile, zones de toucher plus larges. */
+(function () {
+  if (window.__TAC) return; window.__TAC = 1;
+  const css = document.createElement('style'); css.textContent = '@media (pointer:coarse){.tbtns{transform:scale(1.2);transform-origin:100% 100%}.tbtn button,.tbtns button{min-width:56px;min-height:56px}#touch .stick,#touch .joy,#joy{transform:scale(1.15);transform-origin:0 100%}}';
+  (document.head || document.documentElement).appendChild(css);
+  const hook = () => { if (typeof aiUpdate !== 'function' || aiUpdate.__tac) return; const up = aiUpdate;
+    aiUpdate = function (u, dt) { const ai = u && u.ai; const had = ai && ai.target; const r = up.apply(this, arguments);
+      try { if (!ai || ai.type === 'decoy' || ai.leader) return r; const tgt = ai.target;
+        if (tgt && !had && !ai.alerted && G && G.units) { ai.alerted = 1; let n = 0; for (const o of G.units) { if (n >= 4) break; if (o === u || !o.ai || o.team !== u.team || o.ai.target || !alive(o)) continue; if (Math.hypot(o.x - u.x, o.y - u.y) < 360) { o.ai.target = tgt; o.ai.alerted = 1; o.ai.lastSeen = { x: tgt.x, y: tgt.y, t: G.t }; n++; } } if (n) bark(u, 'spot', 0.8); }
+        if (tgt && !u.boss && ai.type !== 'beast' && !ai.retreated && u.hp > 0 && u.hp / u.maxHp < 0.25) { ai.retreated = G.t + 1.6; bark(u, 'lost', 0.6); }
+        if (tgt && ai.retreated && G.t < ai.retreated && !u.act) moveAway(u, tgt.x, tgt.y, 1); } catch (e) { }
+      return r; }; aiUpdate.__tac = 1; };
+  hook(); addEventListener('load', hook);
+})();
 /* Rig v4.6 d'Éternel II : squelette hiérarchique FK + IK 2 os, UNE seule orientation pour tout le corps.
    Les poses (12 principes / ZZZ) de Shinobi 2 sont conservées : le nouveau rig lit les cibles de ninjaPose et le ressort stx/sty. */
 (function () {
