@@ -14384,6 +14384,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     rush: { n: 'Choc de ruées', k: '衝', clash: 'timing', goal: 'Toi et ton rival foncez l’un sur l’autre. Au contact, un curseur va et vient : frappe quand il est dans la zone verte.', keys: () => `Frappe au bon moment : ${KEYS.clash}`, set: (c) => common(c, 5) },
     tech: { n: 'Choc de techniques', k: '術', clash: 'mash', goal: 'Vous lancez chacun une technique (ex. Boule de feu contre Boule de feu). Quand elles se croisent, martèle pour gagner le choc.', keys: () => `Martèle ${KEYS.clash}`,
       set: (c) => `<label>Ta technique<select data-c="tech">${clashTechs().map((k) => opt(k, TN(k), k === c.tech)).join('')}</select></label><label>Technique adverse<select data-c="foeTech">${opt('', 'La même')}${clashTechs().map((k) => opt(k, TN(k), k === c.foeTech)).join('')}</select></label>` + common(c, 5) },
+    kama: { n: 'Choc Kāma', k: '楔', clash: 'mash', goal: 'Kāma complet contre un Ōtsutsuki : vos cubes et votre chakra se percutent. Martèle pour absorber le sien.', keys: () => `Martèle ${KEYS.clash}`, set: (c) => common(c, 3) },
     moveset: { n: 'Simulation de moveset', k: '型', goal: 'Compose 4 techniques et affronte une IA au moveset aléatoire. Victoire quand elle tombe, défaite si tu tombes.', keys: () => KEYS.move,
       set: (c) => { const L = plainTechs(); return [0, 1, 2, 3].map((i) => `<label>Technique ${i + 1}<select data-c="sk${i}">${L.map((k) => opt(k, TN(k), k === c['sk' + i])).join('')}</select></label>`).join('') + diffSel(c); } },
     boss: { n: 'Simulateur de boss', k: '鬼', goal: 'Affronte le boss de ton choix au rang choisi. Victoire quand il tombe, défaite si tu tombes. Le chrono est affiché à la fin.', keys: () => KEYS.move,
@@ -14396,7 +14397,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
   function diffSel(c) { return `<label>Difficulté<select data-c="diff">${DIFF.map((d, i) => opt(i, d, +c.diff === i)).join('')}</select></label>`; }
   function common(c, n) { return `<label>Manches<input data-c="n" type="number" min="1" max="20" value="${+c.n || n}"></label>` + diffSel(c); }
   const defaults = (id) => { const L = plainTechs(), T = clashTechs(), B = BEA();
-    return { bijuu: { beast: B[8] ? B[8].id : B[0] && B[0].id, foe: '', n: 3, diff: 1 }, rush: { n: 5, diff: 1 }, tech: { tech: T[0], foeTech: '', n: 5, diff: 1 }, moveset: { sk0: L[0], sk1: L[1], sk2: L[2], sk3: L[3], diff: 1 }, boss: { boss: Object.keys(BOS())[0], tier: 2 }, labo: { biome: 'ruines' }, mastery: {} }[id]; };
+    return { bijuu: { beast: B[8] ? B[8].id : B[0] && B[0].id, foe: '', n: 3, diff: 1 }, rush: { n: 5, diff: 1 }, tech: { tech: T[0], foeTech: '', n: 5, diff: 1 }, kama: { tech: TECH.kk_pluie_cubes ? 'kk_pluie_cubes' : T[0], foeTech: TECH.kk_cube ? 'kk_cube' : T[0], n: 3, diff: 1 }, moveset: { sk0: L[0], sk1: L[1], sk2: L[2], sk3: L[3], diff: 1 }, boss: { boss: Object.keys(BOS())[0], tier: 2 }, labo: { biome: 'ruines' }, mastery: {} }[id]; };
   const cfgOf = (id) => (CH.last[id] = CH.last[id] || defaults(id));
   /* ---------- DOM ---------- */
   const hub = document.createElement('div'); hub.id = 'ch49'; hub.hidden = true; document.body.appendChild(hub);
@@ -14449,7 +14450,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     window.CH49_BUSY = true; CH.t0 = performance.now();
     if (Gm.clash) { G.cheats.god = true; let e = null; if (id === 'bijuu') { const fb = c.foe || (BEA().filter((b) => b.id !== c.beast)[Math.floor(Math.random() * Math.max(1, BEA().length - 1))] || {}).id; c._foe = fb; try { if (fb) e = spawnBeast(fb, u.x + 640, u.y, 2); } catch (x) {} u.beast = c.beast || u.beast; }
       if (!e) e = spawnMob('deserteur', u.x + 640, u.y, 3) || spawnMob(Object.keys(MOBS)[0], u.x + 640, u.y, 3);
-      e._ch = 1; e.ai = null; e.maxHp = e.hp = 1e6; e.vx = e.vy = 0; e.name = id === 'rush' ? 'Rival de ruée' : e.name || 'Rival'; CH.foe = e; banner(Gm.n, 'MODE CRÉATIF', '#ffd27a', 'Lis les consignes en haut de l’écran'); later(1.3, round); return; }
+      if (id === 'kama') { try { e.name = 'Isshiki Ōtsutsuki'; e.look = Object.assign({}, e.look, { hair: '#2a2a2a', outfit: '#e8e4f0' }); if (typeof enterMode === 'function') enterMode(u, 'karma_k', 4); } catch (x) {} } e._ch = 1; e.ai = null; e.maxHp = e.hp = 1e6; e.vx = e.vy = 0; e.name = id === 'rush' ? 'Rival de ruée' : e.name || 'Rival'; CH.foe = e; banner(Gm.n, 'MODE CRÉATIF', '#ffd27a', 'Lis les consignes en haut de l’écran'); later(1.3, round); return; }
     const diff = +c.diff || 0;
     if (id === 'moveset') { for (let i = 0; i < 4; i++) if (c['sk' + i] && TECH[c['sk' + i]]) u.slots[i] = c['sk' + i];
       const e = spawnMob('deserteur', u.x + 460, u.y, 2 + diff) || spawnMob(Object.keys(MOBS)[0], u.x + 460, u.y, 2 + diff); const pool = plainTechs(); e.slots = [0, 1, 2, 3].map(() => pool[Math.floor(Math.random() * pool.length)]); e.elite = true; e.maxHp *= 2 + diff * 1.5; e.hp = e.maxHp; e._ch = 1; CH.foe = e;
@@ -14469,7 +14470,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     const watch = () => { if (!CH.cur) return; if (!a || !b || a.dead || b.dead) return meet((u.x + e.x) / 2, u.y); if (Math.abs(a.x - b.x) < a.r + b.r) { a.vx = a.vy = b.vx = b.vy = 0; meet((a.x + b.x) / 2, a.y, a, b); } else later(0.05, watch); }; later(0.1, watch); }
   function meet(x, y, a, b) { const C = CH.cur; const tok = CH.tok; let H = null;
     try { const X = window.CFX50; if (X) { const u = P0(), e = CH.foe; const c = C.cfg; const tc = (id) => (TECH[id] && X.elc(TECH[id].el)) || null;
-      const ca = C.id === 'bijuu' ? '#ff9a2a' : C.id === 'tech' ? tc(c.tech) || '#ff7a2a' : X.ucol(u), cb = C.id === 'bijuu' ? '#a46bff' : C.id === 'tech' ? tc(c.foeTech || c.tech) || '#7ab8ff' : '#7ab8ff';
+      const ca = C.id === 'kama' ? '#ffb13d' : C.id === 'bijuu' ? '#ff9a2a' : C.id === 'tech' ? tc(c.tech) || '#ff7a2a' : X.ucol(u), cb = C.id === 'kama' ? '#a46bff' : C.id === 'bijuu' ? '#a46bff' : C.id === 'tech' ? tc(c.foeTech || c.tech) || '#7ab8ff' : '#7ab8ff';
       CH.qg = 0.5; H = X.start({ kind: 'crea-' + C.id, a: a || u, b: b || e, ca, cb: ca === cb ? '#7ab8ff' : cb, bal: () => CH.qg }); } else FX.ring(x, y, '#ffd27a', 20, 260, 0.4, 8); } catch (e) {}
     qte(GAMES[C.id].clash, +C.cfg.diff || 0, (win) => { if (tok !== CH.tok) return; try { if (H) window.CFX50.end(H, win); } catch (e) {} CH.score[win ? 'w' : 'l']++; const w = win ? P0() : CH.foe, l = win ? CH.foe : P0();
       try { banner(win ? 'Choc remporté !' : 'Choc perdu…', GAMES[C.id].n.toUpperCase(), win ? '#ffd27a' : '#ff5a5a'); FX.ring(x, y, win ? '#ffd27a' : '#ff5a5a', 20, 360, 0.6, 12); if (l && w) l.vx = Math.sign(l.x - w.x || 1) * 900; } catch (e) {}
