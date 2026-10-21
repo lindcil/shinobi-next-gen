@@ -11186,11 +11186,16 @@ function techCard2(id, p, opts = {}) {
   const hook = () => { if (typeof aiUpdate !== 'function' || aiUpdate.__tac) return; const up = aiUpdate;
     aiUpdate = function (u, dt) { const ai = u && u.ai; const had = ai && ai.target; const r = up.apply(this, arguments);
       try { if (!ai || ai.type === 'decoy' || ai.leader) return r; const tgt = ai.target;
-        if (tgt && !had && !ai.alerted && G && G.units) { ai.alerted = 1; let n = 0; for (const o of G.units) { if (n >= 4) break; if (o === u || !o.ai || o.team !== u.team || o.ai.target || !alive(o)) continue; if (Math.hypot(o.x - u.x, o.y - u.y) < 360) { o.ai.target = tgt; o.ai.alerted = 1; o.ai.lastSeen = { x: tgt.x, y: tgt.y, t: G.t }; n++; } } if (n) bark(u, 'spot', 0.8); }
-        if (tgt && !u.boss && ai.type !== 'beast' && !ai.retreated && u.hp > 0 && u.hp / u.maxHp < 0.25) { ai.retreated = G.t + 1.6; bark(u, 'lost', 0.6); }
+        if (tgt && !had && !ai.alerted && G && G.units) { ai.alerted = 1; let n = 0; for (const o of G.units) { if (n >= 4) break; if (o === u || !o.ai || o.team !== u.team || o.ai.target || !alive(o)) continue; if (Math.hypot(o.x - u.x, o.y - u.y) < 360) { o.ai.target = tgt; o.ai.alerted = 1; o.ai.lastSeen = { x: tgt.x, y: tgt.y, t: G.t }; n++; } } if (n) { bark(u, 'spot', 0.8); u._tacCue = { k: 0, t: G.t + 1.4 }; } }
+        if (tgt && !u.boss && ai.type !== 'beast' && !ai.retreated && u.hp > 0 && u.hp / u.maxHp < 0.25) { ai.retreated = G.t + 1.6; bark(u, 'lost', 0.6); u._tacCue = { k: 1, t: G.t + 1.6 }; }
         if (tgt && ai.retreated && G.t < ai.retreated && !u.act) moveAway(u, tgt.x, tgt.y, 1); } catch (e) { }
       return r; }; aiUpdate.__tac = 1; };
-  hook(); addEventListener('load', hook);
+  const hookD = () => { if (typeof drawUnit !== 'function' || drawUnit.__tac) return; const d0 = drawUnit;
+    drawUnit = function (ctx, gl, u) { const r = d0.apply(this, arguments); try { const c = u && u._tacCue; if (c && G.t < c.t && u.hp > 0) { const s = u.size || 1, x = u.x, y = u.y - 78 * s - Math.sin(G.t * 9) * 3, a = Math.min(1, (c.t - G.t) * 2); ctx.save(); ctx.globalAlpha = a; ctx.lineJoin = 'round';
+        if (c.k === 0) { ctx.fillStyle = '#ffc23a'; ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x - 5, y - 18); ctx.lineTo(x + 5, y - 18); ctx.lineTo(x + 2, y - 4); ctx.lineTo(x - 2, y - 4); ctx.closePath(); ctx.stroke(); ctx.fill(); ctx.beginPath(); ctx.arc(x, y + 2, 3.2, 0, 7); ctx.stroke(); ctx.fill(); }
+        else { ctx.strokeStyle = '#b06bff'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(x, y - 6, 9, -0.3, Math.PI + 0.6); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x - 14, y - 4); ctx.lineTo(x - 8, y + 4); ctx.lineTo(x - 2, y - 3); ctx.stroke(); }
+        ctx.restore(); } } catch (e) { } return r; }; drawUnit.__tac = 1; };
+  hook(); hookD(); addEventListener('load', () => { hook(); hookD(); });
 })();
 /* Rig v4.6 d'Éternel II : squelette hiérarchique FK + IK 2 os, UNE seule orientation pour tout le corps.
    Les poses (12 principes / ZZZ) de Shinobi 2 sont conservées : le nouveau rig lit les cibles de ninjaPose et le ressort stx/sty. */
@@ -14112,6 +14117,56 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     if (!N) { el.innerHTML = `<b style="color:#ffd166;font-size:16px">${R.k}</b>${R.n}`; return; }
     const f = Math.max(0, Math.min(1, (lv - R.lv) / (N.lv - R.lv))); el.innerHTML = `<b style="color:#ffd166;font-size:16px">${R.k}</b><span style="display:inline-block;width:90px;height:6px;border-radius:3px;background:#1d2747;overflow:hidden"><i style="display:block;height:100%;width:${(f * 100).toFixed(0)}%;background:linear-gradient(90deg,#ffd166,#ff9a2e)"></i></span><b style="color:#ff9a2e;font-size:16px">${N.k}</b><span style="opacity:.8">niv. ${N.lv}</span>`; } catch (e) { } }, 400);
 })();
+/* NG 13 — Traînées M1 par arme, Kāma complet de Kawaki, Code jouable en Edo Tensei, arc « Code et les Claw Grimes »,
+   rencontres Ōtsutsuki (Isshiki, Momoshiki & Kinshiki), défi Edo (Naruto & Sasuke de l'ère précédente), progression de rang revue. */
+(function () {
+  if (window.NG13) return; const X = (window.NG13 = { ev: {} }); const V = S2.v14;
+  /* ---------- 1. Traînées M1 : variantes par arme, plus marquées sur les finisseurs ---------- */
+  try { const R46 = S2.rig; const L = R46.list; const push0 = Array.prototype.push;
+    L.push = function (S) { try { if (S && S.u && !S._ng13) { const u = S.u; S._ng13 = 1; const blade = !!u.sword, mode = !!u.mode;
+          if (blade) { S.R *= 1.22; S.d *= 1.12; } else { S.R *= 0.88; }
+          if (mode) S.R *= 1.08;
+          const echoes = S.big ? 2 : (blade ? 1 : 0); for (let i = 1; i <= echoes; i++) { const E = Object.assign({}, S, { _ng13: 1, R: S.R * (1 - 0.14 * i), a0: S.a0 - S.d * 0.12 * i, t0: S.t0 + 45 * i, fr: -i, col: S.col }); push0.call(this, E); }
+          if (S.big) { S.R *= 1.12; X.ev.fin = (X.ev.fin || 0) + 1; } X.ev[blade ? 'blade' : 'fist'] = (X.ev[blade ? 'blade' : 'fist'] || 0) + 1; } } catch (e) { } return push0.call(this, S); }; } catch (e) { }
+  /* ---------- 2. Kāma complet de Kawaki ---------- */
+  try { const m = (id, n, el, kind, cost, cd, dmg, p, desc) => M(id, n, 'karma_k', el, kind, cost, cd, dmg, Object.assign({ ng: 'karma_k' }, p || {}), desc);
+    m('kk_piliers', 'Daikokuten : Piliers', 'terre', 'line', 24, 8, 70, { rng: 520, cnt: 6, st: { knockup: 1 } }, 'Une rangée de piliers jaillit de l’espace-temps.');
+    m('kk_pluie_cubes', 'Daikokuten : Pluie de cubes', 'terre', 'rain', 34, 14, 80, { cnt: 7, r: 80, rng: 560, cube: 1, st: { knockup: 1 } }, 'Des cubes géants tombent du ciel.');
+    m('kk_echelle', 'Sukunahikona : Retour à l’échelle', 'neutre', 'nova', 30, 12, 90, { r: 220, kb: 700 }, 'Les objets miniaturisés reprennent leur taille autour de toi.');
+    m('kk_ultime', 'Kāma complet : Isshiki', 'neutre', 'meteor', 55, 24, 240, { r: 200, cnt: 1, delay: 0.9, cube: 1, st: { knockup: 1.4 } }, 'Ultime : le cube colossal de Daikokuten, avec toute la puissance d’Isshiki.');
+    const K = MODES.karma_k; if (K && K.stages.length < 4) K.stages.push({ n: 'Kāma complet', skills: ['kk_piliers', 'kk_pluie_cubes', 'kk_echelle', 'kk_cube', 'kk_sukuna', 'kk_pieu', 'kb_absorb', 'kb_dash'], ult: 'kk_ultime', req: 55, drain: 4.6, mul: 1.8 }); } catch (e) { console.warn('ng13 kama', e); }
+  /* ---------- 3. Code et Kawaki dans le roster Edo Tensei (kits canon) ---------- */
+  try { const R = (id, n, el, hair, outfit, scarf, kit, extra) => Object.assign({ id, n, el, eye: '', look: { hair, outfit, scarf }, kit, t: 'Nouvelle ère' }, extra || {});
+    for (const r of [R('code', 'Code', 'neutre', '#f2f2f2', '#1a1a1a', '#e8e8e8', ['co_griffes', 'co_teleport', 'co_lames', 'co_ult']), R('kawaki', 'Kawaki (Kāma complet)', 'neutre', '#1a1a22', '#1a1a1a', '#6a6a7a', ['kk_piliers', 'kk_pluie_cubes', 'kk_cube', 'kk_pieu']), R('isshiki', 'Isshiki Ōtsutsuki', 'neutre', '#2a2a2a', '#e8e4f0', '#c8b8e8', ['kk_cube', 'kk_sukuna', 'kk_pieu', 'kk_ultime'])]) { const o = V.ROSTER.find((x) => x.id === r.id); if (o) { o.kit = r.kit; o.name = o.name || r.name; } else V.ROSTER.push(r); }
+    const kf = V.kitFor; V.kitFor = function (Rc) { if (Rc && Rc.kit) { const k = Rc.kit.filter((id) => TECH[id]); if (k.length >= 3) return k.slice(0, 4); } return kf.apply(this, arguments); }; } catch (e) { }
+  /* ---------- 4. Arc : Code et les Claw Grimes ---------- */
+  try { MOBS.claw_grime = { n: 'Claw Grime', ai: 'brute', body: 'golem', hp: 220, spd: 175, dmg: 18, xp: 22, ryo: 12, mind: 0.1, skill: 0.4, armor: 0.15, size: 1.15, c: '#f2f2f2', c2: '#1a1a1a', ng: 1 };
+    const s = (who, k, c, t) => ({ who, k, c, t }); const BO = ['Boruto', '殻', '#4fd6ff'], KA = ['Kawaki', '鬼', '#9aa7ff'], CO = ['Code', '爪', '#d9f6ff'], SA = ['Sarada', '桜', '#ff5a5a'];
+    if (SNG.ARCS && !SNG.ARCS.some((a) => a.id === 'code')) SNG.ARCS.push({ id: 'code', n: 'Code et les Claw Grimes', era: 'Boruto', biome: 'otsutsuki', k: '爪', beats: [
+      { type: 'scene', title: 'Des marques blanches', sub: 'ENQUÊTE', lines: [s(...SA, 'Ces marques sur les murs… on dirait des griffures.'), s(...KA, 'C’est Code. Il trace le chemin pour ses bêtes.')], qte: { type: 'seq', title: 'Suis la piste des griffes', dur: 9, n: 5, maxMiss: 2 } },
+      { type: 'fight', title: 'Les Claw Grimes', foes: [['claw_grime', 4]], line: s(...BO, 'Elles sortent des marques ! Ne restez pas dessus !') },
+      { type: 'scene', title: 'Les limiteurs', sub: 'DIALOGUE', lines: [s(...CO, 'Isshiki-sama m’a laissé des limiteurs. Je viens de les briser.'), s(...BO, 'Alors on va te briser aussi.')], qte: null },
+      { type: 'fight', title: 'Code, Kāma libéré', foes: [['claw_grime', 2], ['code_boss', 1, 2]], line: s(...CO, 'Vous n’êtes que des obstacles sur ma route.') },
+    ] });
+  } catch (e) { console.warn('ng13 arc', e); }
+  /* ---------- 5. Rencontres : Ōtsutsuki et défi Edo ---------- */
+  try { const E = SNG.enc; const EV = SE35.EVENTS; const hero = () => G.players[0];
+    const near = (u, a, b) => { const t = rand(0, TAU), d = rand(a, b); return [clamp(u.x + Math.cos(t) * d, 80, G.map.w - 80), clamp(u.y + Math.sin(t) * d, 80, G.map.h - 80)]; };
+    const say = (pages, done) => { const d = document.getElementById('dlg35'); if (d && d.classList.contains('on')) return setTimeout(() => say(pages, done), 300); SE35.say(pages, done); };
+    const boss = (id, n, tier, look) => { const [x, y] = near(hero(), 300, 420); const b = spawnBoss(id, x, y, tier); if (b) { b._ng13 = 1; if (n) b.name = n; if (look) b.look = Object.assign({}, b.look, look); } return b; };
+    const reward = (xp, ryo) => { const p = P(); grantXP(p, xp); p.ryo += ryo; Profile.save(); };
+    const add = (n, k, c, f, key) => { if (!EV.some((e) => e.key === key)) EV.push({ id: EV.length, n, k, c, f, rare: false, w: 1, key }); };
+    add('Isshiki Ōtsutsuki', '殻', '#c8b8e8', () => say([{ who: 'Isshiki Ōtsutsuki', k: '殻', c: '#c8b8e8', t: 'Un réceptacle de plus. Agenouille-toi.' }], () => { const b = boss('jigen', 'Isshiki Ōtsutsuki', 3, { hair: '#2a2a2a', outfit: '#e8e4f0', scarf: '#c8b8e8', horns: 1 }); X.isshiki = b; banner('Isshiki Ōtsutsuki', 'RENCONTRE', '#c8b8e8'); }), 'isshiki');
+    add('Momoshiki & Kinshiki', '桃', '#e8e0ff', () => say([{ who: 'Momoshiki Ōtsutsuki', k: '桃', c: '#e8e0ff', t: 'Kinshiki. Occupe-toi de l’insecte.' }, { who: 'Kinshiki Ōtsutsuki', k: '金', c: '#c98c4b', t: 'À vos ordres.' }], () => { boss('momoshiki_boss', null, 2); boss('kinshiki', null, 2); banner('Momoshiki & Kinshiki', 'RENCONTRE', '#e8e0ff'); }), 'momokin');
+    add('Défi Edo : Naruto & Sasuke', '穢', '#d8d0c0', () => say([{ who: 'Kabuto Yakushi', k: '穢', c: '#a8e070', t: 'La génération précédente, réanimée pour toi. Montre-leur ce que vaut la nouvelle.' }], () => {
+      const edo = (u) => { if (u) { u.edo = true; u.look = Object.assign({}, u.look, { skin: '#c9c2b6' }); } return u; };
+      E.chain([() => edo(E.foe('naruto', { name: 'Naruto (Edo, ère précédente)', hp: 4 })), () => edo(E.foe('sasuke', { name: 'Sasuke (Edo, ère précédente)', hp: 4 })), () => [edo(E.foe('naruto', { name: 'Naruto (Edo)', hp: 3 })), edo(E.foe('sasuke', { name: 'Sasuke (Edo)', hp: 3 }))]],
+        () => { reward(900, 400); X.ev.edoWin = 1; banner('Défi Edo réussi', 'LA NOUVELLE ÈRE', '#ffd27a'); }, () => { X.ev.edoFail = 1; }); banner('Défi Edo', 'NARUTO & SASUKE', '#d8d0c0'); }), 'edo_gen');
+  } catch (e) { console.warn('ng13 enc', e); }
+  /* ---------- 6. Carrière : progression de rang plus régulière ---------- */
+  try { const RK = SNG.career.RANKS; const LV = { academie: 1, genin: 5, chunin: 12, jonin: 24, anbu: 36, sannin: 48, kage: 60 }; for (const r of RK) if (LV[r.id] != null) r.lv = LV[r.id]; X.ranks = RK.map((r) => r.lv); } catch (e) { }
+  if (window.SNG && SNG.release) try { SNG.release(15, 'NG 13 — Kāma complet & Code', ['Traînées M1 : plus longues avec une arme, plus courtes et denses à mains nues, échos sur les finisseurs', 'Kawaki : 4e stade « Kāma complet » (Piliers, Pluie de cubes, Retour à l’échelle, ultime Isshiki)', 'Code, Kawaki et Isshiki dans le roster Edo Tensei avec leurs kits canon', 'Saga : arc « Code et les Claw Grimes »', 'Rencontres : Isshiki, Momoshiki & Kinshiki, défi Edo Naruto & Sasuke', 'Carrière : rangs à 5 / 12 / 24 / 36 / 48 / 60']); } catch (e) { }
+})();
 /* Shinobi 2 — Constellations uniques par technique (port Éternel II v4.5, formes thématiques) */
 (function(){
   const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
@@ -14539,6 +14594,10 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
       const sr = (lq ? 8 : 26) * dt * (0.6 + I); for (let k = 0; k < sr; k++) for (const [S, col, sg] of [[P.A, C.ca, 1], [P.B, C.cb, -1]]) emit({ k: 'stream', sx: S.x, sy: S.y, ex: P.x, ey: P.y, ph: rnd(0, TAU), sg, z: C.z, c: col, s: rnd(2, 4), life: rnd(0.35, 0.6), amp: rnd(14, 34) * (0.6 + I) });
       // poussière et débris au sol
       if (Math.random() < (lq ? 0.25 : 0.7) * (0.4 + I)) { const a = rnd(0, TAU); emit({ k: Math.random() < 0.3 ? 'rock' : 'dust', x: P.x + Math.cos(a) * rnd(10, 60), y: P.y + Math.sin(a) * rnd(6, 26), z: 0, vx: Math.cos(a) * rnd(60, 260), vy: Math.sin(a) * rnd(30, 110), vz: rnd(60, 300), g: 900, c: '#8b7a66', s: rnd(4, 12), life: rnd(0.5, 1) }); }
+      // v2 : feux follets en orbite, éclats tournoyants, fissures au sol
+      if (Math.random() < (lq ? 0.35 : 1) * (0.5 + I)) emit({ k: 'orbit', x: P.x, y: P.y, z: C.z, a: rnd(0, TAU), r0: 60 + 70 * I, c: Math.random() < 0.5 ? C.ca : C.cb, s: rnd(2, 4.2), life: rnd(0.5, 0.9), sp: rnd(5, 9) * (Math.random() < 0.5 ? 1 : -1) });
+      if (Math.random() < (lq ? 0.08 : 0.28) * I) { const a = rnd(0, TAU), s = rnd(160, 420); emit({ k: 'shard', x: P.x, y: P.y, z: C.z, vx: Math.cos(a) * s, vy: Math.sin(a) * s * 0.7, vz: rnd(80, 300), g: 520, c: Math.random() < 0.5 ? C.ca : C.cb, s: rnd(5, 10), life: rnd(0.5, 0.8), rot: rnd(0, TAU), vr: rnd(-14, 14) }); }
+      if (I > 0.6 && !C.crack) { C.crack = 1; for (let k = 0; k < (lq ? 4 : 8); k++) emit({ k: 'crack', x: P.x, y: P.y, z: 0, a: k / (lq ? 4 : 8) * TAU + rnd(-0.3, 0.3), len: rnd(50, 130), j: rnd(0, 1000), life: 2.2, c: '#1a120c' }); }
       // anneaux pulsés
       C.ring += dt * (1.4 + I * 2.2); if (C.ring >= 1) { C.ring -= 1; emit({ k: 'ring', x: P.x, y: P.y, z: C.z, c: Math.random() < 0.5 ? C.ca : C.cb, r0: 14, r1: 90 + 120 * I, w: 3 + 4 * I, life: 0.45 }); }
       // cœur du contact : deux demi-halos colorés qui se repoussent
@@ -14552,6 +14611,8 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
     ctx.save(); for (let i = live.length - 1; i >= 0; i--) { const p = live[i]; p.t += dt; if (p.t >= p.life) { live[i] = live[live.length - 1]; live.pop(); put(p); continue; } const q = p.t / p.life, al = 1 - q;
       if (p.k === 'stream') { const e = q * q * (3 - 2 * q); const x = p.sx + (p.ex - p.sx) * e, y = p.sy + (p.ey - p.sy) * e; const sw = Math.sin(p.ph + q * 9) * p.amp * (1 - e) * p.sg; const ang = Math.atan2(p.ey - p.sy, p.ex - p.sx) + Math.PI / 2; const [a, b, zm] = scr(x + Math.cos(ang) * sw, y + Math.sin(ang) * sw * 0.6, p.z * (0.6 + 0.4 * e));
         ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hex(p.c, 0.75 * Math.sin(q * Math.PI)); ctx.beginPath(); ctx.arc(a, b, p.s * zm * 1.4, 0, TAU); ctx.fill(); continue; }
+      if (p.k === 'orbit') { const rr = p.r0 * (1 - q * 0.85), an = p.a + p.sp * p.t; const [a, b, zm] = scr(p.x + Math.cos(an) * rr, p.y + Math.sin(an) * rr * 0.55, p.z + Math.sin(an * 2) * 8); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hex(p.c, 0.8 * Math.sin(q * Math.PI)); ctx.beginPath(); ctx.arc(a, b, p.s * zm, 0, TAU); ctx.fill(); continue; }
+      if (p.k === 'crack') { const [a, b, zm] = scr(p.x, p.y, 0); const L = p.len * Math.min(1, q * 5) * zm; ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = hex(p.c, 0.55 * Math.min(1, (1 - q) * 2)); ctx.lineWidth = 2.4 * zm; ctx.beginPath(); ctx.moveTo(a, b); let x = a, y = b; for (let j = 1; j <= 4; j++) { const an = p.a + Math.sin(p.j + j * 1.7) * 0.45; x = a + Math.cos(an) * L * j / 4; y = b + Math.sin(an) * L * j / 4 * 0.55; ctx.lineTo(x, y); } ctx.stroke(); continue; }
       if (p.k === 'ring' || p.k === 'glow') { const e = 1 - Math.pow(1 - q, 3); const r = p.r0 + (p.r1 - p.r0) * e; const [a, b, zm] = scr(p.x, p.y, p.z);
         if (p.k === 'glow') { ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(a, b, 0, a, b, r * zm); g.addColorStop(0, hex(p.c, (soft ? 0.4 : 0.8) * al)); g.addColorStop(1, hex(p.c, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(a, b, r * zm, 0, TAU); ctx.fill(); continue; }
         ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = hex(p.c, 0.85 * al); ctx.lineWidth = Math.max(1, p.w * al * zm); ctx.beginPath(); ctx.ellipse(a, b, r * zm, r * zm * (p.flat ? 0.35 : 0.62), 0, 0, TAU); ctx.stroke(); continue; }
@@ -14559,6 +14620,7 @@ for (const k of ['celeste', 'miroir', 'neant', 'solaire', 'lunaire', 'anneaux', 
       const [a, b, zm] = scr(p.x, p.y, p.z);
       if (p.k === 'dust') { ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = hex(p.c, 0.2 * al); ctx.beginPath(); ctx.arc(a, b, p.s * zm * (1 + q * 0.6), 0, TAU); ctx.fill(); continue; }
       if (p.k === 'rock') { ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = hex('#4a3e34', al); ctx.fillRect(a - p.s * zm * 0.3, b - p.s * zm * 0.3, p.s * zm * 0.6, p.s * zm * 0.6); continue; }
+      if (p.k === 'shard') { p.rot += p.vr * dt; ctx.globalCompositeOperation = 'lighter'; ctx.save(); ctx.translate(a, b); ctx.rotate(p.rot); ctx.fillStyle = hex(p.c, al); const z2 = p.s * zm; ctx.beginPath(); ctx.moveTo(0, -z2); ctx.lineTo(z2 * 0.45, z2 * 0.6); ctx.lineTo(-z2 * 0.45, z2 * 0.6); ctx.closePath(); ctx.fill(); ctx.restore(); continue; }
       ctx.globalCompositeOperation = 'lighter'; if (p.k === 'spark') { const [c2, d2] = scr(p.x - p.vx * 0.03, p.y - p.vy * 0.03, p.z - p.vz * 0.03); ctx.strokeStyle = hex(p.c, al); ctx.lineWidth = p.s * zm * 0.7; ctx.beginPath(); ctx.moveTo(c2, d2); ctx.lineTo(a, b); ctx.stroke(); }
       else { ctx.fillStyle = hex(p.c, al); ctx.beginPath(); ctx.arc(a, b, p.s * zm * (1 - q * 0.5), 0, TAU); ctx.fill(); } }
     ctx.restore();
